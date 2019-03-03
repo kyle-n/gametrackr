@@ -7,10 +7,12 @@ import user from './user';
 // check JWT middleware
 
 import express from 'express';
-export const router: express.Router = express.Router();
+const router: express.Router = express.Router();
 
 router.use('/discover', discover);
 router.use('/list', list);
 router.use('/review', review);
 router.use('/search', search);
 router.use('/user', user);
+
+export = router;

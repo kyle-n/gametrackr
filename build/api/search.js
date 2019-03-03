@@ -2,11 +2,10 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var axios_1 = __importDefault(require("axios"));
-exports.router = express_1.default.Router();
-exports.router.get('/', function (req, resp) {
+var router = express_1.default.Router();
+router.get('/', function (req, resp) {
     if (!req.query)
         return resp.json({ results: [] });
     var error = { status: 500, msg: 'Database error' };
@@ -23,3 +22,4 @@ exports.router.get('/', function (req, resp) {
         console.log(resp);
     }).catch(function (e) { return resp.status(error.status).send(error.msg); });
 });
+module.exports = router;
