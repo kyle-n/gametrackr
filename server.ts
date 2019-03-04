@@ -5,7 +5,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 
 // app init
-const app: express.Application = express();
+export const app: express.Application = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 import { Initializer } from './db';
 Initializer();
