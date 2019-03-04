@@ -1,0 +1,136 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "error",
+    "limit",
+    "offset",
+    "number_of_page_results",
+    "number_of_total_results",
+    "status_code",
+    "results",
+    "version"
+  ],
+  "properties": {
+    "error": {
+      "$id": "#/properties/error",
+      "type": "string",
+      "title": "The Error Schema",
+      "default": "",
+      "examples": [
+        "OK"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "limit": {
+      "$id": "#/properties/limit",
+      "type": "integer",
+      "title": "The Limit Schema",
+      "default": 0,
+      "examples": [
+        10
+      ]
+    },
+    "offset": {
+      "$id": "#/properties/offset",
+      "type": "integer",
+      "title": "The Offset Schema",
+      "default": 0,
+      "examples": [
+        0
+      ]
+    },
+    "number_of_page_results": {
+      "$id": "#/properties/number_of_page_results",
+      "type": "integer",
+      "title": "The Number_of_page_results Schema",
+      "default": 0,
+      "examples": [
+        10
+      ]
+    },
+    "number_of_total_results": {
+      "$id": "#/properties/number_of_total_results",
+      "type": "integer",
+      "title": "The Number_of_total_results Schema",
+      "default": 0,
+      "examples": [
+        921
+      ]
+    },
+    "status_code": {
+      "$id": "#/properties/status_code",
+      "type": "integer",
+      "title": "The Status_code Schema",
+      "default": 0,
+      "examples": [
+        1
+      ]
+    },
+    "results": {
+      "$id": "#/properties/results",
+      "type": "array",
+      "title": "The Results Schema",
+      "items": {
+        "$id": "#/properties/results/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "required": [
+          "id",
+          "name",
+          "platforms",
+          "resource_type"
+        ],
+        "properties": {
+          "id": {
+            "$id": "#/properties/results/items/properties/id",
+            "type": "integer",
+            "title": "The Id Schema",
+            "default": 0,
+            "examples": [
+              37763
+            ]
+          },
+          "name": {
+            "$id": "#/properties/results/items/properties/name",
+            "type": "string",
+            "title": "The Name Schema",
+            "default": "",
+            "examples": [
+              "Adventure Time: Hey Ice King! Why’d you steal our garbage?!!"
+            ],
+            "pattern": "^(.*)$"
+          },
+          "platforms": {
+            "$id": "#/properties/results/items/properties/platforms",
+            "type": "array",
+            "title": "The Platforms Schema"
+          },
+          "resource_type": {
+            "$id": "#/properties/results/items/properties/resource_type",
+            "type": "string",
+            "title": "The Resource_type Schema",
+            "default": "",
+            "examples": [
+              "game"
+            ],
+            "pattern": "^(.*)$"
+          }
+        }
+      }
+    },
+    "version": {
+      "$id": "#/properties/version",
+      "type": "string",
+      "title": "The Version Schema",
+      "default": "",
+      "examples": [
+        "1.0"
+      ],
+      "pattern": "^(.*)$"
+    }
+  }
+}

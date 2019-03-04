@@ -1,8 +1,8 @@
 import { Client } from 'pg';
+export const connection = `postgres://${process.env.PSQL_USERNAME}:${process.env.PSQL_PASSWORD}@localhost:5432/gametrackr`;
 
 export default function initialize() {
 
-  const connection = `postgres://${process.env.PSQL_USERNAME}:${process.env.PSQL_PASSWORD}@localhost:5432/gametrackr`;
   const client: Client = new Client(connection);
 
   client.connect().then(() => {
@@ -51,7 +51,8 @@ export default function initialize() {
       site_detail_url TEXT,
       abbreviation TEXT
     );`);
-  }).then(() => console.log('Postgres initialized'))
-  .catch(e => console.log(e));
+  }).then(() => client.end()).then(() => {
+    console.log('Database initialized');
+  }).catch(e => console.log(e));
 
 }
