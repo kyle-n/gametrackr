@@ -1,6 +1,6 @@
 import express from 'express';
 import axios from 'axios';
-import searchSchema from '../schemas/search.json';
+import { SearchResultSchema, GiantBombGame, GiantBombPlatform } from '../schemas';
 import { validate } from 'jsonschema';
 import { Client } from 'pg';
 import { connectionUrl } from '../db';
@@ -10,31 +10,55 @@ const client: Client = new Client(connectionUrl);
 client.connect();
 
 router.get('/', (req, resp) => {
+
+  // handle user request
   if (!req.query) return resp.json({ results: [] });
   let error = { status: 500, msg: 'Database error' };
-  const x = 'hey_ice_king';
+
+  // call Giant Bomb API
   const queryString: string = '?' + [
     `api_key=${process.env.GIANT_BOMB_API_KEY}`,
     'format=json',
     `query=${req.query.searchTerm}`,
-    'field_list=name,id,platforms',
     'resources=game'
   ].join('&');
   axios.get(`https://www.giantbomb.com/api/search/${queryString}`).then(gbResp => {
-    if (!gbResp || !gbResp.data || !validate(gbResp.data, searchSchema)) {
+    if (!gbResp || !gbResp.data || !validate(gbResp.data, SearchResultSchema)) {
       error = { status: 500, msg: 'Could not load results from Giant Bomb' };
       throw new Error();
     }
-    console.log(gbResp.data);
+
+    // immediately pass data to client for speedy showing results on frontend
     resp.json(gbResp.data);
+
+    // save games to db while client works
+    // Max 10 results at a time from API so individual inserts are okay
     for (let i = 0; i < gbResp.data.results.length; i++) {
-      const g: any = gbResp.data.results[i];
-      client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
-        expected_release_month, expected_release_year, guid, id, name, original_release_date, 
-        site_detail_url, resource_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);`,
-        [g.aliases, g.api_detail_url, g.deck, g.description, g.expected_release_day,
-        g.expected_release_month, g.expected_release_year, g.guid, g.id, g.name, g.original_release_date,
-        g.site_detail_url, g.resource_type])j
+      const g: GiantBombGame = gbResp.data.results[i];
+      const platformIds: number[] = g.platforms.map(p => p.id);
+      // insert game if not found
+      client.query('DELETE ONLY FROM games WHERE id = $1', [g.id]).then(() => {
+        client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
+          expected_release_month, expected_release_year, guid, id, name, original_release_date, 
+          site_detail_url, resource_type, platforms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);`,
+          [g.aliases, g.api_detail_url, g.deck, g.description, g.expected_release_day, g.expected_release_month, g.expected_release_year, g.guid, g.id, g.name, g.original_release_date, g.site_detail_url, g.resource_type, platformIds]
+        );
+      });
+    }
+
+    // save platform data
+    const allPlatforms: GiantBombPlatform[] = gbResp.data.results.reduce((arr: GiantBombPlatform[], g: GiantBombGame) => {
+      return arr.concat(g.platforms);
+    }, []);
+    const previousIds: number[] = [];
+    // insert platform if not found
+    for (let j = 0; j < allPlatforms.length; j++) {
+      const p: GiantBombPlatform = allPlatforms[j];
+      if (previousIds.includes(p.id)) continue;
+      previousIds.push(p.id);
+      client.query('DELETE ONLY FROM platforms WHERE id = $1', [p.id]).then(() => {
+        client.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation) VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
+      });
     }
   }).catch(e => { console.log(e); resp.status(error.status).send(error.msg) });
 });
