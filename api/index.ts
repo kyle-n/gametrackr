@@ -1,7 +1,7 @@
 import discover from './discover';
 import list from './list';
 import review from './review';
-import search from './search';
+import { router as search } from './search';
 import user from './user';
 
 // check JWT middleware

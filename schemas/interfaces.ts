@@ -22,3 +22,8 @@ export interface GiantBombPlatform {
   site_detail_url: string;
   abbreviation: string;
 }
+
+export interface ServerError {
+  status: number;
+  msg: string;
+}
