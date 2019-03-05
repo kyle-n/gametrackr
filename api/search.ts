@@ -33,9 +33,9 @@ export const savePlatforms = (error: ServerError, gbResp: any) => {
 
 // save games to db
 export const saveGames = (error: ServerError, gbResp: any) => {
-  if (!gbResp || !gbResp.data || !validate(gbResp.data, SearchResultSchema)) {
+  if (!gbResp || !gbResp.data) {
     error = { status: 500, msg: 'Could not load results from Giant Bomb' };
-    throw new Error();
+    console.log(gbResp, 'bad gb resp');
   }
   // Max 10 results at a time from API so individual inserts are okay
   for (let i = 0; i < gbResp.data.results.length; i++) {

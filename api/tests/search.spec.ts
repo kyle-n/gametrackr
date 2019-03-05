@@ -11,46 +11,57 @@ import sinon from 'sinon';
 import axios from 'axios';
 import moxios from 'moxios';
 import IceKingJson from '../../schemas/iceking.json';
+import { ServerError } from '../../schemas';
 
 chai.use(chaiHttp);
 const should = chai.should();
 const client: Client = new Client(connectionUrl);
 client.connect();
+const defaultError: ServerError = { status: 500, msg: 'Database error' };
 
 describe('Client router interface', () => {
 
-  beforeEach(done => {
+  beforeEach(() => {
     moxios.install();
-    client.query('DELETE FROM ONLY games;').then(() => {
-      return client.query('DELETE FROM ONLY platforms;');
-    }).then(() => {
-      return client.query('DELETE FROM ONLY game_images;');
-    }).then(() => done());
   });
 
   afterEach(() => {
     moxios.uninstall();
   });
 
-  it('returns 400 for no query', () => {
-    chai.request(app).get('/api/search').end((e, resp) => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('No search query');
-      resp.error.status.should.equal(400);
-    });
+  it('returns 400 for no query', done => {
+    setTimeout(() => {
+      chai.request(app).get('/api/search').then((resp) => {
+        resp.error.text.should.be.a('string');
+        resp.error.text.should.equal('No search query');
+        resp.error.status.should.equal(400);
+        console.log('tests good');
+        done();
+      });
+    }, 500);
   });
 
-  it('calls the GB API only once', () => {
+  it('calls the GB API only once', done => {
+    console.log('starting second call');
     moxios.stubRequest(/giantbomb.com/g, IceKingJson);
     const getSpy = sinon.spy(axios, 'get');
-    chai.request(app).get('/api/search?searchTerm=Mario').end((e, resp: any) => {
+    chai.request(app).get('/api/search?searchTerm=Mario').then((resp: any) => {
       expect(getSpy.calledOnce).to.equal(true);
-    });
+      return client.query('DELETE FROM games WHERE id < 0');
+    }).then(() => done());
   });
 
-  it('runs saveGames() without crashing', () => {
-    let resultCode = saveGames({ status: 500, msg: 'Server error'}, IceKingJson);
-    expect(resultCode).to.equal(0);
-  });
-  
+  it('runs saveGames() without crashing and saves games correctly', done => {
+    //client.query('DELETE FROM games WHERE id < 0 RETURNING (id, name, deck);').then(deleted => {
+      let resultCode = saveGames(defaultError, IceKingJson);
+      expect(resultCode).to.equal(0);
+      setTimeout(() => {
+        client.query('SELECT * FROM games WHERE id < 0;').then(data => {
+          expect(data.rowCount).to.equal(IceKingJson.data.results.length);
+          return client.query('')
+        });
+      }, 1000);
+    //});
+  }).timeout(3000);
+
 });

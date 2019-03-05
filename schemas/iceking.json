@@ -2311,7 +2311,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-37763",
-        "id":37763,
+        "id":-37763,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2348775-box_atime.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2348775-box_atime.png",
@@ -2356,7 +2356,7 @@
         "original_game_rating":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/game_rating/3065-29/",
-            "id":29,
+            "id":-29,
             "name":"ESRB: E10+"
           }
         ],
@@ -2364,14 +2364,14 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-52/",
-            "id":52,
+            "id":-52,
             "name":"Nintendo DS",
             "site_detail_url":"https://www.giantbomb.com/nintendo-ds/3045-52/",
             "abbreviation":"DS"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-117/",
-            "id":117,
+            "id":-117,
             "name":"Nintendo 3DS",
             "site_detail_url":"https://www.giantbomb.com/nintendo-3ds/3045-117/",
             "abbreviation":"3DS"
@@ -2392,7 +2392,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-55298",
-        "id":55298,
+        "id":-55298,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2931620-8852292265-SQ_3D.jpg",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2931620-8852292265-SQ_3D.jpg",
@@ -2422,22 +2422,22 @@
         "original_game_rating":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/game_rating/3065-6/",
-            "id":6,
+            "id":-6,
             "name":"ESRB: E"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/game_rating/3065-25/",
-            "id":25,
+            "id":-25,
             "name":"CERO: A"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/game_rating/3065-7/",
-            "id":7,
+            "id":-7,
             "name":"PEGI: 3+"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/game_rating/3065-14/",
-            "id":14,
+            "id":-14,
             "name":"OFLC: G"
           }
         ],
@@ -2445,14 +2445,14 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-117/",
-            "id":117,
+            "id":-117,
             "name":"Nintendo 3DS",
             "site_detail_url":"https://www.giantbomb.com/nintendo-3ds/3045-117/",
             "abbreviation":"3DS"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-138/",
-            "id":138,
+            "id":-138,
             "name":"Nintendo 3DS eShop",
             "site_detail_url":"https://www.giantbomb.com/nintendo-3ds-eshop/3045-138/",
             "abbreviation":"3DSE"
@@ -2473,7 +2473,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-55109",
-        "id":55109,
+        "id":-55109,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2878063-screen%20shot%202016-08-18%20at%205.36.51%20pm.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2878063-screen%20shot%202016-08-18%20at%205.36.51%20pm.png",
@@ -2510,42 +2510,42 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-17/",
-            "id":17,
+            "id":-17,
             "name":"Mac",
             "site_detail_url":"https://www.giantbomb.com/mac/3045-17/",
             "abbreviation":"MAC"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-94/",
-            "id":94,
+            "id":-94,
             "name":"PC",
             "site_detail_url":"https://www.giantbomb.com/pc/3045-94/",
             "abbreviation":"PC"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-145/",
-            "id":145,
+            "id":-145,
             "name":"Xbox One",
             "site_detail_url":"https://www.giantbomb.com/xbox-one/3045-145/",
             "abbreviation":"XONE"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-146/",
-            "id":146,
+            "id":-146,
             "name":"PlayStation 4",
             "site_detail_url":"https://www.giantbomb.com/playstation-4/3045-146/",
             "abbreviation":"PS4"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-152/",
-            "id":152,
+            "id":-152,
             "name":"Linux",
             "site_detail_url":"https://www.giantbomb.com/linux/3045-152/",
             "abbreviation":"LIN"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-157/",
-            "id":157,
+            "id":-157,
             "name":"Nintendo Switch",
             "site_detail_url":"https://www.giantbomb.com/nintendo-switch/3045-157/",
             "abbreviation":"NSW"
@@ -2566,7 +2566,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-53085",
-        "id":53085,
+        "id":-53085,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2835503-3089830612-icela.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2835503-3089830612-icela.png",
@@ -2593,14 +2593,14 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-94/",
-            "id":94,
+            "id":-94,
             "name":"PC",
             "site_detail_url":"https://www.giantbomb.com/pc/3045-94/",
             "abbreviation":"PC"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-121/",
-            "id":121,
+            "id":-121,
             "name":"iPad",
             "site_detail_url":"https://www.giantbomb.com/ipad/3045-121/",
             "abbreviation":"IPAD"
@@ -2621,7 +2621,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-44663",
-        "id":44663,
+        "id":-44663,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2728788-screen%20shot%202015-02-23%20at%206.26.41%20pm.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2728788-screen%20shot%202015-02-23%20at%206.26.41%20pm.png",
@@ -2648,28 +2648,28 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-17/",
-            "id":17,
+            "id":-17,
             "name":"Mac",
             "site_detail_url":"https://www.giantbomb.com/mac/3045-17/",
             "abbreviation":"MAC"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-94/",
-            "id":94,
+            "id":-94,
             "name":"PC",
             "site_detail_url":"https://www.giantbomb.com/pc/3045-94/",
             "abbreviation":"PC"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-140/",
-            "id":140,
+            "id":-140,
             "name":"Browser",
             "site_detail_url":"https://www.giantbomb.com/browser/3045-140/",
             "abbreviation":"BROW"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-152/",
-            "id":152,
+            "id":-152,
             "name":"Linux",
             "site_detail_url":"https://www.giantbomb.com/linux/3045-152/",
             "abbreviation":"LIN"
@@ -2690,7 +2690,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-17113",
-        "id":17113,
+        "id":-17113,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2171267-box_hyp.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2171267-box_hyp.png",
@@ -2725,7 +2725,7 @@
         "original_game_rating":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/game_rating/3065-6/",
-            "id":6,
+            "id":-6,
             "name":"ESRB: E"
           }
         ],
@@ -2733,7 +2733,7 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-43/",
-            "id":43,
+            "id":-43,
             "name":"Nintendo 64",
             "site_detail_url":"https://www.giantbomb.com/nintendo-64/3045-43/",
             "abbreviation":"N64"
@@ -2754,7 +2754,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-57850",
-        "id":57850,
+        "id":-57850,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2914220-9926940294-9ba50.jpg",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2914220-9926940294-9ba50.jpg",
@@ -2781,35 +2781,35 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-96/",
-            "id":96,
+            "id":-96,
             "name":"iPhone",
             "site_detail_url":"https://www.giantbomb.com/iphone/3045-96/",
             "abbreviation":"IPHN"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-121/",
-            "id":121,
+            "id":-121,
             "name":"iPad",
             "site_detail_url":"https://www.giantbomb.com/ipad/3045-121/",
             "abbreviation":"IPAD"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-123/",
-            "id":123,
+            "id":-123,
             "name":"Android",
             "site_detail_url":"https://www.giantbomb.com/android/3045-123/",
             "abbreviation":"ANDR"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-124/",
-            "id":124,
+            "id":-124,
             "name":"Windows Phone",
             "site_detail_url":"https://www.giantbomb.com/windows-phone/3045-124/",
             "abbreviation":"WP"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-154/",
-            "id":154,
+            "id":-154,
             "name":"Ouya",
             "site_detail_url":"https://www.giantbomb.com/ouya/3045-154/",
             "abbreviation":"OUYA"
@@ -2830,7 +2830,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-63526",
-        "id":63526,
+        "id":-63526,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/2983330-chrome_2017-12-16_02-17-50.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/2983330-chrome_2017-12-16_02-17-50.png",
@@ -2857,7 +2857,7 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-94/",
-            "id":94,
+            "id":-94,
             "name":"PC",
             "site_detail_url":"https://www.giantbomb.com/pc/3045-94/",
             "abbreviation":"PC"
@@ -2878,7 +2878,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-70924",
-        "id":70924,
+        "id":-70924,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/3061474-capsule_main.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/3061474-capsule_main.png",
@@ -2905,14 +2905,14 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-17/",
-            "id":17,
+            "id":-17,
             "name":"Mac",
             "site_detail_url":"https://www.giantbomb.com/mac/3045-17/",
             "abbreviation":"MAC"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-94/",
-            "id":94,
+            "id":-94,
             "name":"PC",
             "site_detail_url":"https://www.giantbomb.com/pc/3045-94/",
             "abbreviation":"PC"
@@ -2933,7 +2933,7 @@
         "expected_release_quarter":null,
         "expected_release_year":null,
         "guid":"3030-70894",
-        "id":70894,
+        "id":-70894,
         "image":{
           "icon_url":"https://www.giantbomb.com/api/image/square_avatar/3061208-capsule_main2.png",
           "medium_url":"https://www.giantbomb.com/api/image/scale_medium/3061208-capsule_main2.png",
@@ -2960,14 +2960,14 @@
         "platforms":[
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-17/",
-            "id":17,
+            "id":-17,
             "name":"Mac",
             "site_detail_url":"https://www.giantbomb.com/mac/3045-17/",
             "abbreviation":"MAC"
           },
           {
             "api_detail_url":"https://www.giantbomb.com/api/platform/3045-94/",
-            "id":94,
+            "id":-94,
             "name":"PC",
             "site_detail_url":"https://www.giantbomb.com/pc/3045-94/",
             "abbreviation":"PC"
