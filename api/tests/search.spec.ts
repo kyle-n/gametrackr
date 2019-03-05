@@ -35,7 +35,6 @@ describe('Client router interface', () => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('No search query');
         resp.error.status.should.equal(400);
-        console.log('tests good');
         done();
       });
     }, 500);
@@ -43,7 +42,11 @@ describe('Client router interface', () => {
 
   it('calls the GB API only once', done => {
     console.log('starting second call');
-    moxios.stubRequest(/giantbomb.com/g, IceKingJson);
+    moxios.stubRequest(/giantbomb.com/g, {
+      response: IceKingJson.data,
+      status: IceKingJson.status,
+      headers: IceKingJson.headers
+    });
     const getSpy = sinon.spy(axios, 'get');
     chai.request(app).get('/api/search?searchTerm=Mario').then((resp: any) => {
       expect(getSpy.calledOnce).to.equal(true);
