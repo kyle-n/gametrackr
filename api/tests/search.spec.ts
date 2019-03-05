@@ -11,7 +11,7 @@ import sinon from 'sinon';
 import axios from 'axios';
 import moxios from 'moxios';
 import IceKingJson from '../../schemas/iceking.json';
-import { ServerError } from '../../schemas';
+import { ServerError, GiantBombGame } from '../../schemas';
 
 chai.use(chaiHttp);
 const should = chai.should();
@@ -63,6 +63,11 @@ describe('Client router interface', () => {
     setTimeout(() => {
       client.query('SELECT * FROM games WHERE id < 0;').then(data => {
         expect(data.rowCount).to.equal(IceKingJson.data.results.length);
+        const heyIceKing: GiantBombGame = data.rows.find(r => r.id === -37763);
+        const ikComparison: any = IceKingJson.data.results.find(r => r.id === -37763);
+        expect(heyIceKing.deck).to.equal(ikComparison.deck);
+        expect(heyIceKing.name).to.equal(ikComparison.name);
+        expect(heyIceKing.resource_type).to.equal(ikComparison.resource_type);
         return client.query('DELETE FROM games WHERE id < 0;');
       }).then(() => done());
     }, 1000);
