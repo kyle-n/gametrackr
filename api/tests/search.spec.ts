@@ -47,5 +47,10 @@ describe('Client router interface', () => {
       expect(getSpy.calledOnce).to.equal(true);
     });
   });
+
+  it('runs saveGames() without crashing', () => {
+    let resultCode = saveGames({ status: 500, msg: 'Server error'}, IceKingJson);
+    expect(resultCode).to.equal(0);
+  });
   
 });
