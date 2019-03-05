@@ -1,6 +1,14 @@
-// setup and config
+/* --------------------------------------------
+   Class notes:
+   * Each test cleans up after itself because
+     afterEach() runs synchronously. 
+   * IceKingJson is a sample response saved
+     from the GB API.
+   * All test object IDs are negative
+   -------------------------------------------- */
+
 import { app } from '../../server';
-import { searchGiantBomb, saveGames, savePlatforms } from '../search';
+import { saveGames, savePlatforms } from '../search';
 import { describe, it, beforeEach } from 'mocha';
 import { expect } from 'chai';
 import chai from 'chai';
@@ -11,15 +19,17 @@ import sinon from 'sinon';
 import axios from 'axios';
 import moxios from 'moxios';
 import IceKingJson from '../../schemas/iceking.json';
-import { ServerError, GiantBombGame } from '../../schemas';
+import { ServerError, GiantBombGame, GiantBombPlatform } from '../../schemas';
+import { rInt } from '../../utils';
 
+// config
 chai.use(chaiHttp);
 const should = chai.should();
 const client: Client = new Client(connectionUrl);
 client.connect();
 const defaultError: ServerError = { status: 500, msg: 'Database error' };
 
-describe('Client router interface', () => {
+describe('Router search interface', () => {
 
   beforeEach(() => {
     moxios.install();
@@ -42,7 +52,7 @@ describe('Client router interface', () => {
   });
 
   it('calls the GB API only once', done => {
-    moxios.stubRequest(/giantbomb.com/g, {
+    moxios.stubRequest(/giantbomb\.com/g, {
       response: IceKingJson.data,
       status: IceKingJson.status,
       headers: IceKingJson.headers
@@ -57,7 +67,7 @@ describe('Client router interface', () => {
   }).timeout(3000);
 
   it('runs saveGames() synchronously without crashing and saves correctly', done => {
-    let resultCode = saveGames(defaultError, IceKingJson);
+    const resultCode = saveGames(defaultError, IceKingJson);
     expect(resultCode).to.equal(0);
     // pause to let inserts finish
     setTimeout(() => {
@@ -70,6 +80,32 @@ describe('Client router interface', () => {
         expect(heyIceKing.resource_type).to.equal(ikComparison.resource_type);
         return client.query('DELETE FROM games WHERE id < 0;');
       }).then(() => done());
+    }, 1000);
+  }).timeout(3000);
+
+  it('runs savePlatforms() synchronously without crashing and saves correctly', done => {
+    moxios.stubRequest(/giantbomb\.com/g, {
+      response: IceKingJson.data,
+      status: IceKingJson.status,
+      headers: IceKingJson.headers
+    });
+    const resultCode: number = savePlatforms(defaultError, IceKingJson);
+    expect(resultCode).to.equal(0);
+    setTimeout(() => {
+      client.query('SELECT * FROM platforms WHERE id < 0;').then(data => {
+        expect(data.rowCount).to.equal(16);
+        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('api_detail_url');
+        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('id');
+        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('name');
+        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('site_detail_url');
+        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('abbreviation');
+        const ds: GiantBombPlatform = data.rows.find(r => r.id === -52);
+        expect(ds.name).to.equal('Nintendo DS');
+        return client.query('DELETE FROM platforms WHERE id < 0;');
+      }).then(() => {
+        client.end();
+        done();
+      });
     }, 1000);
   }).timeout(3000);
 

@@ -19,10 +19,11 @@ export const savePlatforms = (error: ServerError, gbResp: any) => {
     return arr.concat(g.platforms);
   }, []);
   const previousIds: number[] = [];
+  //console.log(allPlatforms);
   // insert platform, which may have new data
   for (let j = 0; j < allPlatforms.length; j++) {
     const p: GiantBombPlatform = allPlatforms[j];
-    if (previousIds.includes(p.id)) continue;
+    if (!p || !p.id || previousIds.includes(p.id)) continue;
     previousIds.push(p.id);
     client.query('DELETE FROM ONLY platforms WHERE id = $1', [p.id]).then(() => {
       client.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation) VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
@@ -40,7 +41,8 @@ export const saveGames = (error: ServerError, gbResp: any) => {
   // Max 10 results at a time from API so individual inserts are okay
   for (let i = 0; i < gbResp.data.results.length; i++) {
     const g: GiantBombGame = gbResp.data.results[i];
-    const platformIds: number[] = g.platforms.map(p => p.id);
+    let platformIds: number[] = [];
+    if (g.platforms && Array.isArray(g.platforms)) platformIds = g.platforms.map(p => p.id);
     // insert game, which may have new data
     client.query('DELETE FROM games WHERE id = $1', [g.id]).then(() => {
       client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
@@ -70,6 +72,7 @@ export const searchGiantBomb = (req: express.Request, resp: express.Response) =>
   ].join('&');
   axios.get(`https://www.giantbomb.com/api/search/${queryString}`).then(gbResp => {
     // immediately pass data to client for speedy showing results on frontend
+    //console.log(gbResp.data.results[0]);
     resp.json(gbResp.data);
     saveGames(error, gbResp);
     savePlatforms(error, gbResp);
