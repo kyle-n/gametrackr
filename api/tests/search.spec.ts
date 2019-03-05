@@ -16,7 +16,10 @@ const client: Client = new Client(connectionUrl);
 client.connect();
 
 describe('Client router interface', () => {
+  let fakeGet: sinon.SinonSpy;
   beforeEach(done => {
+    fakeGet = sinon.spy(axios, 'get');
+    axios.get = fakeGet;
     client.query('DELETE FROM ONLY games;').then(() => {
       return client.query('DELETE FROM ONLY platforms;');
     }).then(() => {
@@ -26,6 +29,7 @@ describe('Client router interface', () => {
 
   afterEach(() => {
     sinon.restore();
+    fakeGet.restore();
   });
 
   it('returns 400 for no query', () => {
@@ -37,9 +41,12 @@ describe('Client router interface', () => {
   });
 
   it('calls the GB API only once', () => {
-    const fakeGet = sinon.spy(console, 'log');
+    //const fakeGet = sinon.spy(axios, 'all');
+    const cl = sinon.spy(console, 'log');
     chai.request(app).get('/api/search?searchTerm=Mario').end((e, resp) => {
-      expect(fakeGet.callCount).to.equal(1);
+      //expect(fakeGet.calledOnce).to.equal(true);
+      console.log(cl.lastCall, 'lastcall');
+      expect(cl.callCount).to.equal(3);
     });
   });
   

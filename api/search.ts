@@ -53,6 +53,9 @@ export const saveGames = (error: ServerError, gbResp: any) => {
 };
 
 export const searchGiantBomb = (req: express.Request, resp: express.Response) => {
+  console.log('one');
+  console.log('two');
+  console.log('three');
   // handle user request
   let error: ServerError = { status: 500, msg: 'Database error' };
   if (objectEmpty(req.query)) {
