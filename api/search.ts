@@ -5,6 +5,7 @@ import { validate } from 'jsonschema';
 import { Client } from 'pg';
 import { connectionUrl } from '../db';
 import { objectEmpty } from '../utils';
+import fs from 'fs';
 
 export const router: express.Router = express.Router();
 const client: Client = new Client(connectionUrl);
@@ -53,9 +54,6 @@ export const saveGames = (error: ServerError, gbResp: any) => {
 };
 
 export const searchGiantBomb = (req: express.Request, resp: express.Response) => {
-  console.log('one');
-  console.log('two');
-  console.log('three');
   // handle user request
   let error: ServerError = { status: 500, msg: 'Database error' };
   if (objectEmpty(req.query)) {
@@ -71,6 +69,25 @@ export const searchGiantBomb = (req: express.Request, resp: express.Response) =>
     'resources=game'
   ].join('&');
   axios.get(`https://www.giantbomb.com/api/search/${queryString}`).then(gbResp => {
+    const cache: any[] = [];
+    const x = JSON.stringify(gbResp, (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (cache.indexOf(value) !== -1) {
+          // Duplicate reference found
+          try {
+            // If this value does not reference a parent it can be deduped
+            return JSON.parse(JSON.stringify(value));
+          } catch (error) {
+            // discard key if value cannot be deduped
+            return;
+          }
+        }
+        // Store value in our collection
+        cache.push(value);
+      }
+      return value;
+    });
+    fs.writeFileSync('./iceking.json', x);
     // immediately pass data to client for speedy showing results on frontend
     resp.json(gbResp.data);
     saveGames(error, gbResp);

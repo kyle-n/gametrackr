@@ -9,6 +9,8 @@ import { Client } from 'pg';
 import { connectionUrl } from '../../db';
 import sinon from 'sinon';
 import axios from 'axios';
+import moxios from 'moxios';
+import IceKingJson from '../../schemas/iceking.json';
 
 chai.use(chaiHttp);
 const should = chai.should();
@@ -16,10 +18,9 @@ const client: Client = new Client(connectionUrl);
 client.connect();
 
 describe('Client router interface', () => {
-  let fakeGet: sinon.SinonSpy;
+
   beforeEach(done => {
-    fakeGet = sinon.spy(axios, 'get');
-    axios.get = fakeGet;
+    moxios.install();
     client.query('DELETE FROM ONLY games;').then(() => {
       return client.query('DELETE FROM ONLY platforms;');
     }).then(() => {
@@ -28,8 +29,7 @@ describe('Client router interface', () => {
   });
 
   afterEach(() => {
-    sinon.restore();
-    fakeGet.restore();
+    moxios.uninstall();
   });
 
   it('returns 400 for no query', () => {
@@ -41,12 +41,10 @@ describe('Client router interface', () => {
   });
 
   it('calls the GB API only once', () => {
-    //const fakeGet = sinon.spy(axios, 'all');
-    const cl = sinon.spy(console, 'log');
-    chai.request(app).get('/api/search?searchTerm=Mario').end((e, resp) => {
-      //expect(fakeGet.calledOnce).to.equal(true);
-      console.log(cl.lastCall, 'lastcall');
-      expect(cl.callCount).to.equal(3);
+    moxios.stubRequest(/giantbomb.com/g, IceKingJson);
+    const getSpy = sinon.spy(axios, 'get');
+    chai.request(app).get('/api/search?searchTerm=Mario').end((e, resp: any) => {
+      expect(getSpy.calledOnce).to.equal(true);
     });
   });
   
