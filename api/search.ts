@@ -42,7 +42,7 @@ export const saveGames = (error: ServerError, gbResp: any) => {
     const g: GiantBombGame = gbResp.data.results[i];
     const platformIds: number[] = g.platforms.map(p => p.id);
     // insert game, which may have new data
-    client.query('DELETE FROM ONLY games WHERE id = $1', [g.id]).then(() => {
+    client.query('DELETE FROM games WHERE id = $1', [g.id]).then(() => {
       client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
         expected_release_month, expected_release_year, guid, id, name, original_release_date, 
         site_detail_url, resource_type, platforms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);`,

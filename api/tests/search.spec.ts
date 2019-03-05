@@ -30,6 +30,7 @@ describe('Client router interface', () => {
   });
 
   it('returns 400 for no query', done => {
+    // pause to give system time to initialize db
     setTimeout(() => {
       chai.request(app).get('/api/search').then((resp) => {
         resp.error.text.should.be.a('string');
@@ -41,30 +42,30 @@ describe('Client router interface', () => {
   });
 
   it('calls the GB API only once', done => {
-    console.log('starting second call');
     moxios.stubRequest(/giantbomb.com/g, {
       response: IceKingJson.data,
       status: IceKingJson.status,
       headers: IceKingJson.headers
     });
     const getSpy = sinon.spy(axios, 'get');
-    chai.request(app).get('/api/search?searchTerm=Mario').then((resp: any) => {
+    chai.request(app).get('/api/search?searchTerm=target_terror').then((resp: any) => {
       expect(getSpy.calledOnce).to.equal(true);
-      return client.query('DELETE FROM games WHERE id < 0');
-    }).then(() => done());
-  });
-
-  it('runs saveGames() without crashing and saves games correctly', done => {
-    //client.query('DELETE FROM games WHERE id < 0 RETURNING (id, name, deck);').then(deleted => {
-      let resultCode = saveGames(defaultError, IceKingJson);
-      expect(resultCode).to.equal(0);
       setTimeout(() => {
-        client.query('SELECT * FROM games WHERE id < 0;').then(data => {
-          expect(data.rowCount).to.equal(IceKingJson.data.results.length);
-          return client.query('')
-        });
+        client.query('DELETE FROM games WHERE id < 0;').then(() => done());
       }, 1000);
-    //});
+    });
+  }).timeout(3000);
+
+  it('runs saveGames() synchronously without crashing and saves correctly', done => {
+    let resultCode = saveGames(defaultError, IceKingJson);
+    expect(resultCode).to.equal(0);
+    // pause to let inserts finish
+    setTimeout(() => {
+      client.query('SELECT * FROM games WHERE id < 0;').then(data => {
+        expect(data.rowCount).to.equal(IceKingJson.data.results.length);
+        return client.query('DELETE FROM games WHERE id < 0;');
+      }).then(() => done());
+    }, 1000);
   }).timeout(3000);
 
 });
