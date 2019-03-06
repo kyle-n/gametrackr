@@ -27,3 +27,10 @@ export interface ServerError {
   status: number;
   msg: string;
 }
+
+export interface User {
+  id: number;
+  email: string;
+  password: string;
+  confirmed: boolean;
+}
