@@ -15,6 +15,12 @@ export default function initialize() {
       list_index_id INTEGER
       );`);
   }).then(() => {
+    return client.query(`CREATE TABLE IF NOT EXISTS list_indices(
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER,
+      list_id INTEGER
+      );`)
+  }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS games(
       aliases TEXT,
       api_detail_url TEXT,
