@@ -14,8 +14,8 @@ client.connect();
 /* API routes broken into functions for easier testing */
 
 // save platform data to db
-export const savePlatforms = (error: ServerError, gbResp: any) => {
-  if (!gbResp || !gbResp.data) return;
+export const savePlatforms = (error: ServerError, gbResp: any): number => {
+  if (!gbResp || !gbResp.data) return 1;
   const allPlatforms: GiantBombPlatform[] = gbResp.data.results.reduce((arr: GiantBombPlatform[], g: GiantBombGame) => {
     return arr.concat(g.platforms);
   }, []);
@@ -34,10 +34,11 @@ export const savePlatforms = (error: ServerError, gbResp: any) => {
 };
 
 // save games to db
-export const saveGames = (error: ServerError, gbResp: any) => {
+export const saveGames = (error: ServerError, gbResp: any): number => {
   if (!gbResp || !gbResp.data) {
     error = { status: 500, msg: 'Could not load results from Giant Bomb' };
-    return console.log(error);
+    console.log(error);
+    return 1;
   }
   // Max 10 results at a time from API so individual inserts are okay
   for (let i = 0; i < gbResp.data.results.length; i++) {
