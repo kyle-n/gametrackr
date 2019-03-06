@@ -33,4 +33,9 @@ export interface User {
   email: string;
   password: string;
   confirmed: boolean;
+  lists: List[];
+}
+
+export interface List {
+  
 }

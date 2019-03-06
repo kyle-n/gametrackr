@@ -11,7 +11,8 @@ export default function initialize() {
       id SERIAL PRIMARY KEY, 
       EMAIL TEXT NOT NULL, 
       password TEXT NOT NULL, 
-      confirmed BOOL DEFAULT false
+      confirmed BOOL DEFAULT false,
+      list_index_id INTEGER
       );`);
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS games(

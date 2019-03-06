@@ -10,9 +10,9 @@ import express from 'express';
 const router: express.Router = express.Router();
 
 router.use('/discover', discover);
-router.use('/list', list);
-router.use('/review', review);
+router.use('/lists', list);
+router.use('/reviews', review);
 router.use('/search', search);
-router.use('/user', user);
+router.use('/users', user);
 
 export = router;

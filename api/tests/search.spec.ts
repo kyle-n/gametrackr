@@ -32,13 +32,9 @@ const defaultError: ServerError = { status: 500, msg: 'Database error' };
 describe('Router search interface', () => {
 
   // give system time to initialize db
-  before(done => {
-    setTimeout(done, 500);
-  });
+  before(done => setTimeout(done, 500));
 
-  after(() => {
-    client.end();
-  });
+  after(() => client.end());
 
   beforeEach(() => {
     moxios.install();
