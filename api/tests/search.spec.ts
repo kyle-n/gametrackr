@@ -31,24 +31,37 @@ const defaultError: ServerError = { status: 500, msg: 'Database error' };
 
 describe('Router search interface', () => {
 
+  // give system time to initialize db
+  before(done => {
+    setTimeout(done, 500);
+  });
+
+  after(() => {
+    client.end();
+  });
+
   beforeEach(() => {
     moxios.install();
   });
 
   afterEach(() => {
     moxios.uninstall();
+    return new Promise((resolve, reject) => {
+      client.query('DELETE FROM games WHERE id < 0;').then(() => {
+        return client.query('DELETE FROM platforms WHERE id < 0;');
+      }).then(() => {
+        return client.query('DELETE FROM game_images WHERE game_id < 0;');
+      }).then(() => resolve()).catch(e => { console.log(e); reject(); });
+    });
   });
 
   it('returns 400 for no query', done => {
-    // pause to give system time to initialize db
-    setTimeout(() => {
-      chai.request(app).get('/api/search').then((resp) => {
-        resp.error.text.should.be.a('string');
-        resp.error.text.should.equal('No search query');
-        resp.error.status.should.equal(400);
-        done();
-      });
-    }, 500);
+    chai.request(app).get('/api/search').then((resp) => {
+      resp.error.text.should.be.a('string');
+      resp.error.text.should.equal('No search query');
+      resp.error.status.should.equal(400);
+      done();
+    });
   });
 
   it('calls the GB API only once', done => {
@@ -60,9 +73,7 @@ describe('Router search interface', () => {
     const getSpy = sinon.spy(axios, 'get');
     chai.request(app).get('/api/search?searchTerm=target_terror').then((resp: any) => {
       expect(getSpy.calledOnce).to.equal(true);
-      setTimeout(() => {
-        client.query('DELETE FROM games WHERE id < 0;').then(() => done());
-      }, 1000);
+      setTimeout(done, 1000);
     });
   }).timeout(3000);
 
@@ -78,8 +89,8 @@ describe('Router search interface', () => {
         expect(heyIceKing.deck).to.equal(ikComparison.deck);
         expect(heyIceKing.name).to.equal(ikComparison.name);
         expect(heyIceKing.resource_type).to.equal(ikComparison.resource_type);
-        return client.query('DELETE FROM games WHERE id < 0;');
-      }).then(() => done());
+        done();
+      });
     }, 1000);
   }).timeout(3000);
 
@@ -101,9 +112,7 @@ describe('Router search interface', () => {
         expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('abbreviation');
         const ds: GiantBombPlatform = data.rows.find(r => r.id === -52);
         expect(ds.name).to.equal('Nintendo DS');
-        return client.query('DELETE FROM platforms WHERE id < 0;');
-      }).then(() => {
-        client.end();
+
         done();
       });
     }, 1000);
