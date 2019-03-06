@@ -33,9 +33,19 @@ export interface User {
   email: string;
   password: string;
   confirmed: boolean;
-  lists: List[];
 }
 
 export interface List {
-  
+  id: number;
+  title: string;
+  deck: string;
+  entries: ListEntry[];
+}
+
+export interface ListEntry {
+  id: number;
+  list_id: number;
+  game_id: number;
+  ranking: number;
+  text: string;
 }
