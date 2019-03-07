@@ -14,17 +14,26 @@ export const validPassword = (pw: string) => /^(?=.*\d).{6,}$/gi.test(pw);
 
 export const validateUser = (body: any, needBoth: boolean): Promise<ServerError> => {
   let error: ServerError = { status: 200, msg: '' };
-  if (objectEmpty(body)) error = { status: 400, msg: 'Must provide an email address and password' };
-  if (needBoth && (!body.email || !validEmail(body.email))) error = { status: 400, msg: 'Must provide an email address' };
-  if (needBoth && (!body.password || !validPassword(body.password))) error = { status: 400, msg: 'Must provide a password' };
-  if (error.msg) return new Promise((resolve, reject) => reject(error));
-  else return new Promise((resolve, reject) => {
-    client.query('SELECT id FROM users WHERE email = $1;', [body.email]).then(data => {
-      if (data.rowCount) {
-        error = { status: 409, msg: 'Email address is already taken' };
-        reject(error);
-      }
-      else resolve(error);
+  let missingEmail = false, missingPw = false, invalidEmail = false, invalidPw = false, emailTaken = false;
+  if (!body.email) missingEmail = true;
+  if (!body.password) missingPw = true;
+  if (!validEmail(body.email)) invalidEmail = true;
+  if (!validPassword(body.password)) invalidPw = true;
+
+  return new Promise<ServerError>((resolve, reject) => {
+    let addr = 'none';
+    if (!missingEmail && !invalidEmail) addr = body.email;
+    client.query('SELECT id FROM users WHERE email = $1;', [addr]).then(data => {
+      if (data.rowCount) emailTaken = true;
+
+      if (emailTaken) return reject({ status: 409, msg: 'Email address is already taken' });
+      if (missingEmail && missingPw) return reject({ status: 400, msg: 'Must provide an email address and password' });
+      else if (missingEmail) return reject({ status: 400, msg: 'Must provide an email address' });
+      else if (missingPw) return reject({ status: 400, msg: 'Must provide a password' })
+      else if (invalidEmail && invalidPw) return reject({ status: 400, msg: 'Must provide a valid email and password' });
+      else if (invalidEmail) return reject({ status: 400, msg: 'Must provide a valid email address' });
+      else if (invalidPw) return reject({ status: 400, msg: 'Must provide a valid password' });
+      else resolve({ status: 200, msg: '' });
     });
   });
 }

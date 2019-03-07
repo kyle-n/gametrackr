@@ -42,34 +42,36 @@ describe('CRUD API for user profile data', () => {
   });
 
   // create
-  it('returns 400 for requests missing a required field', done => {
-    chai.request(app).post('/api/users').send({}).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Must provide an email address and password');
-      resp.error.status.should.equal(400);
-    })
-    chai.request(app).post('/api/users').send({ password }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Must provide an email address');
-      resp.error.status.should.equal(400);
-      return chai.request(app).post('/api/users').send({ email });
-    }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Must provide a password');
-      resp.error.status.should.equal(400);
-      return done();
+  it('returns 400 for requests missing a required field', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).post('/api/users').send({}).then(resp => {
+        resp.error.text.should.be.a('string');
+        resp.error.text.should.equal('Must provide an email address and password');
+        resp.error.status.should.equal(400);
+        return chai.request(app).post('/api/users').send({ password });
+      }).then(resp => {
+        resp.error.text.should.be.a('string');
+        resp.error.text.should.equal('Must provide an email address');
+        resp.error.status.should.equal(400);
+        return chai.request(app).post('/api/users').send({ email });
+      }).then(resp => {
+        resp.error.text.should.be.a('string');
+        resp.error.text.should.equal('Must provide a password');
+        resp.error.status.should.equal(400);
+        return resolve();
+      }).catch(() => reject());
     });
   });
 
   it('returns 400 for a password that breaks requirements', done => {
     chai.request(app).post('/api/users').send({ password: '12345', email }).then(resp => {
       resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Password should be at least 6 characters and use at least one number');
+      resp.error.text.should.equal('Must provide a valid password');
       resp.error.status.should.equal(400);
       return chai.request(app).post('/api/users').send({ password: 'abcdefgh', email });
     }).then(resp => {
       resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Password should be at least 6 characters and use at least one number');
+      resp.error.text.should.equal('Must provide a valid password');
       resp.error.status.should.equal(400);
       return done();
     });
@@ -243,12 +245,12 @@ describe('CRUD API for user profile data', () => {
           return chai.request(app).put(`/api/users/${uId}`).send({ password: 'abcdefgh' });
         }).then(resp => {
           resp.error.text.should.be.a('string');
-          resp.error.text.should.equal('Password should be at least 6 characters and use at least one number');
+          resp.error.text.should.equal('Must provide a valid password');
           resp.error.status.should.equal(400);
           return chai.request(app).put(`/api/users/${uId}`).send({ password: '123' });
         }).then(resp => {
           resp.error.text.should.be.a('string');
-          resp.error.text.should.equal('Password should be at least 6 characters and use at least one number');
+          resp.error.text.should.equal('Must provide a valid password');
           resp.error.status.should.equal(400);
           return done();
         });
