@@ -50,6 +50,7 @@ export const createUser = (req: express.Request, resp: express.Response): number
   }).then(() => {
     return resp.status(200).send();
   }).catch(e => {
+    console.log(e, 'CREATE ERR');
     if (e.msg) resp.status(e.status).send(e.msg);
     else resp.status(defaultError.status).send(defaultError.msg);
   });
