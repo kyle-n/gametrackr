@@ -11,7 +11,7 @@ export default function initialize() {
       id SERIAL PRIMARY KEY, 
       email TEXT UNIQUE NOT NULL, 
       password TEXT NOT NULL, 
-      confirmed BOOL DEFAULT false,
+      confirmed BOOL DEFAULT false
       );`);
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS list_metadata(
