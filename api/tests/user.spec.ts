@@ -25,12 +25,19 @@ describe('CRUD API for user profile data', () => {
   after(() => client.end());
 
   afterEach(() => {
-    /*
     return new Promise((resolve, reject) => {
-      client.query('DELETE FROM users WHERE id < 0;')
-      .then(() => resolve()).catch(() => reject());
+      client.query('DELETE FROM users WHERE email = $1 RETURNING id;', [email]).then(data => {
+        if (data.rowCount < 1) return resolve();
+        client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [data.rows[0].id]).then(listData => {
+          for (let i = 0; i < listData.rowCount; i++) {
+            const row = listData.rows[i];
+            client.query('DROP TABLE IF EXISTS $1;', [row.list_table_name]).then(() => {
+              if (i === listData.rowCount - 1) return resolve();
+            });
+          }
+        });
+      }).catch(() => reject());
     });
-    */
   });
 
   // create
@@ -260,11 +267,11 @@ describe('CRUD API for user profile data', () => {
         }).then(pwMatch => {
           expect(profile.email).to.equal(testEmail);
           expect(pwMatch);
-          return done();
-        });
+          return client.query('UPDATE users SET email = $1 WHERE id = $2;', [email, profile.id]);
+        }).then(() => done());
       }, 1000);
     });
-  });
+  }).timeout(3000);
 
   // delete
   it('returns 400 for requests without id', done => {
