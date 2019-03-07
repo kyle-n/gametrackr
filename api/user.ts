@@ -75,10 +75,22 @@ export const updateUser = (req: express.Request, resp: express.Response): number
     if (e.msg) resp.status(e.status).send(e.msg);
     else resp.status(error.status).send(error.msg);
   });
+
   return 0;
 };
 
 export const deleteUser = (req: express.Request, resp: express.Response): number => {
+  const uId: number = parseInt(resp.locals.id);
+  client.query('DELETE FROM users WHERE id = $1;', [uId]).then(() => {
+    return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [uId]);
+  }).then(data => {
+    for (let i = 0; i < data.rowCount; i++) {
+      client.query('DROP TABLE IF EXISTS $1;', [data.rows[i].list_table_name]).then(() => {
+        if (i === data.rowCount - 1) return resp.status(200).send();
+      });
+    }
+  }).catch(() => resp.status(defaultError.status).send(defaultError.msg));
+
   return 0;
 };
 
