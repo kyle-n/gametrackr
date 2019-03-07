@@ -145,4 +145,22 @@ describe('CRUD API for user profile data', () => {
     });
   });
 
+  it('returns correct user data', done => {
+    chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      setTimeout(() => {
+        let uId: number;
+        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(data => {
+          uId = data.rows[0].id;
+          return chai.request(app).get(`/api/users/${uId}`);
+        }).then(resp => {
+          expect(resp.body.id).to.equal(uId);
+          expect(resp.body.email).to.equal(email);
+          expect(resp.body.confirmed).to.equal(false);
+          expect(resp.body.password).to.equal(undefined);
+          return done();
+        });
+      }, 1000);
+    });
+  }).timeout(3000);
+
 });
