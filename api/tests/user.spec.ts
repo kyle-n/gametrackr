@@ -24,6 +24,7 @@ describe('CRUD API for user profile data', () => {
 
   after(() => client.end());
 
+  // wipe test data
   afterEach(() => {
     return new Promise((resolve, reject) => {
       client.query('DELETE FROM users WHERE email = $1 RETURNING id;', [email]).then(data => {
@@ -42,6 +43,11 @@ describe('CRUD API for user profile data', () => {
 
   // create
   it('returns 400 for requests missing a required field', done => {
+    chai.request(app).post('/api/users').send({}).then(resp => {
+      resp.error.text.should.be.a('string');
+      resp.error.text.should.equal('Must provide an email address and password');
+      resp.error.status.should.equal(400);
+    })
     chai.request(app).post('/api/users').send({ password }).then(resp => {
       resp.error.text.should.be.a('string');
       resp.error.text.should.equal('Must provide an email address');
