@@ -272,7 +272,7 @@ describe('CRUD API for user profile data', () => {
           return bcrypt.compare(testPw, profile.password);
         }).then(pwMatch => {
           expect(profile.email).to.equal(testEmail);
-          expect(pwMatch);
+          expect(pwMatch).to.equal(true);
           return client.query('UPDATE users SET email = $1 WHERE id = $2;', [email, profile.id]);
         }).then(() => done());
       }, 1000);

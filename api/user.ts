@@ -61,6 +61,20 @@ export const readUser = (req: express.Request, resp: express.Response): number =
 };
 
 export const updateUser = (req: express.Request, resp: express.Response): number => {
+  const uId: number = parseInt(req.params.userId);
+  let error: ServerError = { ...defaultError };
+  validateUser(req.body, false).then(() => {
+    if (req.body.password) return bcrypt.hash(req.body.password, 10);
+    else return new Promise<string>(resolve => resolve(''));
+  }).then(hashed => {
+    if (req.body.email && !hashed) return client.query('UPDATE users SET (email = $1, confirmed = false) WHERE id = $2;', [req.body.email, uId]);
+    else if (!req.body.email && hashed) return client.query('UPDATE users SET password = $1 WHERE id = $2;', [hashed, uId]);
+    else return client.query('UPDATE users SET (email = $1, password = $2, confirmed = false WHERE id = $3;', [req.body.email, hashed, uId]);
+  }).then(() => resp.status(200).send())
+  .catch(e => {
+    if (e.msg) resp.status(e.status).send(e.msg);
+    else resp.status(error.status).send(error.msg);
+  });
   return 0;
 };
 
