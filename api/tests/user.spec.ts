@@ -266,4 +266,49 @@ describe('CRUD API for user profile data', () => {
     });
   });
 
+  // delete
+  it('returns 400 for requests without id', done => {
+    chai.request(app).delete('/api/users').send({ email, password }).then(resp => {
+      resp.error.text.should.be.a('string');
+      resp.error.text.should.equal('Request /api/users/user_id, not /api/users');
+      resp.error.status.should.equal(400);
+      return done();
+    });
+  });
+
+  it('returns 404 for nonexistant user id', done => {
+    client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(data => {
+      let missingId: number;
+      if (data.rowCount > 0) missingId = data.rows[0].id + 1;
+      else missingId = 1;
+      return chai.request(app).delete(`/api/users/${missingId}`);
+    }).then(resp => {
+      resp.error.text.should.be.a('string');
+      resp.error.text.should.equal('User profile with that ID not found');
+      resp.error.status.should.equal(404);
+      return done();
+    });
+  });
+
+  it('deletes the requested user and rows', done => {
+    chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      setTimeout(() => {
+        let uId: number;
+        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(data => {
+          uId = data.rows[0].id;
+          return chai.request(app).delete(`/api/users/${uId}`);
+        }).then(resp => {
+          expect(resp.status).to.equal(200);
+          return client.query('SELECT id FROM users WHERE id = $1;', [uId]);
+        }).then(data => {
+          expect(data.rowCount).to.equal(0);
+          return client.query('SELECT id FROM list_metadata WHERE user_id = $1;', [uId]);
+        }).then(data => {
+          expect(data.rowCount).to.equal(0);
+          return done();
+        })
+      }, 1000);
+    });
+  }).timeout(3000);
+
 });
