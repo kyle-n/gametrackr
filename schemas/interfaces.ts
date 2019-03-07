@@ -1,3 +1,5 @@
+import express from 'express';
+
 export interface GiantBombGame extends Array<any> {
   aliases: string;
   api_detail_url: string;
@@ -44,7 +46,6 @@ export interface List {
 
 export interface ListEntry {
   id: number;
-  list_id: number;
   game_id: number;
   ranking: number;
   text: string;
