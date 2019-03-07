@@ -9,16 +9,17 @@ export default function initialize() {
     console.log('PostgreSQL connected');
     return client.query(`CREATE TABLE IF NOT EXISTS users(
       id SERIAL PRIMARY KEY, 
-      EMAIL TEXT NOT NULL, 
+      EMAIL TEXT UNIQUE NOT NULL, 
       password TEXT NOT NULL, 
       confirmed BOOL DEFAULT false,
-      list_index_id INTEGER
       );`);
   }).then(() => {
-    return client.query(`CREATE TABLE IF NOT EXISTS list_indices(
+    return client.query(`CREATE TABLE IF NOT EXISTS list_metadata(
       id SERIAL PRIMARY KEY,
       user_id INTEGER,
-      list_id INTEGER
+      list_table_name TEXT,
+      title TEXT,
+      deck TEXT
       );`)
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS games(

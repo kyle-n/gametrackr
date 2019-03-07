@@ -30,7 +30,6 @@ export interface ServerError {
 
 export interface User {
   id: number;
-  list_index_id: number;
   email: string;
   password: string;
   confirmed: boolean;
