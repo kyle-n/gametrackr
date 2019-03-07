@@ -94,8 +94,13 @@ export const deleteUser = (req: express.Request, resp: express.Response): number
   return 0;
 };
 
+const fourHundredNotSpecified = (req: express.Request, resp: express.Response) => resp.status(400).send('Request /api/users/user_id, not /api/users');
+
 export const router: express.Router = express.Router();
-router.post('/', createUser);
+router.route('/').get(fourHundredNotSpecified)
+                 .post(createUser)
+                 .put(fourHundredNotSpecified)
+                 .delete(fourHundredNotSpecified);
 router.route('/:userId').get(readUser)
                         .put(updateUser)
                         .delete(deleteUser);
