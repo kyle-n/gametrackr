@@ -8,6 +8,7 @@ import { Client } from 'pg';
 import sinon from 'sinon';
 import { User, List, ListEntry } from '../../schemas';
 import { connectionUrl } from '../../db';
+import bcrypt from 'bcrypt';
 
 // config
 chai.use(chaiHttp);
@@ -87,10 +88,13 @@ describe('CRUD API for user profile data', () => {
     chai.request(app).post('/api/users').send({ password, email }).then(resp => {
       resp.status.should.equal(200);
       setTimeout(() => {
+        let profile: User;
         client.query('SELECT * FROM users WHERE email = $1;', [email]).then(data => {
-          const profile = data.rows[0];
           expect(data.rowCount).to.equal(1);
-          expect(profile.password).to.not.equal(password);
+          profile = data.rows[0];
+          return bcrypt.compare(password, profile.password);
+        }).then(pwMatch => {
+          expect(pwMatch).to.equal(true);
           expect(profile.email).to.equal(email);
           expect(profile.confirmed).to.equal(false);
           return done();
@@ -162,5 +166,104 @@ describe('CRUD API for user profile data', () => {
       }, 1000);
     });
   }).timeout(3000);
+
+  // update
+  it('returns 400 for requests without id', done => {
+    chai.request(app).put('/api/users').send({ email, password }).then(resp => {
+      resp.error.text.should.be.a('string');
+      resp.error.text.should.equal('Request /api/users/user_id, not /api/users');
+      resp.error.status.should.equal(400);
+      return done();
+    });
+  });
+
+  it('returns 404 for nonexistant user id', done => {
+    client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(data => {
+      let missingId: number;
+      if (data.rowCount > 0) missingId = data.rows[0].id + 1;
+      else missingId = 1;
+      return chai.request(app).put(`/api/users/${missingId}`).send({ email, password });
+    }).then(resp => {
+      resp.error.text.should.be.a('string');
+      resp.error.text.should.equal('User profile with that ID not found');
+      resp.error.status.should.equal(404);
+      return done();
+    });
+  });
+
+  it('returns 400 if missing email and password in json', done => {
+    chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      setTimeout(() => {
+        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(data => {
+          return chai.request(app).put(`/api/users/${data.rows[0].id}`).send({ useless: 'data' });
+        }).then(resp => {
+          resp.error.text.should.be.a('string');
+          resp.error.text.should.equal('Must provide an update to the email or password');
+          resp.error.status.should.equal(400);
+          return done();
+        });
+      }, 1000);
+    });
+  }).timeout(3000);
+
+  it('returns 400 for bad email', done => {
+    chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      setTimeout(() => {
+        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(data => {
+          return chai.request(app).put(`/api/users/${data.rows[0].id}`).send({ email: 'bad' });
+        }).then(resp => {
+          resp.error.text.should.be.a('string');
+          resp.error.text.should.equal('Must provide a valid new email');
+          resp.error.status.should.equal(400);
+          return done();
+        });
+      }, 1000);
+    });
+  }).timeout(3000);
+
+  it('returns 400 for bad password', done => {
+    chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      setTimeout(() => {
+        let uId: number;
+        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(data => {
+          uId = data.rows[0].id;
+          return chai.request(app).put(`/api/users/${uId}`).send({ password: 'abcdefgh' });
+        }).then(resp => {
+          resp.error.text.should.be.a('string');
+          resp.error.text.should.equal('Password should be at least 6 characters and use at least one number');
+          resp.error.status.should.equal(400);
+          return chai.request(app).put(`/api/users/${uId}`).send({ password: '123' });
+        }).then(resp => {
+          resp.error.text.should.be.a('string');
+          resp.error.text.should.equal('Password should be at least 6 characters and use at least one number');
+          resp.error.status.should.equal(400);
+          return done();
+        });
+      }, 1000);
+    });
+  }).timeout(3000);
+
+  it('updates user profile correctly', done => {
+    chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      setTimeout(() => {
+        let profile: User;
+        const testEmail = 'test@gmail.com', testPw = 'abc123';
+        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(data => {
+          profile.id = data.rows[0].id;
+          return chai.request(app).put(`/api/users/${profile.id}`).send({ email: testEmail, password: testPw });
+        }).then(resp => {
+          return client.query('SELECT * FROM users WHERE id = $1;', [profile.id]);
+        }).then(data => {
+          expect(data.rowCount).to.equal(1);
+          profile = data.rows[0];
+          return bcrypt.compare(testPw, profile.password);
+        }).then(pwMatch => {
+          expect(profile.email).to.equal(testEmail);
+          expect(pwMatch);
+          return done();
+        });
+      }, 1000);
+    });
+  });
 
 });
