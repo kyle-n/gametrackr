@@ -7,14 +7,19 @@ import { connectionUrl } from '../db';
 const client: Client = new Client(connectionUrl);
 client.connect();
 
-export const validateUser = (body: any): Promise<void> => {
+export const validEmail = (addr: string) => /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(addr);
+export const validPassword = (pw: string) => /^(?=.*\d).{6,}$/gi.test(pw);
+
+export const validateUser = (body: any): Promise<string> => {
   let status: string = '';
   if (objectEmpty(body)) status = 'missing both';
-  if (status) return new Promise((resolve, reject) => reject());
+  if (!body.email || !validEmail(body.email)) status = 'missing email';
+  if (!body.password || !validPassword(body.password)) status = 'missing password';
+  if (status) return new Promise((resolve, reject) => reject(status));
   else return new Promise((resolve, reject) => {
     client.query('SELECT id FROM users WHERE email = $1;', [body.email]).then(data => {
-      if (data.rowCount) reject();
-      else resolve();
+      if (data.rowCount) reject(status);
+      else resolve(status);
     });
   });
 }
