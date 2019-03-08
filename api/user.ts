@@ -20,8 +20,8 @@ export const validateUser = (body: any, needBoth: boolean): Promise<ServerError>
   return new Promise<ServerError>((resolve, reject) => {
     let addr = 'none';
     if (!missingEmail && !invalidEmail) addr = body.email;
-    client.query('SELECT id FROM users WHERE email = $1;', [addr]).then(data => {
-      if (data.rowCount) emailTaken = true;
+    client.query('SELECT id FROM users WHERE email = $1;', [addr]).then(rows => {
+      if (rows.length) emailTaken = true;
 
       if (emailTaken) return reject({ status: 409, msg: 'Email address is already taken' });
       if (missingEmail && missingPw) return reject({ status: 400, msg: 'Must provide an email address and password' });
@@ -39,11 +39,11 @@ export const createUser = (req: express.Request, resp: express.Response): number
   validateUser(req.body, true).then(() => {
     return bcrypt.hash(req.body.password, 10);
   }).then(hashed => {
-    return client.query(`INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id;`, [req.body.email, hashed]);
-  }).then(data => {
-    return client.query('INSERT INTO list_metadata (user_id, list_table_name, title) VALUES ($1, $2, $3) RETURNING list_table_name;', [data.rows[0].id, nameList(), 'Played games']);
-  }).then(data => {
-    return client.query('CREATE TABLE $1~ (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [data.rows[0].list_table_name]);
+    return client.query(`INSERT INTO users (email, password, confirmed) VALUES ($1, $2, $3) RETURNING id;`, [req.body.email, hashed, false]);
+  }).then(rows => {
+    return client.query('INSERT INTO list_metadata (user_id, list_table_name, title) VALUES ($1, $2, $3) RETURNING list_table_name;', [rows[0].id, nameList(), 'Played games']);
+  }).then(rows => {
+    return client.query('CREATE TABLE $1~ (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [rows[0].list_table_name]);
   }).then(() => {
     return resp.status(200).send();
   }).catch(e => {
@@ -57,12 +57,12 @@ export const createUser = (req: express.Request, resp: express.Response): number
 
 export const readUser = (req: express.Request, resp: express.Response): number => {
   let error: ServerError = { ...defaultError };
-  client.query('SELECT (id, email, confirmed) FROM users WHERE id = $1;', [resp.locals.id]).then(data => {
-    if (!data.rowCount) {
+  client.query('SELECT (id, email, confirmed) FROM users WHERE id = $1;', [resp.locals.id]).then(rows => {
+    if (!rows.length) {
       error = { status: 404, msg: 'User profile with that ID not found'};
       throw new Error();
     }
-    resp.status(200).json(data.rows[0]);
+    resp.status(200).json(rows[0]);
   }).catch(() => resp.status(error.status).send(error.msg));
   return 0;
 };
@@ -90,10 +90,10 @@ export const deleteUser = (req: express.Request, resp: express.Response): number
   const uId: number = parseInt(resp.locals.id);
   client.query('DELETE FROM users WHERE id = $1;', [uId]).then(() => {
     return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [uId]);
-  }).then(data => {
-    for (let i = 0; i < data.rowCount; i++) {
-      client.query('DROP TABLE IF EXISTS $1;', [data.rows[i].list_table_name]).then(() => {
-        if (i === data.rowCount - 1) return resp.status(200).send();
+  }).then(rows => {
+    for (let i = 0; i < rows.length; i++) {
+      client.query('DROP TABLE IF EXISTS $1;', [rows[i].list_table_name]).then(() => {
+        if (i === rows.length - 1) return resp.status(200).send();
       });
     }
   }).catch(() => resp.status(defaultError.status).send(defaultError.msg));

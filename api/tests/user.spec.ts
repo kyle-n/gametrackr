@@ -23,10 +23,10 @@ describe('CRUD API for user profile data', () => {
   afterEach(() => {
     return new Promise((resolve, reject) => {
       client.query('DELETE FROM users WHERE email = $1 RETURNING id;', [email]).then(rows => {
-        if (rows.length < 1) return new Promise<any>(resolve => resolve({ rowCount: 0, rows: [] }));
+        if (rows.length < 1) return new Promise<any>(resolve => resolve([]));
         else return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [rows[0].id]);
       }).then(rows => {
-        console.log('about to loop');
+        if (rows.length === 0) return resolve();
         for (let i = 0; i < rows.length; i++) {
           console.log('about to drop table', i);
           client.query('DROP TABLE IF EXISTS $1~;', [rows[i].list_table_name]).then(() => {
