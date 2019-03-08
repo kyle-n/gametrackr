@@ -57,7 +57,11 @@ export const createUser = (req: express.Request, resp: express.Response): number
 
 export const readUser = (req: express.Request, resp: express.Response): number => {
   let error: ServerError = { ...defaultError };
-  client.query('SELECT (id, email, confirmed) FROM users WHERE id = $1;', [resp.locals.id]).then(rows => {
+
+  // temp code until I make middleware to set resp.locals.id from JWT
+  resp.locals.id = parseInt(req.params.userId);
+
+  client.query('SELECT id, email, confirmed FROM users WHERE id = $1;', [resp.locals.id]).then(rows => {
     if (!rows.length) {
       error = { status: 404, msg: 'User profile with that ID not found'};
       throw new Error();

@@ -28,7 +28,6 @@ describe('CRUD API for user profile data', () => {
       }).then(rows => {
         if (rows.length === 0) return resolve();
         for (let i = 0; i < rows.length; i++) {
-          console.log('about to drop table', i);
           client.query('DROP TABLE IF EXISTS $1~;', [rows[i].list_table_name]).then(() => {
             if (i === rows.length - 1) return resolve();
           });
@@ -55,7 +54,7 @@ describe('CRUD API for user profile data', () => {
         resp.error.text.should.equal('Must provide a password');
         resp.error.status.should.equal(400);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
@@ -127,7 +126,7 @@ describe('CRUD API for user profile data', () => {
           expect(playedGamesList.list_table_name).to.be.a('string');
           expect(playedGamesList.title.toLowerCase()).to.equal('played games');
           expect(playedGamesList.deck).to.equal(null);
-          return client.query('SELECT * FROM $1;', [playedGamesList.list_table_name]);
+          return client.query('SELECT * FROM $1~;', [playedGamesList.list_table_name]);
         }).then(rows => {
           expect(rows.length).to.equal(0);
           return done();
@@ -168,6 +167,7 @@ describe('CRUD API for user profile data', () => {
           uId = rows[0].id;
           return chai.request(app).get(`/api/users/${uId}`);
         }).then(resp => {
+          console.log(resp.body, 'resp');
           expect(resp.body.id).to.equal(uId);
           expect(resp.body.email).to.equal(email);
           expect(resp.body.confirmed).to.equal(false);
