@@ -1,19 +1,19 @@
-import { Client } from 'pg';
+import pgp from 'pg-promise';
+import { connectionUrl } from '.';
 export const connection = `postgres://${process.env.PSQL_USERNAME}:${process.env.PSQL_PASSWORD}@localhost:5432/gametrackr`;
+
+const database = pgp();
+export const client = database(connectionUrl);
 
 export default function initialize() {
 
-  const client: Client = new Client(connection);
-
-  client.connect().then(() => {
-    console.log('PostgreSQL connected');
-    return client.query(`CREATE TABLE IF NOT EXISTS users(
+  client.query(`CREATE TABLE IF NOT EXISTS users(
       id SERIAL PRIMARY KEY, 
       email TEXT UNIQUE NOT NULL, 
       password TEXT NOT NULL, 
       confirmed BOOL DEFAULT false
-      );`);
-  }).then(() => {
+      );`
+  ).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS list_metadata(
       id SERIAL PRIMARY KEY,
       user_id INTEGER,

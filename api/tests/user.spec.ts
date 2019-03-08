@@ -4,25 +4,20 @@ import { describe, it, beforeEach } from 'mocha';
 import chai from 'chai';
 import { expect } from 'chai';
 import chaiHttp from 'chai-http';
-import { Client } from 'pg';
 import sinon from 'sinon';
 import { User, List, ListEntry } from '../../schemas';
-import { connectionUrl } from '../../db';
+import { client } from '../../db';
 import bcrypt from 'bcrypt';
 
 // config
 chai.use(chaiHttp);
 const should = chai.should();
-const client: Client = new Client(connectionUrl);
-client.connect();
 const password = 'xyz123', email='kylebnazario@yahoo.com';
 
 describe('CRUD API for user profile data', () => {
 
   // let system init db
   before(done => setTimeout(done, 500));
-
-  after(() => client.end());
 
   // wipe test data
   afterEach(() => {
@@ -31,8 +26,8 @@ describe('CRUD API for user profile data', () => {
         if (data.rowCount < 1) return resolve();
         client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [data.rows[0].id]).then(listData => {
           for (let i = 0; i < listData.rowCount; i++) {
-            const row = listData.rows[i];
-            client.query('DROP TABLE IF EXISTS $1;', [row.list_table_name]).then(() => {
+            console.log('about to drop table', i);
+            client.query('DROP TABLE IF EXISTS $1~;', [listData.rows[i].list_table_name]).then(() => {
               if (i === listData.rowCount - 1) return resolve();
             });
           }

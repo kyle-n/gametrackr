@@ -10,3 +10,7 @@ export function rInt(a: number, b?: number) {
   }
   return Math.floor(Math.random() * upper + lower);
 }
+
+export function nameList(): string {
+  return 'list_' + Date.now();
+}

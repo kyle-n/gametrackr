@@ -13,8 +13,7 @@ import { describe, it, beforeEach } from 'mocha';
 import { expect } from 'chai';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import { Client } from 'pg';
-import { connectionUrl } from '../../db';
+import { client } from '../../db';
 import sinon from 'sinon';
 import axios from 'axios';
 import moxios from 'moxios';
@@ -25,16 +24,12 @@ import { rInt } from '../../utils';
 // config
 chai.use(chaiHttp);
 const should = chai.should();
-const client: Client = new Client(connectionUrl);
-client.connect();
 const defaultError: ServerError = { status: 500, msg: 'Database error' };
 
 describe('Router search interface', () => {
 
   // give system time to initialize db
   before(done => setTimeout(done, 500));
-
-  after(() => client.end());
 
   beforeEach(() => {
     moxios.install();

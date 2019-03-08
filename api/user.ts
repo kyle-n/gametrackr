@@ -1,12 +1,9 @@
 import express from 'express';
-import { objectEmpty } from '../utils';
+import { nameList } from '../utils';
 import { User, ServerError } from '../schemas';
-import { Client } from 'pg';
-import { connectionUrl } from '../db';
+import { client } from '../db';
 import bcrypt from 'bcrypt';
 
-const client: Client = new Client(connectionUrl);
-client.connect();
 const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
 
 export const validEmail = (addr: string) => /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(addr);
@@ -42,15 +39,15 @@ export const createUser = (req: express.Request, resp: express.Response): number
   validateUser(req.body, true).then(() => {
     return bcrypt.hash(req.body.password, 10);
   }).then(hashed => {
-    return client.query(`INSERT INTO users (email, password) VALUES ($1, $1) RETURNING id;`, [req.body.email, hashed]);
+    return client.query(`INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id;`, [req.body.email, hashed]);
   }).then(data => {
-    return client.query('INSERT INTO list_metadata (user_id, list_table_name, title) VALUES ($1, $2, $3) RETURNING list_table_name;', [data.rows[0].id, Date.now(), 'Played games']);
+    return client.query('INSERT INTO list_metadata (user_id, list_table_name, title) VALUES ($1, $2, $3) RETURNING list_table_name;', [data.rows[0].id, nameList(), 'Played games']);
   }).then(data => {
     return client.query('CREATE TABLE $1 (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [data.rows[0].list_table_name]);
   }).then(() => {
     return resp.status(200).send();
   }).catch(e => {
-    console.log(e, 'CREATE ERR');
+    //console.log(e, 'CREATE ERR');
     if (e.msg) resp.status(e.status).send(e.msg);
     else resp.status(defaultError.status).send(defaultError.msg);
   });
