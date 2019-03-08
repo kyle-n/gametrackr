@@ -167,7 +167,6 @@ describe('CRUD API for user profile data', () => {
           uId = rows[0].id;
           return chai.request(app).get(`/api/users/${uId}`);
         }).then(resp => {
-          console.log(resp.body, 'resp');
           expect(resp.body.id).to.equal(uId);
           expect(resp.body.email).to.equal(email);
           expect(resp.body.confirmed).to.equal(false);
@@ -241,12 +240,12 @@ describe('CRUD API for user profile data', () => {
           return chai.request(app).put(`/api/users/${uId}`).send({ password: 'abcdefgh' });
         }).then(resp => {
           resp.error.text.should.be.a('string');
-          resp.error.text.should.equal('Must provide a valid password');
+          resp.error.text.should.equal('Must provide a valid new password');
           resp.error.status.should.equal(400);
           return chai.request(app).put(`/api/users/${uId}`).send({ password: '123' });
         }).then(resp => {
           resp.error.text.should.be.a('string');
-          resp.error.text.should.equal('Must provide a valid password');
+          resp.error.text.should.equal('Must provide a valid new password');
           resp.error.status.should.equal(400);
           return done();
         });
@@ -260,7 +259,7 @@ describe('CRUD API for user profile data', () => {
         let profile: User;
         const testEmail = 'test@gmail.com', testPw = 'abc123';
         client.query('SELECT id FROM users WHERE email = $1;', [email]).then(rows => {
-          profile.id = rows[0].id;
+          profile = rows[0];
           return chai.request(app).put(`/api/users/${profile.id}`).send({ email: testEmail, password: testPw });
         }).then(resp => {
           return client.query('SELECT * FROM users WHERE id = $1;', [profile.id]);
