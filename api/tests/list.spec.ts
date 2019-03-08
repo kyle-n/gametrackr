@@ -22,10 +22,10 @@ describe('Router list api interface', () => {
     setTimeout(() => {
       client.query('SELECT id FROM users WHERE email = $1;', email).then(rows => {
         // login if there's a test account, otherwise create one
-        if (rows.length) return chai.request(app).post('/api/users/login').send({ email, password });
-        else return chai.request(app).post('/api/users').send({ email, password });
+        if (rows.length) return chai.request(app).post('/api/external/login').set('authorization', token).send({ email, password });
+        else return chai.request(app).post('/api/users').set('authorization', token).send({ email, password });
       }).then(resp => {
-        token = resp.body.token;
+        token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', email);
       }).then(rows => {
         userId = rows[0].id;
@@ -59,23 +59,23 @@ describe('Router list api interface', () => {
   // create
   it('returns 400 for bad new list requests', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).post('/api/lists').send({ title }).then(resp => {
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title }).then(resp => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('Must provide a valid title and deck');
         resp.error.status.should.equal(400);
-        return chai.request(app).post('/api/lists').send({ deck });
+        return chai.request(app).post('/api/lists').set('authorization', token).send({ deck });
       }).then(resp => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('Must provide a valid title and deck');
         resp.error.status.should.equal(400);
         const tooLong = 'String of more than twenty characters, the limit for titles';
-        return chai.request(app).post('/api/lists').send({ title: tooLong, deck });
+        return chai.request(app).post('/api/lists').set('authorization', token).send({ title: tooLong, deck });
       }).then(resp => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('Must provide a valid title and deck');
         resp.error.status.should.equal(400);
         const tooLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non arcu leo. Vestibulum dignissim consequat velit nec accumsan. Phasellus molestie vel metus nec vulputate. Phasellus sit amet elementum erat. Nulla sollicitudin dolor ut bibendum tempor. Proin vitae cursus felis. Ut aliquam erat quis molestie interdum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer consectetur leo congue, faucibus arcu at, porttitor eros. Donec consectetur justo sed ultrices rutrum. Etiam tincidunt, leo nec consequat pharetra, dolor ligula vehicula elit, vel ultricies erat nibh a nisi. Duis euismod sem orci, a ornare sem fermentum et.';
-        return chai.request(app).post('/api/lists').send({ title, deck: tooLong });
+        return chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck: tooLong });
       }).then(resp => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('Must provide a valid title and deck');
@@ -87,7 +87,7 @@ describe('Router list api interface', () => {
 
   it('correctly saves a new list', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).post('/api/lists').send({ title, deck }).then(resp => {
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         resp.status.should.equal(200);
         setTimeout(() => {
           client.query('SELECT * FROM list_metadata WHERE title = $1;', title).then(rows => {
