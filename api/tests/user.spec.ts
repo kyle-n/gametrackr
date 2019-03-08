@@ -316,7 +316,7 @@ describe('CRUD API for user profile data', () => {
         }).then(rows => {
           expect(rows.length).to.equal(0);
           return done();
-        })
+        });
       }, 1000);
     });
   }).timeout(3000);

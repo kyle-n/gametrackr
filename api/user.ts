@@ -112,16 +112,22 @@ export const updateUser = (req: express.Request, resp: express.Response): number
 };
 
 export const deleteUser = (req: express.Request, resp: express.Response): number => {
-  const uId: number = parseInt(resp.locals.id);
-  client.query('DELETE FROM users WHERE id = $1;', [uId]).then(() => {
+  resp.locals.id = parseInt(req.params.userId);
+  const uId: number = resp.locals.id;
+  let error: ServerError = { ...defaultError };
+  client.query('DELETE FROM users WHERE id = $1 RETURNING id;', [uId]).then(rows => {
+    if (!rows.length) {
+      error = { status: 404, msg: 'User profile with that ID not found' };
+      throw new Error();
+    }
     return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [uId]);
   }).then(rows => {
     for (let i = 0; i < rows.length; i++) {
-      client.query('DROP TABLE IF EXISTS $1;', [rows[i].list_table_name]).then(() => {
+      client.query('DROP TABLE IF EXISTS $1~;', [rows[i].list_table_name]).then(() => {
         if (i === rows.length - 1) return resp.status(200).send();
       });
     }
-  }).catch(() => resp.status(defaultError.status).send(defaultError.msg));
+  }).catch(() => resp.status(error.status).send(error.msg));
 
   return 0;
 };
