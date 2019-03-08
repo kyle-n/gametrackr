@@ -1,5 +1,4 @@
 import { app } from '../../server';
-import { createUser, readUser, updateUser, deleteUser } from '../user';
 import { describe, it, beforeEach } from 'mocha';
 import chai from 'chai';
 import { expect } from 'chai';

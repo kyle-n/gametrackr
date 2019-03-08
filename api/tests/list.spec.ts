@@ -22,8 +22,8 @@ describe('Router list api interface', () => {
     setTimeout(() => {
       client.query('SELECT id FROM users WHERE email = $1;', email).then(rows => {
         // login if there's a test account, otherwise create one
-        if (rows.length) return chai.request(app).post('/api/external/login').set('authorization', token).send({ email, password });
-        else return chai.request(app).post('/api/users').set('authorization', token).send({ email, password });
+        if (rows.length) return chai.request(app).post('/api/external/login').send({ email, password });
+        else return chai.request(app).post('/api/external').set('authorization', token).send({ email, password });
       }).then(resp => {
         token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', email);
@@ -87,13 +87,19 @@ describe('Router list api interface', () => {
 
   it('correctly saves a new list', () => {
     return new Promise<void>((resolve, reject) => {
+      let tableResponseName: string;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         resp.status.should.equal(200);
-        setTimeout(() => {
-          client.query('SELECT * FROM list_metadata WHERE title = $1;', title).then(rows => {
-
-          })
-        }, 1000);
+        resp.body.listTableName.should.be.a('string');
+        tableResponseName = resp.body.listTableName;
+        return client.query('SELECT * FROM list_metadata WHERE list_table_name = $1;', resp.body.listTableName);
+      }).then(rows => {
+        expect(rows.length).to.equal(1);
+        expect(rows[0].list_table_name).to.equal(tableResponseName);
+        expect(rows[0].user_id).to.equal(userId);
+        expect(rows[0].title).to.equal(title);
+        expect(rows[0].deck).to.equal(deck);
+        return resolve();
       }).catch(e => { console.log(e); reject(); });
     })
   }).timeout(3000);

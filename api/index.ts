@@ -1,9 +1,9 @@
 import discover from './discover';
-import list from './list';
 import review from './review';
 import { router as search } from './search';
 import { router as user } from './user';
 import { router as external } from './external';
+import { router as list } from './list';
 import { checkJwt } from './checkjwt';
 
 // check JWT middleware
