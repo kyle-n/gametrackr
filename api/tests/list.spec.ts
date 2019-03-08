@@ -11,8 +11,9 @@ import { client } from '../../db';
 chai.use(chaiHttp);
 const should = chai.should();
 const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
-const email = 'test@test.com', password = 'abc123';
+const email = process.env.TEST_EMAIL, password = process.env.TEST_PASSWORD;
 const title = 'Test list', deck = 'Test deck';
+let token: string;
 
 describe('Router list api interface', () => {
 

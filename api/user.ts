@@ -1,8 +1,10 @@
 import express from 'express';
 import { nameList } from '../utils';
-import { User, ServerError } from '../schemas';
+import { User, ServerError, DecodedToken } from '../schemas';
 import { client } from '../db';
 import bcrypt from 'bcrypt';
+import { checkJwt } from './checkjwt';
+import jwt from 'jsonwebtoken';
 
 const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
 
@@ -36,19 +38,21 @@ export const validateNewUser = (body: any): Promise<ServerError> => {
 }
 
 export const createUser = (req: express.Request, resp: express.Response): number => {
+  let newUser: DecodedToken;
   validateNewUser(req.body).then(() => {
     return bcrypt.hash(req.body.password, 10);
   }).then(hashed => {
     return client.query(`INSERT INTO users (email, password, confirmed) VALUES ($1, $2, $3) RETURNING id;`, [req.body.email, hashed, false]);
   }).then(rows => {
+    newUser = { id: rows[0].id, email: req.body.email };
     return client.query('INSERT INTO list_metadata (user_id, list_table_name, title) VALUES ($1, $2, $3) RETURNING list_table_name;', [rows[0].id, nameList(), 'Played games']);
   }).then(rows => {
     return client.query('CREATE TABLE $1~ (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [rows[0].list_table_name]);
   }).then(() => {
-    return resp.status(200).send();
+    const newToken = jwt.sign(newUser, <string>process.env.SECRET_KEY);
+    resp.status(200).json({ token: newToken });
   }).catch(e => {
-    //console.log(e, 'CREATE ERR');
-    if (e.msg) resp.status(e.status).send(e.msg);
+    if (e.msg) resp.status(e.status).json(e.msg);
     else resp.status(defaultError.status).send(defaultError.msg);
   });
 
