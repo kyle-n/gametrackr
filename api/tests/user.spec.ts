@@ -38,7 +38,7 @@ describe('CRUD API for user profile data', () => {
   // create
   it('returns 400 for requests missing a required field', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).post('/api/users').send({}).then(resp => {
+      chai.request(app).post('/api/external').send({}).then(resp => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('Must provide an email address and password');
         resp.error.status.should.equal(400);
@@ -58,7 +58,7 @@ describe('CRUD API for user profile data', () => {
   });
 
   it('returns 400 for a password that breaks requirements', done => {
-    chai.request(app).post('/api/users').send({ password: '12345', email }).then(resp => {
+    chai.request(app).post('/api/external').send({ password: '12345', email }).then(resp => {
       resp.error.text.should.be.a('string');
       resp.error.text.should.equal('Must provide a valid password');
       resp.error.status.should.equal(400);
@@ -72,7 +72,7 @@ describe('CRUD API for user profile data', () => {
   });
 
   it('returns 400 for an email that breaks requirements', done => {
-    chai.request(app).post('/api/users').send({ password, email: 'nomail' }).then(resp => {
+    chai.request(app).post('/api/external').send({ password, email: 'nomail' }).then(resp => {
       resp.error.text.should.be.a('string');
       resp.error.text.should.equal('Must provide a valid email address');
       resp.error.status.should.equal(400);
@@ -81,9 +81,9 @@ describe('CRUD API for user profile data', () => {
   });
 
   it('returns 409 for taken email', done => {
-    chai.request(app).post('/api/users').send({ password, email }).then(() => {
+    chai.request(app).post('/api/external').send({ password, email }).then(() => {
       setTimeout(() => {
-        chai.request(app).post('/api/users').send({ password, email }).then(resp => {
+        chai.request(app).post('/api/external').send({ password, email }).then(resp => {
           resp.error.text.should.be.a('string');
           resp.error.text.should.equal('Email address is already taken');
           resp.error.status.should.equal(409);
@@ -94,7 +94,7 @@ describe('CRUD API for user profile data', () => {
   }).timeout(3000);
 
   it('correctly adds user data', done => {
-    chai.request(app).post('/api/users').send({ password, email }).then(resp => {
+    chai.request(app).post('/api/external').send({ password, email }).then(resp => {
       resp.status.should.equal(200);
       setTimeout(() => {
         let profile: User;
@@ -113,7 +113,7 @@ describe('CRUD API for user profile data', () => {
   }).timeout(3000);
 
   it('creates default user list', done => {
-    chai.request(app).post('/api/users').send({ email, password }).then(resp => {
+    chai.request(app).post('/api/external').send({ email, password }).then(resp => {
       resp.status.should.equal(200);
       setTimeout(() => {
         client.query('SELECT id FROM users WHERE email = $1;', [email]).then(rows => {
