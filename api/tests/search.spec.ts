@@ -73,9 +73,9 @@ describe('Router search interface', () => {
     expect(resultCode).to.equal(0);
     // pause to let inserts finish
     setTimeout(() => {
-      client.query('SELECT * FROM games WHERE id < 0;').then(data => {
-        expect(data.rowCount).to.equal(IceKingJson.data.results.length);
-        const heyIceKing: GiantBombGame = data.rows.find((r: GiantBombGame) => r.id === -37763);
+      client.query('SELECT * FROM games WHERE id < 0;').then(rows => {
+        expect(rows.length).to.equal(IceKingJson.data.results.length);
+        const heyIceKing: GiantBombGame = rows.find((r: GiantBombGame) => r.id === -37763);
         const ikComparison: any = IceKingJson.data.results.find((r: any) => r.id === -37763);
         expect(heyIceKing.deck).to.equal(ikComparison.deck);
         expect(heyIceKing.name).to.equal(ikComparison.name);
@@ -94,14 +94,14 @@ describe('Router search interface', () => {
     const resultCode: number = savePlatforms(defaultError, IceKingJson);
     expect(resultCode).to.equal(0);
     setTimeout(() => {
-      client.query('SELECT * FROM platforms WHERE id < 0;').then(data => {
-        expect(data.rowCount).to.equal(16);
-        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('api_detail_url');
-        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('id');
-        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('name');
-        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('site_detail_url');
-        expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('abbreviation');
-        const ds: GiantBombPlatform = data.rows.find((r: GiantBombPlatform) => r.id === -52);
+      client.query('SELECT * FROM platforms WHERE id < 0;').then(rows => {
+        expect(rows.length).to.equal(16);
+        expect(rows[rInt(rows.length)]).to.haveOwnProperty('api_detail_url');
+        expect(rows[rInt(rows.length)]).to.haveOwnProperty('id');
+        expect(rows[rInt(rows.length)]).to.haveOwnProperty('name');
+        expect(rows[rInt(rows.length)]).to.haveOwnProperty('site_detail_url');
+        expect(rows[rInt(rows.length)]).to.haveOwnProperty('abbreviation');
+        const ds: GiantBombPlatform = rows.find((r: GiantBombPlatform) => r.id === -52);
         expect(ds.name).to.equal('Nintendo DS');
 
         done();
