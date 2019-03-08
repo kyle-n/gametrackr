@@ -52,7 +52,7 @@ describe('Router list api interface', () => {
   });
 
   // create
-  it('returns 400 for new list requests missing a required field', () => {
+  it('returns 400 for bad new list requests', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/lists').send({ title }).then(resp => {
         resp.error.text.should.be.a('string');
@@ -79,5 +79,18 @@ describe('Router list api interface', () => {
       }).catch(e => { console.log(e); reject(); });
     });
   });
+
+  it('correctly saves a new list', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).post('/api/lists').send({ title, deck }).then(resp => {
+        resp.status.should.equal(200);
+        setTimeout(() => {
+          client.query('SELECT * FROM list_metadata WHERE title = $1;', title).then(rows => {
+
+          })
+        }, 1000);
+      }).catch(e => { console.log(e); reject(); });
+    })
+  }).timeout(3000);
 
 });

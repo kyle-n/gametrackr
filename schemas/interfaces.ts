@@ -50,3 +50,8 @@ export interface ListEntry {
   ranking: number;
   text: string;
 }
+
+export interface DecodedToken {
+  id: number;
+  email: string;
+}
