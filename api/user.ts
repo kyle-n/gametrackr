@@ -43,7 +43,7 @@ export const createUser = (req: express.Request, resp: express.Response): number
   }).then(data => {
     return client.query('INSERT INTO list_metadata (user_id, list_table_name, title) VALUES ($1, $2, $3) RETURNING list_table_name;', [data.rows[0].id, nameList(), 'Played games']);
   }).then(data => {
-    return client.query('CREATE TABLE $1 (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [data.rows[0].list_table_name]);
+    return client.query('CREATE TABLE $1~ (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [data.rows[0].list_table_name]);
   }).then(() => {
     return resp.status(200).send();
   }).catch(e => {

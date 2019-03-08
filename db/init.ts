@@ -1,9 +1,8 @@
 import pgp from 'pg-promise';
-import { connectionUrl } from '.';
 export const connection = `postgres://${process.env.PSQL_USERNAME}:${process.env.PSQL_PASSWORD}@localhost:5432/gametrackr`;
 
 const database = pgp();
-export const client = database(connectionUrl);
+export const client = database(connection);
 
 export default function initialize() {
 
@@ -59,7 +58,7 @@ export default function initialize() {
       site_detail_url TEXT,
       abbreviation TEXT
     );`);
-  }).then(() => client.end()).then(() => {
+  }).then(() => {
     console.log('Database initialized');
   }).catch(e => console.log(e));
 

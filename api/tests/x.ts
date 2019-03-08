@@ -75,8 +75,8 @@ describe('Router search interface', () => {
     setTimeout(() => {
       client.query('SELECT * FROM games WHERE id < 0;').then(data => {
         expect(data.rowCount).to.equal(IceKingJson.data.results.length);
-        const heyIceKing: GiantBombGame = data.rows.find(r => r.id === -37763);
-        const ikComparison: any = IceKingJson.data.results.find(r => r.id === -37763);
+        const heyIceKing: GiantBombGame = data.rows.find((r: GiantBombGame) => r.id === -37763);
+        const ikComparison: any = IceKingJson.data.results.find((r: any) => r.id === -37763);
         expect(heyIceKing.deck).to.equal(ikComparison.deck);
         expect(heyIceKing.name).to.equal(ikComparison.name);
         expect(heyIceKing.resource_type).to.equal(ikComparison.resource_type);
@@ -101,7 +101,7 @@ describe('Router search interface', () => {
         expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('name');
         expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('site_detail_url');
         expect(data.rows[rInt(data.rowCount)]).to.haveOwnProperty('abbreviation');
-        const ds: GiantBombPlatform = data.rows.find(r => r.id === -52);
+        const ds: GiantBombPlatform = data.rows.find((r: GiantBombPlatform) => r.id === -52);
         expect(ds.name).to.equal('Nintendo DS');
 
         done();
