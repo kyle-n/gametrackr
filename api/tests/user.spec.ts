@@ -12,11 +12,14 @@ import bcrypt from 'bcrypt';
 chai.use(chaiHttp);
 const should = chai.should();
 const password = 'xyz123', email='kylebnazario@yahoo.com';
+let token: string;
 
 describe('CRUD API for user profile data', () => {
 
   // let system init db
-  before(done => setTimeout(done, 500));
+  before(done => setTimeout(() => {
+    client.query('DELETE FROM users WHERE email = $1;', email).then(() => done());
+  }, 500));
 
   // wipe test data
   afterEach(() => {
@@ -39,181 +42,182 @@ describe('CRUD API for user profile data', () => {
   it('returns 400 for requests missing a required field', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/external').send({}).then(resp => {
-        resp.error.text.should.be.a('string');
-        resp.error.text.should.equal('Must provide an email address and password');
-        resp.error.status.should.equal(400);
+        expect(resp.status, '400 for missing email and password').to.equal(400);
+        expect(resp.error.text, 'Correct error msg for missing email and password').to.equal('Must provide an email address and password');
         return chai.request(app).post('/api/users').send({ password });
       }).then(resp => {
-        resp.error.text.should.be.a('string');
-        resp.error.text.should.equal('Must provide an email address');
-        resp.error.status.should.equal(400);
+        expect(resp.status, '400 for missing email').to.equal(400);
+        expect(resp.error.text, 'Correct error msg for missing email').to.equal('Must provide an email address');
         return chai.request(app).post('/api/users').send({ email });
       }).then(resp => {
-        resp.error.text.should.be.a('string');
-        resp.error.text.should.equal('Must provide a password');
-        resp.error.status.should.equal(400);
+        expect(resp.status, '400 for missing password').to.equal(400);
+        expect(resp.error.text, 'Correct error msg for missing password').to.equal('Must provide a password');
         return resolve();
       }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 400 for a password that breaks requirements', done => {
-    chai.request(app).post('/api/external').send({ password: '12345', email }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Must provide a valid password');
-      resp.error.status.should.equal(400);
-      return chai.request(app).post('/api/users').send({ password: 'abcdefgh', email });
-    }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Must provide a valid password');
-      resp.error.status.should.equal(400);
-      return done();
+  it('returns 400 for a password that breaks requirements', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/external').send({ password: '12345', email }).then(resp => {
+        expect(resp.status, '400 for too short password').to.equal(400);
+        expect(resp.error.text, 'Correct error msg for too short password').to.equal('Must provide a valid password');
+        return chai.request(app).post('/api/users').send({ password: 'abcdefgh', email });
+      }).then(resp => {
+        expect(resp.status, '400 for password without a number').to.equal(400);
+        expect(resp.error.text, 'Correct error msg for password without a number').to.equal('Must provide a valid password');
+        return resolve();
+      }).catch(() => reject());
     });
   });
 
-  it('returns 400 for an email that breaks requirements', done => {
-    chai.request(app).post('/api/external').send({ password, email: 'nomail' }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Must provide a valid email address');
-      resp.error.status.should.equal(400);
-      return done();
+  it('returns 400 for an email that breaks requirements', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/external').send({ password, email: 'nomail' }).then(resp => {
+        expect(resp.status, '400 for invalid email').to.equal(400);
+        expect(resp.error.text, 'Correct error msg for invalid email').to.equal('Must provide a valid email address');
+        return resolve();
+      }).catch(() => reject());
     });
   });
 
-  it('returns 409 for taken email', done => {
-    chai.request(app).post('/api/external').send({ password, email }).then(() => {
-      setTimeout(() => {
-        chai.request(app).post('/api/external').send({ password, email }).then(resp => {
-          resp.error.text.should.be.a('string');
-          resp.error.text.should.equal('Email address is already taken');
-          resp.error.status.should.equal(409);
-          return done();
-        });
-      }, 1000);
+  it('returns 409 for taken email', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/external').send({ password, email }).then(() => {
+        return chai.request(app).post('/api/external').send({ password, email });
+      }).then(resp => {
+        expect(resp.status, '409 for taken email').to.equal(409);
+        expect(resp.error.text, 'Correct error msg for taken email').to.equal('Email address is already taken');
+        return resolve();
+      }).catch(() => reject());
     });
   }).timeout(3000);
 
-  it('correctly adds user data', done => {
-    chai.request(app).post('/api/external').send({ password, email }).then(resp => {
-      resp.status.should.equal(200);
-      setTimeout(() => {
+  it('correctly adds user data', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/external').send({ password, email }).then(resp => {
+        resp.status.should.equal(200);
         let profile: User;
         client.query('SELECT * FROM users WHERE email = $1;', [email]).then(rows => {
-          expect(rows.length).to.equal(1);
+          expect(rows.length, 'A user record was inserted into the db').to.equal(1);
           profile = rows[0];
           return bcrypt.compare(password, profile.password);
         }).then(pwMatch => {
-          expect(pwMatch).to.equal(true);
-          expect(profile.email).to.equal(email);
-          expect(profile.confirmed).to.equal(false);
-          return done();
-        });
-      }, 1000);
+          expect(pwMatch, 'Hashed password matches input password').to.equal(true);
+          expect(profile.email, 'Db email matches input email').to.equal(email);
+          expect(profile.confirmed, 'New profiles are always not confirmed').to.equal(false);
+          return resolve();
+        }).catch(() => reject());
+      });
     });
-  }).timeout(3000);
+  });
 
-  it('creates default user list', done => {
-    chai.request(app).post('/api/external').send({ email, password }).then(resp => {
-      resp.status.should.equal(200);
-      setTimeout(() => {
-        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(rows => {
-          return client.query('SELECT * FROM list_metadata WHERE user_id = $1;', [rows[0].id]);
-        }).then(rows => {
-          expect(rows.length).to.equal(1);
-          const playedGamesList = rows[0];
-          expect(playedGamesList.id).to.not.equal(null);
-          expect(playedGamesList.list_table_name).to.be.a('string');
-          expect(playedGamesList.title.toLowerCase()).to.equal('played games');
-          expect(playedGamesList.deck).to.equal(null);
-          return client.query('SELECT * FROM $1~;', [playedGamesList.list_table_name]);
-        }).then(rows => {
-          expect(rows.length).to.equal(0);
-          return done();
-        });
-      }, 1000);
+  it('creates default user list', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/external').send({ email, password }).then(resp => {
+        return client.query('SELECT id FROM users WHERE email = $1;', [email]);
+      }).then(rows => {
+        return client.query('SELECT * FROM list_metadata WHERE user_id = $1;', [rows[0].id]);
+      }).then(rows => {
+        expect(rows.length, 'One default list created for new user').to.equal(1);
+        const playedGamesList = rows[0];
+        expect(playedGamesList.id, 'List has an id').to.be.a('number');
+        expect(playedGamesList.list_table_name, 'List has a table name').to.be.a('string');
+        expect(playedGamesList.title.toLowerCase(), 'List is named played games').to.equal('played games');
+        expect(playedGamesList.deck, 'Empty string for deck').to.equal('');
+        return client.query('SELECT * FROM $1~;', [playedGamesList.list_table_name]);
+      }).then(rows => {
+        expect(rows.length, 'No games in new list').to.equal(0);
+        return resolve();
+      }).catch(() => reject());
     });
-  }).timeout(3000);
+  });
 
   // read
-  it('returns 400 for requests without an id', done => {
-    chai.request(app).get('/api/users').then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Request /api/users/user_id, not /api/users');
-      resp.error.status.should.equal(400);
-      return done();
+  it('returns 400 for requests without an id', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).get('/api/users').then(resp => {
+        expect(resp.status, '400 for GET without id').to.equal(400);
+        expect(resp.error.text, 'Correct error msg for no id with GET').to.equal('Request /api/users/user_id, not /api/users');
+        return resolve();
+      }).catch(() => reject();)
     });
   });
 
-  it('returns 404 for users not in db', done => {
-    client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(rows => {
-      let missingId: number;
-      if (rows.length > 0) missingId = rows[0].id + 1;
-      else missingId = 1;
-      return chai.request(app).get(`/api/users/${missingId}`);
-    }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('User profile with that ID not found');
-      resp.error.status.should.equal(404);
-      return done();
+  it('returns 404 for users not in db', () => {
+    return new Promise((resolve, reject) => {
+      client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(rows => {
+        let missingId: number;
+        if (rows.length > 0) missingId = rows[0].id + 1;
+        else missingId = 1;
+        return chai.request(app).get(`/api/users/${missingId}`);
+      }).then(resp => {
+        expect(resp.status, '404 for user not in db').to.equal(404);
+        expect(resp.error.text, 'Correct error msg for requesting nonexistent user').to.equal('User profile with that ID not found');
+        return resolve();
+      });
     });
   });
 
-  it('returns correct user data', done => {
-    chai.request(app).post('/api/users').send({ email, password }).then(() => {
-      setTimeout(() => {
-        let uId: number;
-        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(rows => {
-          uId = rows[0].id;
-          return chai.request(app).get(`/api/users/${uId}`);
-        }).then(resp => {
-          expect(resp.body.id).to.equal(uId);
-          expect(resp.body.email).to.equal(email);
-          expect(resp.body.confirmed).to.equal(false);
-          expect(resp.body.password).to.equal(undefined);
-          return done();
-        });
-      }, 1000);
+  it('returns correct user data', () => {
+    return new Promise((resolve, reject) => {
+      let uId: number;
+      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+        return client.query('SELECT id FROM users WHERE email = $1;', [email]);
+      }).then(rows => {
+        uId = rows[0].id;
+        return chai.request(app).get(`/api/users/${uId}`);
+      }).then(resp => {
+        expect(resp.body.id, 'Resp id matches input id').to.equal(uId);
+        expect(resp.body.email, 'Resp email matches input email').to.equal(email);
+        expect(resp.body.confirmed, 'New account is not confirmed').to.equal(false);
+        expect(resp.body.password, 'Does not return password to user').to.equal(undefined);
+        return resolve();
+      });
     });
-  }).timeout(3000);
+  });
 
   // update
-  it('returns 400 for requests without id', done => {
-    chai.request(app).put('/api/users').send({ email, password }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('Request /api/users/user_id, not /api/users');
-      resp.error.status.should.equal(400);
-      return done();
+  it('returns 400 for requests without id', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).put('/api/users').send({ email, password }).then(resp => {
+        expect(resp.status, '400 for request without user id').to.equal(400);
+        expect(resp.error.text, 'Correct error msg').to.equal('Request /api/users/user_id, not /api/users');
+        return resolve();
+      }).catch(() => reject());
     });
   });
 
-  it('returns 404 for nonexistant user id', done => {
-    client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(rows => {
-      let missingId: number;
-      if (rows.length > 0) missingId = rows[0].id + 1;
-      else missingId = 1;
-      return chai.request(app).put(`/api/users/${missingId}`).send({ email, password });
-    }).then(resp => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('User profile with that ID not found');
-      resp.error.status.should.equal(404);
-      return done();
+  it('returns 404 for nonexistant user id', () => {
+    return new Promise((resolve, reject) => {
+      client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(rows => {
+        let missingId: number;
+        if (rows.length > 0) missingId = rows[0].id + 1;
+        else missingId = 1;
+        return chai.request(app).put(`/api/users/${missingId}`).send({ email, password });
+      }).then(resp => {
+        resp.error.text.should.be.a('string');
+        resp.error.text.should.equal('User profile with that ID not found');
+        resp.error.status.should.equal(404);
+        return resolve();
+      }).catch(() => reject());
     });
   });
 
-  it('returns 400 if missing email and password in json', done => {
-    chai.request(app).post('/api/users').send({ email, password }).then(() => {
-      setTimeout(() => {
-        client.query('SELECT id FROM users WHERE email = $1;', [email]).then(rows => {
-          return chai.request(app).put(`/api/users/${rows[0].id}`).send({ useless: 'data' });
-        }).then(resp => {
-          resp.error.text.should.be.a('string');
-          resp.error.text.should.equal('Must provide an update to the email or password');
-          resp.error.status.should.equal(400);
-          return done();
-        });
-      }, 1000);
+  it('returns 400 if missing email and password in json', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+        return client.query('SELECT id FROM users WHERE email = $1;', [email]);
+      }).then(rows => {
+        return chai.request(app).put(`/api/users/${rows[0].id}`).send({ useless: 'data' });
+      }).then(resp => {
+        resp.error.text.should.be.a('string');
+        resp.error.text.should.equal('Must provide an update to the email or password');
+        resp.error.status.should.equal(400);
+        return resolve();
+      });
     });
-  }).timeout(3000);
+  });
 
   it('returns 400 for bad email', done => {
     chai.request(app).post('/api/users').send({ email, password }).then(() => {
