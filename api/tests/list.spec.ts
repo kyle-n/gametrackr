@@ -1,18 +1,15 @@
 import { app } from '../../server';
-import { describe, it, beforeEach } from 'mocha';
+import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import IceKingJson from '../../schemas/iceking.json';
-import { GiantBombGame, ServerError, List, ListEntry, GiantBombPlatform } from '../../schemas';
+import { List } from '../../schemas';
 import { client } from '../../db';
 import { objectEmpty } from '../../utils';
-import { doesNotReject } from 'assert';
 
 // config
 chai.use(chaiHttp);
 const should = chai.should();
-const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
 const email = 'test@test.com', password = 'abc123';
 const title = 'Test list', deck = 'Test deck';
 let token: string;
@@ -129,6 +126,20 @@ describe('Router list api interface', () => {
     });
   });
 
+  it('returns 404 for get nonexistent list', () => {
+    return new Promise((resolve, reject) => {
+      client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;').then(rows => {
+        let badId = 1;
+        if (rows.length) badId = rows[0].id + 1;
+        return chai.request(app).get(`/api/lists/${badId}`).set('authorization', token);
+      }).then(resp => {
+        expect(resp.status, '404 status').to.equal(404);
+        expect(resp.error.text, 'Correct error msg').to.equal('Could not find a list with the requested ID');
+        return resolve();
+      }).catch(() => reject());
+    });
+  });
+
   it('returns a list correctly', () => {
     return new Promise((resolve, reject) => {
       let list: List;
@@ -186,6 +197,20 @@ describe('Router list api interface', () => {
         expect(resp.error.status, 'Too long deck, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long deck, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long deck, error text should be "${validWarning}"`).to.equal(validWarning);
+        return resolve();
+      }).catch(() => reject());
+    });
+  });
+
+  it('returns 404 for updating nonexistent list', () => {
+    return new Promise((resolve, reject) => {
+      client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;').then(rows => {
+        let badId = 1;
+        if (rows.length) badId = rows[0].id + 1;
+        return chai.request(app).put(`/api/lists/${badId}`).set('authorization', token).send({ title, deck });
+      }).then(resp => {
+        expect(resp.status, '404 status').to.equal(404);
+        expect(resp.error.text, 'Correct error msg').to.equal('Cannot find a list with the requested ID');
         return resolve();
       }).catch(() => reject());
     });
