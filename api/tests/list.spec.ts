@@ -7,6 +7,7 @@ import IceKingJson from '../../schemas/iceking.json';
 import { GiantBombGame, ServerError, List, ListEntry, GiantBombPlatform } from '../../schemas';
 import { client } from '../../db';
 import { objectEmpty } from '../../utils';
+import { doesNotReject } from 'assert';
 
 // config
 chai.use(chaiHttp);
@@ -117,7 +118,7 @@ describe('Router list api interface', () => {
   });
 
   // read
-  it('returns 400 for request without a list id', () => {
+  it('returns 400 for get request without a list id', () => {
     return new Promise((resolve, reject) => {
       chai.request(app).get('/api/lists').set('authorization', token).then(resp => {
         expect(resp.status, 'resp.status should be 400 for /api/lists (no listId)').to.equal(400);
@@ -157,7 +158,7 @@ describe('Router list api interface', () => {
   });
 
   // update
-  it('returns 400 for a bad request', () => {
+  it('returns 400 for a bad update request', () => {
     return new Promise((resolve, reject) => {
       let listId: number;
       const validWarning = 'Must provide a valid title and deck';
@@ -185,6 +186,86 @@ describe('Router list api interface', () => {
         expect(resp.error.status, 'Too long deck, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long deck, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long deck, error text should be "${validWarning}"`).to.equal(validWarning);
+        return resolve();
+      }).catch(() => reject());
+    });
+  });
+
+  it('updates a list correctly', () => {
+    return new Promise((resolve, reject) => {
+      const editedTitle = '', editedDeck = '';
+      let listId: number;
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
+        listId = resp.body.listId;
+        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: editedDeck });
+      }).then(resp => {
+        expect(resp.status, 'Response to valid update should be 200').to.equal(200);
+        return client.query('SELECT title, deck FROM list_metadata WHERE id = $1;', listId);
+      }).then(rows => {
+        if (!rows.length) throw new Error();
+        expect(rows[0].title, 'Db title should equal update title').to.equal(editedTitle);
+        expect(rows[0].deck, 'Db deck should equal updated deck').to.equal(editedDeck);
+        return client.query('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3;', [title, deck, listId]);
+      }).then(rows => {
+        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: null });
+      }).then(resp => {
+        expect(resp.status, 'Resp.status to update just title should be 200').to.equal(200);
+        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: null, deck: editedDeck });
+      }).then(resp => {
+        expect(resp.status, 'Resp.status to update just deck should be 200').to.equal(200);
+        return client.query('SELECT title, deck FROM list_metadata WHERE id = $1;', listId);
+      }).then(rows => {
+        if (!rows.length) throw new Error();
+        expect(rows[0].title, 'Single field title update should flow to db').to.equal(editedTitle);
+        expect(rows[0].deck, 'Single field deck update should flow to db').to.equal(editedDeck);
+        return resolve();
+      }).catch(() => reject());
+    });
+  });
+
+  // delete
+  it('returns 400 for a bad delete request', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
+        return chai.request(app).delete('/api/lists').set('authorization', token);
+      }).then(resp => {
+        expect(resp.status, 'Delete without list id should return 400').to.equal(400);
+        expect(resp.error.text, 'Error message for no list specified should be "Request /api/lists/list_id, not /api/lists"').to.equal('Request /api/lists/list_id, not /api/lists');
+        return resolve();
+      }).catch(() => reject());
+    });
+  });
+  
+  it('returns 404 for deleting list not in db', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
+        return client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;');
+      }).then(rows => {
+        return chai.request(app).delete(`/api/lists/${rows[0].id + 1}`).set('authorization', token);
+      }).then(resp => {
+        expect(resp.status, 'Returns 404 when trying to delete nonexistant list').to.equal(404);
+        expect(resp.error, 'Returns error msg for 404 delete').to.equal('Cannot find a list with the requested ID');
+        return resolve();
+      }).catch(() => reject());
+    });
+  });
+
+  it('deletes a list correctly', () => {
+    return new Promise((resolve, reject) => {
+      let listId: number;
+      let listTableName: string;
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
+        listId = resp.body.listId;
+        listTableName = resp.body.listTableName;
+        return chai.request(app).delete(`/api/lists/${listId}`).set('authorization', token);
+      }).then(resp => {
+        expect(resp.status, 'Valid delete status 200').to.equal(200);
+        return client.query('SELECT id FROM list_metadata WHERE id = $1;', listId);
+      }).then(rows => {
+        expect(rows.length, 'List deleted from list_metadata').to.equal(0);
+        return client.query('SELECT relname FROM pg_class WHERE relname = $1;', listTableName);
+      }).then(rows => {
+        expect(rows.length, 'List table deleted').to.equal(0);
         return resolve();
       }).catch(() => reject());
     });
