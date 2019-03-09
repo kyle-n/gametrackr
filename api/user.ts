@@ -11,6 +11,53 @@ const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
 export const validEmail = (addr: string) => /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(addr);
 export const validPassword = (pw: string) => /^(?=.*\d).{6,}$/gi.test(pw);
 
+export const validateNewUser = (body: any): Promise<ServerError> => {
+  let error: ServerError = { status: 200, msg: '' };
+  let missingEmail = false, missingPw = false, invalidEmail = false, invalidPw = false, emailTaken = false;
+  if (!body.email) missingEmail = true;
+  if (!body.password) missingPw = true;
+  if (!validEmail(body.email)) invalidEmail = true;
+  if (!validPassword(body.password)) invalidPw = true;
+
+  return new Promise<ServerError>((resolve, reject) => {
+    let addr = 'none';
+    if (!missingEmail && !invalidEmail) addr = body.email;
+    client.query('SELECT id FROM users WHERE email = $1;', [addr]).then(rows => {
+      if (rows.length) emailTaken = true;
+
+      if (emailTaken) return reject({ status: 409, msg: 'Email address is already taken' });
+      if (missingEmail && missingPw) return reject({ status: 400, msg: 'Must provide an email address and password' });
+      else if (missingEmail) return reject({ status: 400, msg: 'Must provide an email address' });
+      else if (missingPw) return reject({ status: 400, msg: 'Must provide a password' })
+      else if (invalidEmail && invalidPw) return reject({ status: 400, msg: 'Must provide a valid email and password' });
+      else if (invalidEmail) return reject({ status: 400, msg: 'Must provide a valid email address' });
+      else if (invalidPw) return reject({ status: 400, msg: 'Must provide a valid password' });
+      else resolve({ status: 200, msg: '' });
+    });
+  });
+}
+
+export const createUser = (req: express.Request, resp: express.Response): number => {
+  let newUser: DecodedToken;
+  validateNewUser(req.body).then(() => {
+    return bcrypt.hash(req.body.password, 10);
+  }).then(hashed => {
+    return client.query(`INSERT INTO users (email, password, confirmed) VALUES ($1, $2, $3) RETURNING id;`, [req.body.email, hashed, false]);
+  }).then(rows => {
+    newUser = { id: rows[0].id, email: req.body.email };
+    return client.query('INSERT INTO list_metadata (user_id, list_table_name, title) VALUES ($1, $2, $3) RETURNING list_table_name;', [rows[0].id, nameList(), 'Played games']);
+  }).then(rows => {
+    return client.query('CREATE TABLE $1~ (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [rows[0].list_table_name]);
+  }).then(() => {
+    const newToken = jwt.sign(newUser, <string>process.env.SECRET_KEY);
+    resp.status(200).json({ token: newToken });
+  }).catch(e => {
+    if (e.msg) resp.status(e.status).json(e.msg);
+    else resp.status(defaultError.status).send(defaultError.msg);
+  });
+  return 0;
+};
+
 export const readUser = (req: express.Request, resp: express.Response): number => {
   let error: ServerError = { ...defaultError };
 

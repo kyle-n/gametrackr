@@ -11,7 +11,7 @@ import { client } from '../../db';
 chai.use(chaiHttp);
 const should = chai.should();
 const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
-const email = process.env.TEST_EMAIL, password = process.env.TEST_PASSWORD;
+const email = 'test@test.com', password = 'abc123';
 const title = 'Test list', deck = 'Test deck';
 let token: string;
 let userId: number;
@@ -20,14 +20,19 @@ describe('Router list api interface', () => {
 
   before(done => {
     setTimeout(() => {
+      console.log('initial query');
       client.query('SELECT id FROM users WHERE email = $1;', email).then(rows => {
         // login if there's a test account, otherwise create one
+        console.log('about to request');
         if (rows.length) return chai.request(app).post('/api/external/login').send({ email, password });
-        else return chai.request(app).post('/api/external').set('authorization', token).send({ email, password });
+        else return chai.request(app).post('/api/external').send({ email, password });
       }).then(resp => {
+        console.log(resp.body, 'got resp');
+        console.log(resp.error);
         token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', email);
       }).then(rows => {
+        console.log(rows, 'should be a created user');
         userId = rows[0].id;
         return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', userId);
       }).then(rows => {
@@ -37,8 +42,8 @@ describe('Router list api interface', () => {
             if (i === rows.length - 1) return done()
           });
         });
-      });
-    }, 500);
+      }).catch(e => console.log(e));
+    }, 800);
   });
 
   afterEach(done => {
