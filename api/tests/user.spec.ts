@@ -28,14 +28,10 @@ describe('CRUD API for user profile data', () => {
     return new Promise<void>((resolve, reject) => {
       client.query('DELETE FROM users WHERE email = $1 RETURNING id;', [email]).then(rows => {
         if (rows.length < 1) return new Promise<any>(resolve => resolve([]));
-        else return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [rows[0].id]);
+        else return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', [rows[0].id]);
       }).then(rows => {
         if (rows.length === 0) return resolve();
-        for (let i = 0; i < rows.length; i++) {
-          client.query('DROP TABLE IF EXISTS $1~;', [rows[i].list_table_name]).then(() => {
-            if (i === rows.length - 1) return resolve();
-          });
-        }
+        client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => resolve());
       }).catch(e => { console.log(e, 'x'); reject(); });
     });
   });
@@ -124,10 +120,9 @@ describe('CRUD API for user profile data', () => {
         expect(rows.length, 'One default list created for new user').to.equal(1);
         const playedGamesList = rows[0];
         expect(playedGamesList.id, 'List has an id').to.be.a('number');
-        expect(playedGamesList.list_table_name, 'List has a table name').to.be.a('string');
         expect(playedGamesList.title.toLowerCase(), 'List is named played games').to.equal('played games');
         expect(playedGamesList.deck, 'Empty string for deck').to.equal('');
-        return client.query('SELECT * FROM $1~;', [playedGamesList.list_table_name]);
+        return client.query('SELECT id FROM list_entries WHERE list_id = $1;', playedGamesList.id);
       }).then(rows => {
         expect(rows.length, 'No games in new list').to.equal(0);
         return resolve();

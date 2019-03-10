@@ -33,26 +33,18 @@ describe('Router list api interface', () => {
       }).then(rows => {
         console.log(rows, 'should be a created user');
         userId = rows[0].id;
-        return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', userId);
+        return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', userId);
       }).then(rows => {
         if (!rows.length) return done();
-        rows.forEach((table: any, i: number)=> {
-          client.query('DROP TABLE IF EXISTS $1~;', table.list_table_name).then(() => {
-            if (i === rows.length - 1) return done()
-          });
-        });
+        client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => done());
       }).catch(e => console.log(e));
     }, 800);
   });
 
   afterEach(done => {
-    client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', userId).then(rows => {
+    client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', userId).then(rows => {
       if (!rows.length) return done();
-      rows.forEach((table: any, i: number) => {
-        client.query('DROP TABLE IF EXISTS $1~;', table.list_table_name).then(() => {
-          if (i === rows.length - 1) return done();
-        });
-      });
+      client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => {
     });
   });
 
@@ -92,23 +84,22 @@ describe('Router list api interface', () => {
 
   it('correctly saves a new list', () => {
     return new Promise<void>((resolve, reject) => {
-      let tableResponseName: string;
-      let tableResponseId: number;
+      let listRespId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         expect(resp.status, 'Create list status should be 200').to.equal(200);
         expect(resp.body.listTableName, 'Server should return req.body.listTableName').to.be.a('string');
-        tableResponseName = resp.body.listTableName;
         expect(resp.body.listId, 'server should return list id').to.be.a('number');
-        tableResponseId = resp.body.listId;
-        expect(tableResponseName, 'resp.body.listTableName should be a truthy string').to.be.ok;
-        return client.query('SELECT * FROM list_metadata WHERE list_table_name = $1;', resp.body.listTableName);
+        listRespId = resp.body.listId;
+        return client.query('SELECT * FROM list_metadata WHERE id = $1;', resp.body.listId);
       }).then(rows => {
         expect(rows.length, 'test user should have only one list').to.equal(1);
-        expect(rows[0].id, 'response id should equal db id').to.equal(tableResponseId);
-        expect(rows[0].list_table_name, 'response list name should equal db name').to.equal(tableResponseName);
+        expect(rows[0].id, 'response id should equal db id').to.equal(listRespId);
         expect(rows[0].user_id, 'saved db list user_id should equal test test id').to.equal(userId);
         expect(rows[0].title, 'title saved to db should equal title input to api').to.equal(title);
         expect(rows[0].deck, 'deck saved to db should equal deck input to api').to.equal(deck);
+        return client.query('SELECT id FROM list_entries WHERE list_id = $1;', listRespId);
+      }).then(rows => {
+        expect(rows.length, 'Zero entries on new empty list').to.equal(0);
         return resolve();
       }).catch(e => { console.log(e); reject(); });
     });
@@ -154,13 +145,13 @@ describe('Router list api interface', () => {
         expect(resp.body.entries, 'Returns list entries').to.be.an('array');
         expect(resp.body.entries, 'Should be no game entries').to.equal(0);
         list = resp.body;
-        return client.query('SELECT id, list_table_name, title, deck FROM list_metadata WHERE user_id = $1;', userId);
+        return client.query('SELECT id, title, deck FROM list_metadata WHERE user_id = $1;', userId);
       }).then(rows => {
         expect(rows.length, 'Should only have one list').to.equal(1);
         expect(rows[0].title, 'Db title should equal returned title').to.equal(list.title);
         expect(rows[0].deck, 'Db deck should equal returned deck').to.equal(list.deck);
         expect(rows[0].id, 'Db list id should equal returned id').to.equal(list.id);
-        return client.query('SELECT id FROM $1~;', rows[0].list_table_name);
+        return client.query('SELECT id FROM list_entries WHERE list_id = $1;', rows[0].id);
       }).then(rows => {
         expect(rows.length, 'Db entries should match returned entries').to.equal(list.entries.length);
         return resolve();

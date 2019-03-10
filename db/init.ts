@@ -16,10 +16,16 @@ export default function initialize() {
     return client.query(`CREATE TABLE IF NOT EXISTS list_metadata(
       id SERIAL PRIMARY KEY,
       user_id INTEGER,
-      list_table_name TEXT,
       title TEXT,
       deck TEXT
       );`)
+  }).then(() => {
+    return client.query(`CREATE TABLE IF NOT EXISTS list_entries(
+      id SERIAL PRIMARY KEY,
+      ranking INTEGER,
+      list_id INTEGER NOT NULL,
+      game_id INTEGER NOT NULL
+    );`)
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS games(
       aliases TEXT,

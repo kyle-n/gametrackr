@@ -45,10 +45,8 @@ export const createUser = (req: express.Request, resp: express.Response): number
     return client.query(`INSERT INTO users (email, password, confirmed) VALUES ($1, $2, $3) RETURNING id;`, [req.body.email, hashed, false]);
   }).then(rows => {
     newUser = { id: rows[0].id, email: req.body.email };
-    return client.query('INSERT INTO list_metadata (user_id, list_table_name, title, deck) VALUES ($1, $2, $3, $4) RETURNING list_table_name;', [rows[0].id, nameList(), 'Played games', '']);
+    return client.query('INSERT INTO list_metadata (user_id, title, deck) VALUES ($1, $2, $3);', [rows[0].id, 'Played games', '']);
   }).then(rows => {
-    return client.query('CREATE TABLE $1~ (id SERIAL PRIMARY KEY, ranking INTEGER, game_id INTEGER, text TEXT);', [rows[0].list_table_name]);
-  }).then(() => {
     const newToken = jwt.sign(newUser, <string>process.env.SECRET_KEY);
     resp.status(200).json({ token: newToken });
   }).catch(e => {
@@ -123,13 +121,10 @@ export const deleteUser = (req: express.Request, resp: express.Response): number
       error = { status: 404, msg: 'User profile with that ID not found' };
       throw new Error();
     }
-    return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING list_table_name;', [uId]);
+    return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', [uId]);
   }).then(rows => {
-    for (let i = 0; i < rows.length; i++) {
-      client.query('DROP TABLE IF EXISTS $1~;', [rows[i].list_table_name]).then(() => {
-        if (i === rows.length - 1) return resp.status(200).send();
-      });
-    }
+    if (!rows.length) return resp.status(200).send();
+    client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => resp.status(200).send());
   }).catch(() => resp.status(error.status).send(error.msg));
 
   return 0;
