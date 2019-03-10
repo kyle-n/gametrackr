@@ -30,11 +30,18 @@ const readAllLists = (req: express.Request, resp: express.Response): void | expr
   client.query('SELECT title, deck, id, private FROM list_metadata WHERE user_id = $1;', resp.locals.id).then(rows => {
     return resp.status(200).json({ lists: rows });
   });
-  return;
 }
 
 const updateList = (req: express.Request, resp: express.Response): void | express.Response => {
-  return;
+  let error = { ...defaultError };
+  if (!validate(req.body, ListUpdateSchema)) return resp.status(400).send('Must provide a valid title and deck');
+  client.query('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3 RETURNING id;', [req.body.title, req.body.deck, req.params.listId]).then(rows => {
+    if (!rows.length) {
+      error = { status: 404, msg: 'Could not find a list with the requested ID' };
+      throw new Error();
+    }
+    return resp.status(200).send();
+  }).catch(() => resp.status(error.status).send(error.msg));
 }
 
 const deleteList = (req: express.Request, resp: express.Response): void | express.Response => {
