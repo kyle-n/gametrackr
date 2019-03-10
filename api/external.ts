@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { ServerError, User, DecodedToken } from '../schemas';
 import { client } from '../db';
 import bcrypt from 'bcrypt';
-import { createUser } from '../api/user';
+import { createUser } from './user';
 
 export const router: express.Router = express.Router();
 const defaultError: ServerError = { status: 500, msg: 'Internal server error' };

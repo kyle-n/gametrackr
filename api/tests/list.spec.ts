@@ -44,7 +44,7 @@ describe('Router list api interface', () => {
   afterEach(done => {
     client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', userId).then(rows => {
       if (!rows.length) return done();
-      client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => {
+      client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => done());
     });
   });
 

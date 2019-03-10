@@ -25,7 +25,8 @@ export default function initialize() {
       id SERIAL PRIMARY KEY,
       ranking INTEGER,
       list_id INTEGER NOT NULL,
-      game_id INTEGER NOT NULL
+      game_id INTEGER NOT NULL,
+      text TEXT
     );`)
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS games(

@@ -9,6 +9,7 @@ import { client } from '../../db';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { response } from 'express';
 dotenv.config({ path: __dirname + '/.env' });
 
 // config
@@ -93,20 +94,20 @@ describe('CRUD API for user profile data', () => {
 
   it('correctly adds user data', () => {
     return new Promise<void>((resolve, reject) => {
+      let profile: User;
       chai.request(app).post('/api/external').send({ password, email }).then(resp => {
         resp.status.should.equal(200);
-        let profile: User;
-        client.query('SELECT * FROM users WHERE email = $1;', [email]).then(rows => {
-          expect(rows.length, 'A user record was inserted into the db').to.equal(1);
-          profile = rows[0];
-          return bcrypt.compare(password, profile.password);
-        }).then(pwMatch => {
-          expect(pwMatch, 'Hashed password matches input password').to.equal(true);
-          expect(profile.email, 'Db email matches input email').to.equal(email);
-          expect(profile.confirmed, 'New profiles are always not confirmed').to.equal(false);
-          return resolve();
-        }).catch(() => reject());
-      });
+        return client.query('SELECT * FROM users WHERE email = $1;', [email]);
+      }).then(rows => {
+        expect(rows.length, 'A user record was inserted into the db').to.equal(1);
+        profile = rows[0];
+        return bcrypt.compare(password, profile.password);
+      }).then(pwMatch => {
+        expect(pwMatch, 'Hashed password matches input password').to.equal(true);
+        expect(profile.email, 'Db email matches input email').to.equal(email);
+        expect(profile.confirmed, 'New profiles are always not confirmed').to.equal(false);
+        return resolve();
+      }).catch(() => reject());
     });
   });
 
@@ -149,7 +150,11 @@ describe('CRUD API for user profile data', () => {
   // read
   it('returns 400 for requests without an id', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).get('/api/users').then(resp => {
+      let token: string;
+      chai.request(app).post('/api/external').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
+        return chai.request(app).get('/api/users').set('authorization', token);
+      }).then(resp => {
         expect(resp.status, '400 for GET without id').to.equal(400);
         expect(resp.error.text, 'Correct error msg for no id with GET').to.equal('Request /api/users/user_id, not /api/users');
         return resolve();
@@ -159,27 +164,33 @@ describe('CRUD API for user profile data', () => {
 
   it('returns 404 for users not in db', () => {
     return new Promise<void>((resolve, reject) => {
-      client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(rows => {
+      let token: string;
+      chai.request(app).post('/api/external').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
+        return client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;');
+      }).then(rows => {
         let missingId: number;
         if (rows.length > 0) missingId = rows[0].id + 1;
         else missingId = 1;
-        return chai.request(app).get(`/api/users/${missingId}`);
+        return chai.request(app).get(`/api/users/${missingId}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status, '404 for user not in db').to.equal(404);
         expect(resp.error.text, 'Correct error msg for requesting nonexistent user').to.equal('User profile with that ID not found');
         return resolve();
-      });
+      }).catch(() => reject());
     });
   });
 
   it('returns correct user data', () => {
     return new Promise<void>((resolve, reject) => {
       let uId: number;
-      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      let token: string;
+      chai.request(app).post('/api/users').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', [email]);
       }).then(rows => {
         uId = rows[0].id;
-        return chai.request(app).get(`/api/users/${uId}`);
+        return chai.request(app).get(`/api/users/${uId}`).set('authorization', token);
       }).then(resp => {
         expect(resp.body.id, 'Resp id matches input id').to.equal(uId);
         expect(resp.body.email, 'Resp email matches input email').to.equal(email);
@@ -193,7 +204,11 @@ describe('CRUD API for user profile data', () => {
   // update
   it('returns 400 for requests without id', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).put('/api/users').send({ email, password }).then(resp => {
+      let token: string;
+      chai.request(app).post('/api/external').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
+        return chai.request(app).put('/api/users').send({ email, password });
+      }).then(resp => {
         expect(resp.status, '400 for request without user id').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Request /api/users/user_id, not /api/users');
         return resolve();
@@ -203,11 +218,15 @@ describe('CRUD API for user profile data', () => {
 
   it('returns 404 for nonexistant user id', () => {
     return new Promise<void>((resolve, reject) => {
+      let token: string;
+      let missingId: number;
       client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(rows => {
-        let missingId: number;
         if (rows.length > 0) missingId = rows[0].id + 1;
         else missingId = 1;
-        return chai.request(app).put(`/api/users/${missingId}`).send({ email, password });
+        return chai.request(app).post('/api/external').send({ email, password });
+      }).then(resp => {
+        token = 'jwt ' + resp.body.token;
+        return chai.request(app).put(`/api/users/${missingId}`).send({ email, password }).set('authorization', token);
       }).then(resp => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('User profile with that ID not found');
@@ -219,10 +238,12 @@ describe('CRUD API for user profile data', () => {
 
   it('returns 400 if missing email and password in json', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      let token: string;
+      chai.request(app).post('/api/users').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', [email]);
       }).then(rows => {
-        return chai.request(app).put(`/api/users/${rows[0].id}`).send({ useless: 'data' });
+        return chai.request(app).put(`/api/users/${rows[0].id}`).send({ useless: 'data' }).set('authorization', token);
       }).then(resp => {
         resp.error.text.should.be.a('string');
         resp.error.text.should.equal('Must provide an update to the email or password');
@@ -234,10 +255,12 @@ describe('CRUD API for user profile data', () => {
 
   it('returns 400 for bad email', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      let token: string;
+      chai.request(app).post('/api/external').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', [email]);
       }).then(rows => {
-        return chai.request(app).put(`/api/users/${rows[0].id}`).send({ email: 'bad' });
+        return chai.request(app).put(`/api/users/${rows[0].id}`).send({ email: 'bad' }).set('authorization', token);
       }).then(resp => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid new email');
@@ -249,15 +272,17 @@ describe('CRUD API for user profile data', () => {
   it('returns 400 for bad password', () => {
     return new Promise<void>((resolve, reject) => {
       let uId: number;
-      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      let token: string;
+      chai.request(app).post('/api/users').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', [email]);
       }).then(rows => {
         uId = rows[0].id;
-        return chai.request(app).put(`/api/users/${uId}`).send({ password: 'abcdefgh' });
+        return chai.request(app).put(`/api/users/${uId}`).send({ password: 'abcdefgh' }).set('authorization', token);
       }).then(resp => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid new password');
-        return chai.request(app).put(`/api/users/${uId}`).send({ password: '123' });
+        return chai.request(app).put(`/api/users/${uId}`).send({ password: '123' }).set('authorization', token);
       }).then(resp => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid new password');
@@ -270,11 +295,13 @@ describe('CRUD API for user profile data', () => {
     return new Promise<void>((resolve, reject) => {
       let profile: User;
       const testEmail = 'test@gmail.com', testPw = 'abc123';
-      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      let token: string;
+      chai.request(app).post('/api/users').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', [email]);
       }).then(rows => {
         profile = rows[0];
-        return chai.request(app).put(`/api/users/${profile.id}`).send({ email: testEmail, password: testPw });
+        return chai.request(app).put(`/api/users/${profile.id}`).send({ email: testEmail, password: testPw }).set('authorization', token);
       }).then(resp => {
         return client.query('SELECT * FROM users WHERE id = $1;', [profile.id]);
       }).then(rows => {
@@ -292,7 +319,11 @@ describe('CRUD API for user profile data', () => {
   // delete
   it('returns 400 for requests without id', () => {
     return new Promise<void>((resolve, reject) => {
-      chai.request(app).delete('/api/users').send({ email, password }).then(resp => {
+      let token: string;
+      chai.request(app).post('/api/external').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
+        return chai.request(app).delete('/api/users').send({ email, password }).set('authorization', token);
+      }).then(resp => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Request /api/users/user_id, not /api/users');
         return resolve();
@@ -302,11 +333,15 @@ describe('CRUD API for user profile data', () => {
 
   it('returns 404 for nonexistant user id', () => {
     return new Promise<void>((resolve, reject) => {
-      client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;').then(rows => {
+      let token: string;
+      chai.request(app).post('/api/external').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
+        return client.query('SELECT id FROM users ORDER BY id DESC LIMIT 1;');
+      }).then(rows => {
         let missingId: number;
         if (rows.length > 0) missingId = rows[0].id + 1;
         else missingId = 1;
-        return chai.request(app).delete(`/api/users/${missingId}`);
+        return chai.request(app).delete(`/api/users/${missingId}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status, '404 status').to.equal(404);
         expect(resp.error.text, 'Correct error msg').to.equal('User profile with that ID not found');
@@ -318,11 +353,13 @@ describe('CRUD API for user profile data', () => {
   it('deletes the requested user and rows', () => {
     return new Promise<void>((resolve, reject) => {
       let uId: number;
-      chai.request(app).post('/api/users').send({ email, password }).then(() => {
+      let token: string;
+      chai.request(app).post('/api/users').send({ email, password }).then(resp => {
+        token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', [email]);
       }).then(rows => {
         uId = rows[0].id;
-        return chai.request(app).delete(`/api/users/${uId}`);
+        return chai.request(app).delete(`/api/users/${uId}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status).to.equal(200);
         return client.query('SELECT id FROM users WHERE id = $1;', [uId]);
