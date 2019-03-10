@@ -9,7 +9,8 @@ export const checkJwt = (req: express.Request, resp: express.Response, next: exp
     let decoded: DecodedToken;
     try { decoded = <DecodedToken>jwt.verify(token, <string>process.env.SECRET_KEY); }
     catch (e) {
-      console.log(e);
+      console.log(req.method, req.path);
+      console.log(token, 'in middleware');
       return resp.status(401).send('Invalid login token');
     }
     if (decoded && decoded.id) {
