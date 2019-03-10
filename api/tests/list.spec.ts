@@ -19,19 +19,14 @@ describe('Router list api interface', () => {
 
   before(done => {
     setTimeout(() => {
-      console.log('initial query');
       client.query('SELECT id FROM users WHERE email = $1;', email).then(rows => {
         // login if there's a test account, otherwise create one
-        console.log('about to request');
         if (rows.length) return chai.request(app).post('/api/external/login').send({ email, password });
         else return chai.request(app).post('/api/external').send({ email, password });
       }).then(resp => {
-        console.log(resp.body, 'got resp');
-        console.log(resp.error);
         token = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM users WHERE email = $1;', email);
       }).then(rows => {
-        console.log(rows, 'should be a created user');
         userId = rows[0].id;
         return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', userId);
       }).then(rows => {
@@ -57,24 +52,24 @@ describe('Router list api interface', () => {
     const validWarning = 'Must provide a valid title and deck';
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/lists').set('authorization', token).send({ title }).then(resp => {
-        expect(resp.error.status, 'Missing deck, status should be 400').to.equal(400);
+        expect(resp.status, 'Missing deck, status should be 400').to.equal(400);
         expect(resp.error.text, 'Missing deck, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Missing deck, error text should be "${validWarning}"`).to.equal(validWarning);
         return chai.request(app).post('/api/lists').set('authorization', token).send({ deck });
       }).then(resp => {
-        expect(resp.error.status, 'Missing title, status should be 400').to.equal(400);
+        expect(resp.status, 'Missing title, status should be 400').to.equal(400);
         expect(resp.error.text, 'Missing title, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Missing title, error text should be "${validWarning}"`).to.equal(validWarning);
         const tooLong = 'String of more than twenty characters, the limit for titles';
         return chai.request(app).post('/api/lists').set('authorization', token).send({ title: tooLong, deck });
       }).then(resp => {
-        expect(resp.error.status, 'Too long title, status should be 400').to.equal(400);
+        expect(resp.status, 'Too long title, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long title, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long title, error text should be "${validWarning}"`).to.equal(validWarning);
         const tooLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non arcu leo. Vestibulum dignissim consequat velit nec accumsan. Phasellus molestie vel metus nec vulputate. Phasellus sit amet elementum erat. Nulla sollicitudin dolor ut bibendum tempor. Proin vitae cursus felis. Ut aliquam erat quis molestie interdum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer consectetur leo congue, faucibus arcu at, porttitor eros. Donec consectetur justo sed ultrices rutrum. Etiam tincidunt, leo nec consequat pharetra, dolor ligula vehicula elit, vel ultricies erat nibh a nisi. Duis euismod sem orci, a ornare sem fermentum et.';
         return chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck: tooLong });
       }).then(resp => {
-        expect(resp.error.status, 'Too long deck, status should be 400').to.equal(400);
+        expect(resp.status, 'Too long deck, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long deck, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long deck, error text should be "${validWarning}"`).to.equal(validWarning);
         return resolve();
@@ -181,13 +176,13 @@ describe('Router list api interface', () => {
         const tooLong = 'String of more than twenty characters, the limit for titles';
         return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: tooLong, deck });
       }).then(resp => {
-        expect(resp.error.status, 'Too long title, status should be 400').to.equal(400);
+        expect(resp.status, 'Too long title, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long title, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long title, error text should be "${validWarning}"`).to.equal(validWarning);
         const tooLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non arcu leo. Vestibulum dignissim consequat velit nec accumsan. Phasellus molestie vel metus nec vulputate. Phasellus sit amet elementum erat. Nulla sollicitudin dolor ut bibendum tempor. Proin vitae cursus felis. Ut aliquam erat quis molestie interdum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer consectetur leo congue, faucibus arcu at, porttitor eros. Donec consectetur justo sed ultrices rutrum. Etiam tincidunt, leo nec consequat pharetra, dolor ligula vehicula elit, vel ultricies erat nibh a nisi. Duis euismod sem orci, a ornare sem fermentum et.';
         return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title, deck: tooLong });
       }).then(resp => {
-        expect(resp.error.status, 'Too long deck, status should be 400').to.equal(400);
+        expect(resp.status, 'Too long deck, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long deck, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long deck, error text should be "${validWarning}"`).to.equal(validWarning);
         return resolve();
