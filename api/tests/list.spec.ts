@@ -96,6 +96,7 @@ describe('Router list api interface', () => {
         expect(rows[0].user_id, 'saved db list user_id should equal test test id').to.equal(userId);
         expect(rows[0].title, 'title saved to db should equal title input to api').to.equal(title);
         expect(rows[0].deck, 'deck saved to db should equal deck input to api').to.equal(deck);
+        expect(rows[0].private, 'db list is private by default').to.equal(true);
         return client.query('SELECT id FROM list_entries WHERE list_id = $1;', listRespId);
       }).then(rows => {
         expect(rows.length, 'Zero entries on new empty list').to.equal(0);
@@ -141,15 +142,17 @@ describe('Router list api interface', () => {
         expect(resp.body.title, 'Returns list title').to.be.a('string');
         expect(resp.body.deck, 'Returns list deck').to.be.a('string');
         expect(resp.body.id, 'Returns list id').to.be.a('number');
+        expect(resp.body.private, 'Private by default').to.equal(true);
         expect(resp.body.entries, 'Returns list entries').to.be.an('array');
         expect(resp.body.entries, 'Should be no game entries').to.equal(0);
         list = resp.body;
-        return client.query('SELECT id, title, deck FROM list_metadata WHERE user_id = $1;', userId);
+        return client.query('SELECT id, title, deck, private FROM list_metadata WHERE user_id = $1;', userId);
       }).then(rows => {
         expect(rows.length, 'Should only have one list').to.equal(1);
         expect(rows[0].title, 'Db title should equal returned title').to.equal(list.title);
         expect(rows[0].deck, 'Db deck should equal returned deck').to.equal(list.deck);
         expect(rows[0].id, 'Db list id should equal returned id').to.equal(list.id);
+        expect(rows[0].private, 'Db list private by default').to.equal(true);
         return client.query('SELECT id FROM list_entries WHERE list_id = $1;', rows[0].id);
       }).then(rows => {
         expect(rows.length, 'Db entries should match returned entries').to.equal(list.entries.length);

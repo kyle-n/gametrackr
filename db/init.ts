@@ -17,7 +17,8 @@ export default function initialize() {
       id SERIAL PRIMARY KEY,
       user_id INTEGER,
       title TEXT,
-      deck TEXT
+      deck TEXT,
+      private BOOL DEFAULT true
       );`)
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS list_entries(
