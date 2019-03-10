@@ -45,7 +45,16 @@ const updateList = (req: express.Request, resp: express.Response): void | expres
 }
 
 const deleteList = (req: express.Request, resp: express.Response): void | express.Response => {
-  return;
+  let error = { ...defaultError };
+  client.query('DELETE FROM list_metadata WHERE id = $1 RETURNING id;', req.params.listId).then(rows => {
+    if (!rows.length) {
+      error = { status: 404, msg: 'Cannot find a list with the requested ID' };
+      throw new Error();
+    }
+    return client.query('DELETE FROM list_entries WHERE list_id = $1;', rows[0].id);
+  }).then(() => {
+    return resp.status(200).send();
+  }).catch(() => resp.status(error.status).send(error.msg));
 }
 
 const fourHundredNotSpecified = (req: express.Request, resp: express.Response): express.Response => resp.status(400).send('Request /api/lists/list_id, not /api/lists');
