@@ -87,7 +87,6 @@ describe('Router list api interface', () => {
       let listRespId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         expect(resp.status, 'Create list status should be 200').to.equal(200);
-        expect(resp.body.listTableName, 'Server should return req.body.listTableName').to.be.a('string');
         expect(resp.body.listId, 'server should return list id').to.be.a('number');
         listRespId = resp.body.listId;
         return client.query('SELECT * FROM list_metadata WHERE id = $1;', resp.body.listId);
@@ -269,19 +268,17 @@ describe('Router list api interface', () => {
   it('deletes a list correctly', () => {
     return new Promise((resolve, reject) => {
       let listId: number;
-      let listTableName: string;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         listId = resp.body.listId;
-        listTableName = resp.body.listTableName;
         return chai.request(app).delete(`/api/lists/${listId}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status, 'Valid delete status 200').to.equal(200);
         return client.query('SELECT id FROM list_metadata WHERE id = $1;', listId);
       }).then(rows => {
         expect(rows.length, 'List deleted from list_metadata').to.equal(0);
-        return client.query('SELECT relname FROM pg_class WHERE relname = $1;', listTableName);
+        return client.query('SELECT id FROM list_entries WHERE list_id = $1;', listId);
       }).then(rows => {
-        expect(rows.length, 'List table deleted').to.equal(0);
+        expect(rows.length, 'List entries deleted').to.equal(0);
         return resolve();
       }).catch(() => reject());
     });

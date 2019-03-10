@@ -1,10 +1,8 @@
 import express from 'express';
 import axios from 'axios';
-import { SearchResultSchema, GiantBombGame, GiantBombPlatform, ServerError } from '../schemas';
-import { validate } from 'jsonschema';
+import { GiantBombGame, GiantBombPlatform, ServerError } from '../schemas';
 import { client } from '../db';
 import { objectEmpty } from '../utils';
-import fs from 'fs';
 
 export const router: express.Router = express.Router();
 
