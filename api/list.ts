@@ -34,10 +34,10 @@ const readAllLists = (req: express.Request, resp: express.Response): void | expr
 
 const updateList = (req: express.Request, resp: express.Response): void | express.Response => {
   let error = { ...defaultError };
-  if (!validate(req.body, ListUpdateSchema)) return resp.status(400).send('Must provide a valid title and deck');
+  if (!validate(req.body, ListUpdateSchema).valid) return resp.status(400).send('Must provide a valid title and deck');
   client.query('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3 RETURNING id;', [req.body.title, req.body.deck, req.params.listId]).then(rows => {
     if (!rows.length) {
-      error = { status: 404, msg: 'Could not find a list with the requested ID' };
+      error = { status: 404, msg: 'Cannot find a list with the requested ID' };
       throw new Error();
     }
     return resp.status(200).send();

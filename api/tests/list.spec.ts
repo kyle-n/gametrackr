@@ -139,7 +139,7 @@ describe('Router list api interface', () => {
         expect(resp.status, '404 status').to.equal(404);
         expect(resp.error.text, 'Correct error msg').to.equal('Could not find a list with the requested ID');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
@@ -156,7 +156,7 @@ describe('Router list api interface', () => {
         expect(resp.body.id, 'Returns list id').to.be.a('number');
         expect(resp.body.private, 'Private by default').to.equal(true);
         expect(resp.body.entries, 'Returns list entries').to.be.an('array');
-        expect(resp.body.entries, 'Should be no game entries').to.equal(0);
+        expect(resp.body.entries.length, 'Should be no game entries').to.equal(0);
         list = resp.body;
         return client.query('SELECT id, title, deck, private FROM list_metadata WHERE user_id = $1;', userId);
       }).then(rows => {
@@ -169,7 +169,10 @@ describe('Router list api interface', () => {
       }).then(rows => {
         expect(rows.length, 'Db entries should match returned entries').to.equal(list.entries.length);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
     });
   });
 
@@ -203,7 +206,10 @@ describe('Router list api interface', () => {
         expect(resp.error.text, 'Too long deck, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long deck, error text should be "${validWarning}"`).to.equal(validWarning);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
     });
   });
 
@@ -217,7 +223,10 @@ describe('Router list api interface', () => {
         expect(resp.status, '404 status').to.equal(404);
         expect(resp.error.text, 'Correct error msg').to.equal('Cannot find a list with the requested ID');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
     });
   });
 
@@ -237,10 +246,10 @@ describe('Router list api interface', () => {
         expect(rows[0].deck, 'Db deck should equal updated deck').to.equal(editedDeck);
         return client.query('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3;', [title, deck, listId]);
       }).then(rows => {
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: null });
+        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: '' });
       }).then(resp => {
         expect(resp.status, 'Resp.status to update just title should be 200').to.equal(200);
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: null, deck: editedDeck });
+        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: '', deck: editedDeck });
       }).then(resp => {
         expect(resp.status, 'Resp.status to update just deck should be 200').to.equal(200);
         return client.query('SELECT title, deck FROM list_metadata WHERE id = $1;', listId);
@@ -249,7 +258,7 @@ describe('Router list api interface', () => {
         expect(rows[0].title, 'Single field title update should flow to db').to.equal(editedTitle);
         expect(rows[0].deck, 'Single field deck update should flow to db').to.equal(editedDeck);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
@@ -262,7 +271,7 @@ describe('Router list api interface', () => {
         expect(resp.status, 'Delete without list id should return 400').to.equal(400);
         expect(resp.error.text, 'Error message for no list specified should be "Request /api/lists/list_id, not /api/lists"').to.equal('Request /api/lists/list_id, not /api/lists');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
   
@@ -274,9 +283,9 @@ describe('Router list api interface', () => {
         return chai.request(app).delete(`/api/lists/${rows[0].id + 1}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status, 'Returns 404 when trying to delete nonexistant list').to.equal(404);
-        expect(resp.error, 'Returns error msg for 404 delete').to.equal('Cannot find a list with the requested ID');
+        expect(resp.error.text, 'Returns error msg for 404 delete').to.equal('Cannot find a list with the requested ID');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
@@ -295,7 +304,7 @@ describe('Router list api interface', () => {
       }).then(rows => {
         expect(rows.length, 'List entries deleted').to.equal(0);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
