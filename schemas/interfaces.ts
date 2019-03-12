@@ -42,6 +42,7 @@ export interface List {
   title: string;
   deck: string;
   entries: ListEntry[];
+  private: boolean;
 }
 
 export interface ListEntry {

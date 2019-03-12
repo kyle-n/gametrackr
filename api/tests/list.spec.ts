@@ -101,18 +101,32 @@ describe('Router list api interface', () => {
   });
 
   // read
-  it('returns 400 for get request without a list id', () => {
+  it('returns array of user\'s lists for GET without a list id', () => {
     return new Promise((resolve, reject) => {
-      chai.request(app).get('/api/lists').set('authorization', token).then(resp => {
-        expect(resp.status, 'resp.status should be 400 for /api/lists (no listId)').to.equal(400);
-        expect(resp.error.text, 'resp error text should be a string').to.be.a('string');
-        expect(resp.error.text, 'resp error msg should be "Request /api/lists/list_id, not /api/lists"').to.equal('Request /api/lists/list_id, not /api/lists');
+      let lists: List[];
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
+        return chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck });
+      }).then(resp => {
+        return chai.request(app).get('/api/lists').set('authorization', token);
+      }).then(resp => {
+        expect(resp.status, '200 status').to.equal(200);
+        expect(resp.body.lists, 'Resp.body.lists is an array').to.be.an('array');
+        lists = resp.body.lists.length;
+        return client.query('SELECT title, deck, id, private FROM list_metadata WHERE id = ANY($1);', lists);
+      }).then(rows => {
+        rows.forEach((dbList: List, i: number)=> {
+          const respList = lists[i];
+          expect(dbList.title, `Db title ${dbList.title} matches resp title`).to.equal(respList.title);
+          expect(dbList.deck, `Db deck for ${dbList.title} matches resp deck`).to.equal(respList.deck);
+          expect(dbList.id, `Db id for ${dbList.title} matches resp title`).to.equal(respList.id);
+          expect(dbList.private, `Db private for ${dbList.title} matches resp private`).to.equal(respList.private);
+        });
         return resolve();
       }).catch(() => reject());
     });
   });
 
-  it('returns 404 for get nonexistent list', () => {
+  it('returns 404 for GET nonexistent list', () => {
     return new Promise((resolve, reject) => {
       client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;').then(rows => {
         let badId = 1;
