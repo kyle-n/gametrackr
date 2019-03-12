@@ -4,6 +4,7 @@ import { router as search } from './search';
 import { router as user } from './user';
 import { router as external } from './external';
 import { router as list } from './list';
+import { router as game } from './game';
 import { checkJwt } from './checkjwt';
 
 // check JWT middleware
@@ -17,5 +18,6 @@ router.use('/reviews', checkJwt, review);
 router.use('/search', checkJwt, search);
 router.use('/users', checkJwt, user);
 router.use('/external', external);
+router.use('/games', checkJwt, game);
 
 export = router;
