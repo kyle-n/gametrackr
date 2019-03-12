@@ -43,7 +43,8 @@ export default function initialize() {
       original_release_date TEXT,
       site_detail_url TEXT,
       resource_type TEXT,
-      platforms INTEGER[]
+      platforms INTEGER[],
+      custom BOOL DEFAULT false
     );`)
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS game_images(

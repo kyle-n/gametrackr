@@ -11,6 +11,7 @@ export interface GiantBombGame extends Array<any> {
   guid: string;
   id: number;
   name: string;
+  image: string;
   original_release_date: string;
   site_detail_url: string;
   resource_type: string;
@@ -23,6 +24,11 @@ export interface GiantBombPlatform {
   name: string;
   site_detail_url: string;
   abbreviation: string;
+}
+
+export interface CustomGame {
+  id: number;
+  user_id: number;
 }
 
 export interface ServerError {

@@ -44,8 +44,8 @@ export const saveGames = (error: ServerError, gbResp: any): number => {
     client.query('DELETE FROM games WHERE id = $1', [g.id]).then(() => {
       client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
         expected_release_month, expected_release_year, guid, id, name, original_release_date, 
-        site_detail_url, resource_type, platforms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);`,
-        [g.aliases, g.api_detail_url, g.deck, g.description, g.expected_release_day, g.expected_release_month, g.expected_release_year, g.guid, g.id, g.name, g.original_release_date, g.site_detail_url, g.resource_type, platformIds]
+        site_detail_url, resource_type, platforms, custom) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);`,
+        [g.aliases, g.api_detail_url, g.deck, g.description, g.expected_release_day, g.expected_release_month, g.expected_release_year, g.guid, g.id, g.name, g.original_release_date, g.site_detail_url, g.resource_type, platformIds, false]
       );
     });
   }
