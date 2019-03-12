@@ -31,7 +31,7 @@ describe('CRUD API for user profile data', () => {
         else return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', [rows[0].id]);
       }).then(rows => {
         if (rows.length === 0) return resolve();
-        client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => resolve());
+        client.query('DELETE FROM list_entries WHERE list_id IN ($1:list);', [rows.map((r: any) => r.id)]).then(() => resolve());
       }).catch(e => { console.log(e); reject(); });
     });
   });

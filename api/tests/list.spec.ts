@@ -31,7 +31,7 @@ describe('Router list api interface', () => {
         return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', userId);
       }).then(rows => {
         if (!rows.length) return done();
-        client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => done());
+        client.query('DELETE FROM list_entries WHERE list_id IN ($1:list);', [rows.map((r: any) => r.id)]).then(() => done());
       }).catch(e => console.log(e));
     }, 800);
   });
@@ -39,7 +39,7 @@ describe('Router list api interface', () => {
   afterEach(done => {
     client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', userId).then(rows => {
       if (!rows.length) return done();
-      client.query('DELETE FROM list_entries WHERE list_id = ANY($1);', [rows.map((r: any) => r.id)]).then(() => done());
+      client.query('DELETE FROM list_entries WHERE list_id IN ($1:list);', [rows.map((r: any) => r.id)]).then(() => done());
     });
   });
 
@@ -112,7 +112,7 @@ describe('Router list api interface', () => {
         expect(resp.status, '200 status').to.equal(200);
         expect(resp.body.lists, 'Resp.body.lists is an array').to.be.an('array');
         lists = resp.body.lists.length;
-        return client.query('SELECT title, deck, id, private FROM list_metadata WHERE id = ANY($1);', lists);
+        return client.query('SELECT title, deck, id, private FROM list_metadata WHERE id IN ($1:list);', [lists]);
       }).then(rows => {
         rows.forEach((dbList: List, i: number)=> {
           const respList = lists[i];
@@ -122,7 +122,10 @@ describe('Router list api interface', () => {
           expect(dbList.private, `Db private for ${dbList.title} matches resp private`).to.equal(respList.private);
         });
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
     });
   });
 
@@ -144,7 +147,7 @@ describe('Router list api interface', () => {
     return new Promise((resolve, reject) => {
       let list: List;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
-        return chai.request(app).get('/api/lists').set('authorization', token);
+        return chai.request(app).get(`/api/lists/${resp.body.listId}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status, 'Get list status should be 200').to.equal(200);
         expect(objectEmpty(resp.body), 'Response body should not be empty').to.not.equal(true);
