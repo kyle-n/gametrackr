@@ -124,7 +124,7 @@ export const deleteUser = (req: express.Request, resp: express.Response): number
     return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', [uId]);
   }).then(rows => {
     if (!rows.length) return resp.status(200).send();
-    client.query('DELETE FROM list_entries WHERE list_id IN ($1);', [rows.map((r: any) => r.id)]).then(() => resp.status(200).send());
+    client.query('DELETE FROM list_entries WHERE list_id IN ($1:list);', [rows.map((r: any) => r.id)]).then(() => resp.status(200).send());
   }).catch(() => resp.status(error.status).send(error.msg));
 
   return 0;

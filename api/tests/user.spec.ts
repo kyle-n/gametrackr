@@ -37,7 +37,7 @@ describe('CRUD API for user profile data', () => {
   });
 
   // create
-  it('returns 400 for requests missing a required field', () => {
+  it('returns 400 for POST missing a required field', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/external').send({}).then(resp => {
         expect(resp.status, '400 for missing email and password').to.equal(400);
@@ -55,7 +55,7 @@ describe('CRUD API for user profile data', () => {
     });
   });
 
-  it('returns 400 for a password that breaks requirements', () => {
+  it('returns 400 for POST password that breaks requirements', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/external').send({ password: '12345', email }).then(resp => {
         expect(resp.status, '400 for too short password').to.equal(400);
@@ -65,21 +65,21 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '400 for password without a number').to.equal(400);
         expect(resp.error.text, 'Correct error msg for password without a number').to.equal('Must provide a valid password');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 400 for an email that breaks requirements', () => {
+  it('returns 400 for POST email that breaks requirements', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/external').send({ password, email: 'nomail' }).then(resp => {
         expect(resp.status, '400 for invalid email').to.equal(400);
         expect(resp.error.text, 'Correct error msg for invalid email').to.equal('Must provide a valid email address');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 409 for taken email', () => {
+  it('returns 409 for POST with taken email', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/external').send({ password, email }).then(() => {
         return chai.request(app).post('/api/external').send({ password, email });
@@ -87,11 +87,11 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '409 for taken email').to.equal(409);
         expect(resp.error.text, 'Correct error msg for taken email').to.equal('Email address is already taken');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   }).timeout(3000);
 
-  it('correctly adds user data', () => {
+  it('correctly adds user data on POST', () => {
     return new Promise<void>((resolve, reject) => {
       let profile: User;
       chai.request(app).post('/api/external').send({ password, email }).then(resp => {
@@ -106,11 +106,11 @@ describe('CRUD API for user profile data', () => {
         expect(profile.email, 'Db email matches input email').to.equal(email);
         expect(profile.confirmed, 'New profiles are always not confirmed').to.equal(false);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('creates default user list', () => {
+  it('creates default user list on POST', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
         return client.query('SELECT id FROM users WHERE email = $1;', [email]);
@@ -126,11 +126,11 @@ describe('CRUD API for user profile data', () => {
       }).then(rows => {
         expect(rows.length, 'No games in new list').to.equal(0);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns a jwt', () => {
+  it('returns a jwt from POST', () => {
     return new Promise<void>((resolve, reject) => {
       let decoded: DecodedToken;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -142,12 +142,12 @@ describe('CRUD API for user profile data', () => {
         expect(rows[0].id, 'Db id matches jwt id').to.equal(decoded.id);
         expect(rows[0].email, 'Db email matches jwt email').to.equal(decoded.email);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
   // read
-  it('returns 400 for requests without an id', () => {
+  it('returns 400 for GET without an id', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -157,11 +157,11 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '400 for GET without id').to.equal(400);
         expect(resp.error.text, 'Correct error msg for no id with GET').to.equal('Request /api/users/user_id, not /api/users');
         return resolve();
-      }).catch(() => reject())
+      }).catch(e => { console.log(e); reject(); })
     });
   });
 
-  it('returns 404 for users not in db', () => {
+  it('returns 404 for GET user not in db', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -176,11 +176,11 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '404 for user not in db').to.equal(404);
         expect(resp.error.text, 'Correct error msg for requesting nonexistent user').to.equal('User profile with that ID not found');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns correct user data', () => {
+  it('GETs correct user data', () => {
     return new Promise<void>((resolve, reject) => {
       let uId: number;
       let token: string;
@@ -196,12 +196,12 @@ describe('CRUD API for user profile data', () => {
         expect(resp.body.confirmed, 'New account is not confirmed').to.equal(false);
         expect(resp.body.password, 'Does not return password to user').to.equal(undefined);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
   // update
-  it('returns 400 for update requests without id', () => {
+  it('returns 400 for PUT without id', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -211,11 +211,11 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '400 for request without user id').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Request /api/users/user_id, not /api/users');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 404 for nonexistant user id', () => {
+  it('returns 404 for PUT to nonexistant user id', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       let missingId: number;
@@ -231,11 +231,11 @@ describe('CRUD API for user profile data', () => {
         resp.error.text.should.equal('User profile with that ID not found');
         resp.error.status.should.equal(404);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 400 if missing email and password in json', () => {
+  it('returns 400 if PUT missing email and password in json', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -248,11 +248,11 @@ describe('CRUD API for user profile data', () => {
         resp.error.text.should.equal('Must provide an update to the email or password');
         resp.error.status.should.equal(400);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 400 for bad email', () => {
+  it('returns 400 for PUT with bad email', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -264,11 +264,11 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid new email');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 400 for bad password', () => {
+  it('returns 400 for PUT with bad password', () => {
     return new Promise<void>((resolve, reject) => {
       let uId: number;
       let token: string;
@@ -286,14 +286,14 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid new password');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('updates user profile correctly', () => {
+  it('updates user profile correctly on PUT', () => {
     return new Promise<void>((resolve, reject) => {
       let profile: User;
-      const testEmail = 'test@gmail.com', testPw = 'abc123';
+      const testEmail = 'test@gmail.com', testPw = 'xyz123';
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
         token = 'jwt ' + resp.body.token;
@@ -302,6 +302,7 @@ describe('CRUD API for user profile data', () => {
         profile = rows[0];
         return chai.request(app).put(`/api/users/${profile.id}`).send({ email: testEmail, password: testPw }).set('authorization', token);
       }).then(resp => {
+        if (resp.error && resp.error.text) console.log(resp.error.text);
         return client.query('SELECT * FROM users WHERE id = $1;', [profile.id]);
       }).then(rows => {
         expect(rows.length).to.equal(1);
@@ -310,13 +311,14 @@ describe('CRUD API for user profile data', () => {
       }).then(pwMatch => {
         expect(profile.email).to.equal(testEmail);
         expect(pwMatch).to.equal(true);
-        return resolve();
-      }).catch(() => reject());
+        return client.query('UPDATE users SET email = $1 WHERE id = $2;', [email, profile.id]);
+      }).then(() => resolve())
+      .catch(e => { console.log(e); reject(); });
     });
   });
 
   // delete
-  it('returns 400 for requests without id', () => {
+  it('returns 400 for DELETE without id', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -326,11 +328,11 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Request /api/users/user_id, not /api/users');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('returns 404 for nonexistant user id', () => {
+  it('returns 404 for DELETE on nonexistant user id', () => {
     return new Promise<void>((resolve, reject) => {
       let token: string;
       chai.request(app).post('/api/external').send({ email, password }).then(resp => {
@@ -345,11 +347,11 @@ describe('CRUD API for user profile data', () => {
         expect(resp.status, '404 status').to.equal(404);
         expect(resp.error.text, 'Correct error msg').to.equal('User profile with that ID not found');
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 
-  it('deletes the requested user and rows', () => {
+  it('DELETEs the requested user and list rows', () => {
     return new Promise<void>((resolve, reject) => {
       let uId: number;
       let token: string;
@@ -368,7 +370,7 @@ describe('CRUD API for user profile data', () => {
       }).then(rows => {
         expect(rows.length).to.equal(0);
         return resolve();
-      }).catch(() => reject());
+      }).catch(e => { console.log(e); reject(); });
     });
   });
 

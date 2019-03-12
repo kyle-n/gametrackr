@@ -35,7 +35,6 @@ describe('Router search interface', () => {
       chai.request(app).post('/api/external').send({ email: 'test@test.com', password: 'abc123' }).then(resp => {
         if (resp.error && resp.error.text) console.log(resp.error.text);
         token = 'jwt ' + resp.body.token;
-        console.log('test token', token);
         return done();
       });
     }, 500);
