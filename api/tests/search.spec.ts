@@ -25,11 +25,21 @@ import { rInt } from '../../utils';
 chai.use(chaiHttp);
 const should = chai.should();
 const defaultError: ServerError = { status: 500, msg: 'Database error' };
+let token: string;
 
 describe('Router search interface', () => {
 
   // give system time to initialize db
-  before(done => setTimeout(done, 500));
+  before(done => {
+    setTimeout(() => {
+      chai.request(app).post('/api/external').send({ email: 'test@test.com', password: 'abc123' }).then(resp => {
+        if (resp.error && resp.error.text) console.log(resp.error.text);
+        token = 'jwt ' + resp.body.token;
+        console.log('test token', token);
+        return done();
+      });
+    }, 500);
+  });
 
   beforeEach(() => {
     moxios.install();
@@ -46,12 +56,17 @@ describe('Router search interface', () => {
     });
   });
 
-  it('returns 400 for no query', done => {
-    chai.request(app).get('/api/search').then((resp) => {
-      resp.error.text.should.be.a('string');
-      resp.error.text.should.equal('No search query');
-      resp.error.status.should.equal(400);
-      done();
+  it('returns 400 for no query', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).get('/api/search').set('authorization', token).then(resp => {
+        resp.error.text.should.be.a('string');
+        resp.error.text.should.equal('No search query');
+        resp.error.status.should.equal(400);
+        return resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
     });
   });
 
@@ -62,7 +77,7 @@ describe('Router search interface', () => {
       headers: IceKingJson.headers
     });
     const getSpy = sinon.spy(axios, 'get');
-    chai.request(app).get('/api/search?searchTerm=target_terror').then((resp: any) => {
+    chai.request(app).get('/api/search?searchTerm=target_terror').set('authorization', token).then((resp: any) => {
       expect(getSpy.calledOnce).to.equal(true);
       setTimeout(done, 1000);
     });
