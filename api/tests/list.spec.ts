@@ -48,7 +48,7 @@ describe('Router list api interface', () => {
   });
 
   // create
-  it('returns 400 for bad new list requests', () => {
+  it('returns 400 for bad POST', () => {
     const validWarning = 'Must provide a valid title and deck';
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/lists').set('authorization', token).send({ title }).then(resp => {
@@ -77,7 +77,7 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('correctly saves a new list', () => {
+  it('correctly saves a new list on POST', () => {
     return new Promise<void>((resolve, reject) => {
       let listRespId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
@@ -143,7 +143,7 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('returns 403 for private list', () => {
+  it('returns 403 for GET private list', () => {
     return new Promise<void>((resolve, reject) => {
       let secondUserToken: string;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(() => {
@@ -157,15 +157,18 @@ describe('Router list api interface', () => {
       }).then(resp => {
         expect(resp.status).to.equal(400);
         expect(resp.error.text).to.equal('Cannot update another user\'s list');
-        return resolve();
-      }).catch(e => {
+        return client.query('DELETE FROM users WHERE email = $1 RETURNING id;', 'test2@test.com');
+      }).then(rows => {
+        return client.query('DELETE FROM list_metadata WHERE user_id = $1;', rows[0].id);
+      }).then(() => resolve())
+      .catch(e => {
         console.log(e);
         reject();
       });
     });
   });
 
-  it('returns a list correctly', () => {
+  it('GETs a list correctly', () => {
     return new Promise<void>((resolve, reject) => {
       let list: List;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
@@ -199,7 +202,7 @@ describe('Router list api interface', () => {
   });
 
   // update
-  it('returns 400 for a bad update request', () => {
+  it('returns 400 for a bad PUT', () => {
     return new Promise<void>((resolve, reject) => {
       let listId: number;
       const validWarning = 'Must provide a valid title and deck';
@@ -235,7 +238,7 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('returns 404 for updating nonexistent list', () => {
+  it('returns 404 for PUT to nonexistent list', () => {
     return new Promise<void>((resolve, reject) => {
       client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;').then(rows => {
         let badId = 1;
@@ -252,7 +255,34 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('updates a list correctly', () => {
+  it('returns 403 for PUT to another user\'s list', () => {
+    return new Promise<void>((resolve, reject) => {
+      let listId: number;
+      const secondMail = 'test2@test.com', secondPw = 'abc123';
+      let secondUserToken: string;
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
+        if (!resp.body.listId) throw new Error();
+        listId = resp.body.listId;
+        return chai.request(app).post('/api/external').send({ email: secondMail, password: secondPw });
+      }).then(resp => {
+        if (!resp.body.token) throw new Error();
+        secondUserToken = 'jwt ' + resp.body.token;
+        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', secondUserToken).send({ title: 'New title', deck });
+      }).then(resp => {
+        expect(resp.status).to.equal(403);
+        expect(resp.error.text).to.equal('Cannot update another user\'s list');
+        return client.query('DELETE FROM users WHERE email = $1 RETURNING id;', secondMail);
+      }).then(rows => {
+        return client.query('DELETE FROM list_metadata WHERE user_id = $1;', rows[0].id);
+      }).then(() => resolve())
+      .catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('updates a list correctly on PUT', () => {
     return new Promise<void>((resolve, reject) => {
       const editedTitle = '', editedDeck = '';
       let listId: number;
@@ -285,7 +315,7 @@ describe('Router list api interface', () => {
   });
 
   // delete
-  it('returns 400 for a bad delete request', () => {
+  it('returns 400 for a bad DELETE', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         return chai.request(app).delete('/api/lists').set('authorization', token);
@@ -297,7 +327,7 @@ describe('Router list api interface', () => {
     });
   });
   
-  it('returns 404 for deleting list not in db', () => {
+  it('returns 404 for DELETE list not in db', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         return client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;');
@@ -311,7 +341,7 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('deletes a list correctly', () => {
+  it('DELETEs a list correctly', () => {
     return new Promise<void>((resolve, reject) => {
       let listId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {

@@ -216,7 +216,7 @@ describe('Game API', () => {
         reject();
       });
     });
-  }):
+  });
 
   it('returns 403 on PUT to non-custom game', () => {
     return new Promise((resolve, reject) => {
