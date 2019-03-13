@@ -4,6 +4,7 @@ import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import { client } from '../../db';
 import { GiantBombGame } from '../../schemas';
+import jwt from 'jsonwebtoken';
 
 chai.use(chaiHttp);
 let token: string;
@@ -116,6 +117,7 @@ describe('Game API', () => {
         expect(rows[0].deck).to.equal(custom.deck);
         expect(rows[0].original_release_date).to.equal(custom.original_release_date);
         expect(rows[0].image).to.equal(custom.image);
+        expect(rows[0].owner_id).to.equal(userId);
         return client.query('SELECT id FROM list_entries WHERE list_id IN ($1:list) AND game_id = $2;', [custom.lists, rows[0].id]);
       }).then(rows => {
         expect(rows.length).to.equal(custom.lists.length);
