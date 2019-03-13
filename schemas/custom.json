@@ -64,7 +64,8 @@
         "examples": [
           1,
           2
-        ]
+        ],
+        "minItems": 1
       }
     }
   }
