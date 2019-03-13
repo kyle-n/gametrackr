@@ -10,8 +10,8 @@ chai.use(chaiHttp);
 let token: string;
 let userId: number;
 const custom = {
-  name: 'Spelunky Classic',
-  deck: 'Spelunky is a cave exploration / treasure-hunting game inspired by classic platform games and roguelikes, where the goal is to grab as much treasure from the cave as possible.',
+  name: '123123123123123123',
+  deck: '7329873297459837459837345345',
   original_release_date: '2008-12-21',
   image: 'http://i.imgur.com/G1CdQJz.png',
   lists: []
@@ -251,6 +251,145 @@ describe('Game API', () => {
         expect(resp.status).to.equal(403);
         expect(resp.error.text).to.equal('Cannot update another user\'s custom game');
         return resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('PUTs an update correctly to a custom game', () => {
+    return new Promise<void>((resolve, reject) => {
+      const listArr: number[] = [];
+      const newGame = {
+        name: 'New name',
+        deck: 'New deck',
+        original_release_date: '2001',
+        image: 'new image',
+        lists: listArr
+      };
+      const title = 'title', deck = 'deck';
+      let gameId: number;
+      chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
+        if (!resp.body.listId) throw new Error();
+        newGame.lists.push(<number>resp.body.listId);
+        chai.request(app).post('/api/games').set('authorization', token).send({ ...custom, lists: newGame.lists });
+      }).then(() => {
+        return client.query('SELECT id FROM games WHERE name = $1;', custom.name);
+      }).then(rows => {
+        gameId = rows[0].id;
+        return chai.request(app).put(`/api/games/${gameId}`).set('authorization', token).send(newGame);
+      }).then(resp => {
+        expect(resp.status).to.equal(200);
+        return client.query('SELECT * FROM list_entries WHERE game_id = $1;', gameId);
+      }).then(rows => {
+        expect(rows.length).to.equal(newGame.lists.length);
+        const matchingOutOfOrder = newGame.lists.reduce((allMatch, l) => {
+          const match = rows.find((r: any) => r.list_id === l);
+          return allMatch && match != undefined;
+        }, true);
+        expect(matchingOutOfOrder).to.equal(true);
+        expect(rows[0].name).to.equal(newGame.name);
+        expect(rows[0].deck).to.equal(newGame.deck);
+        expect(rows[0].original_release_date).to.equal(newGame.original_release_date);
+        expect(rows[0].image).to.equal(newGame.image);
+        return resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  // delete
+  it('returns 400 for DELETE without game id', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).delete('/api/games').set('authorization', token).then(resp => {
+        expect(resp.status).to.equal(400);
+        expect(resp.error.text).to.equal('Request /api/games/game_id, not /api/games');
+        resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('returns 404 for DELETE nonexistent game', () => {
+    return new Promise<void>((resolve, reject) => {
+      let badId: number;
+      client.query('SELECT id FROM games ORDER BY id desc LIMIT 1;').then(rows => {
+        if (rows.length) badId = rows[0].id + 1;
+        else badId = 1;
+        return chai.request(app).delete(`/api/games/${badId}`).set('authorization', token);
+      }).then(resp => {
+        expect(resp.status).to.equal(404);
+        expect(resp.error.text).to.equal('Could not find a game with the requested ID');
+        resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('returns 403 for DELETE Giant Bomb game', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).get('/api/search?searchTerm=target_terror').set('authorization', token).then(searchResp => {
+        setTimeout(() => {
+          client.query('SELECT id FROM games WHERE custom = false LIMIT 1;').then(rows => {
+            return chai.request(app).delete(`/api/games/${rows[0].id}`).set('authorization', token);
+          }).then(resp => {
+            expect(resp.status).to.equal(403);
+            expect(resp.error.text).to.equal('Cannot delete non-custom Giant Bomb games');
+            resolve();
+          });
+        }, 1000);
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('returns 403 for DELETE another user\'s custom game', () => {
+    return new Promise<void>((resolve, reject) => {
+      let gameId: number;
+      let secondUserToken: string;
+      chai.request(app).post('/api/games').set('authorization', token).send(custom).then(resp => {
+        return client.query('SELECT id FROM games WHERE custom = true AND name = $1;', custom.name);
+      }).then(rows => {
+        if (!rows.length) throw new Error();
+        gameId = rows[0].id;
+        return chai.request(app).post('/api/external').send({ email: 'test2@test.com', password: 'abc123' });
+      }).then(resp => {
+        secondUserToken = 'jwt ' + resp.body.token;
+        return chai.request(app).delete(`/api/games/${gameId}`).set('authorization', secondUserToken);
+      }).then(resp => {
+        expect(resp.status).to.equal(403);
+        expect(resp.error.text).to.equal('Cannot delete another user\'s custom game');
+        resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('DELETEs a custom game correctly', () => {
+    return new Promise<void>((resolve, reject) => {
+      let gameId: number;
+      chai.request(app).post('/api/games').set('authorization', token).send(custom).then(() => {
+        return client.query('SELECT id FROM games WHERE name = $1 AND custom = true;', custom.name);
+      }).then(rows => {
+        gameId = rows[0].id;
+        return chai.request(app).delete(`/api/games/${gameId}`).set('authorization', token);
+      }).then(resp => {
+        expect(resp.status).to.equal(200);
+        return client.query('SELECT id FROM games WHERE id = $1;', gameId);
+      }).then(rows => {
+        expect(rows.length).to.equal(0);
+        resolve();
       }).catch(e => {
         console.log(e);
         reject();
