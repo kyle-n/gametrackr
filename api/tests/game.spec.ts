@@ -127,4 +127,133 @@ describe('Game API', () => {
     });
   });
 
+  // read
+  it('returns 400 for GET without game id', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).get('/api/games').set('authorization', token).then(resp => {
+        expect(resp.status).to.equal(400);
+        expect(resp.error.text).to.equal('Request /api/games/game_id, not /api/games');
+        return resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('returns 404 for GET game not in db', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).get('/api/games/2').set('authorization', token).then(resp => {
+        expect(resp.status).to.equal(404);
+        expect(resp.error.text).to.equal('Could not find a game with the requested ID');
+        return resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('GETs an existing game correctly', () => {
+    return new Promise<void>((resolve, reject) => {
+      chai.request(app).get('/api/search?searchTerm=target_terror').set('authorization', token).then(resp => {
+        const gb = resp.body.results[0];
+        setTimeout(() => {
+          chai.request(app).get(`/api/games/${gb.id}`).set('authorization', token).then(game => {
+            expect(game.status).to.equal(200);
+            expect(game.body.id).to.equal(gb.id);
+            expect(game.body.guid).to.equal(gb.guid);
+            expect(game.body.name).to.equal(gb.name);
+            expect(game.body.deck).to.equal(gb.deck);
+            expect(game.body.description).to.equal(gb.description);
+            expect(game.body.original_release_date).to.equal(gb.original_release_date);
+            expect(game.body.site_detail_url).to.equal(gb.site_detail_url);
+            return resolve();
+          });
+        }, 1000);
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  }).timeout(3000);
+
+  // update
+  it('returns 400 on PUT with no useful params', () => {
+    return new Promise<void>((resolve, reject) => {
+      let gameId: number;
+      chai.request(app).post('/api/games').set('authorization', token).send(custom).then(() => {
+        return client.query('SELECT id FROM games WHERE name = $1;', custom.name);
+      }).then(rows => {
+        gameId = rows[0].id;
+        return chai.request(app).put(`/api/games/${gameId}`).set('authorization', token).send({ useless: 'data' });
+      }).then(resp => {
+        expect(resp.status, '400 status').to.equal(400);
+        expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid new name, description, release date or image');
+        return resolve();
+      }).catch(e => {
+        console.log(e);
+        return reject();
+      });
+    });
+  });
+
+  it('returns 404 on PUT to nonexistent game', () => {
+    return new Promise<void>((resolve, reject) => {
+      let badId: number;
+      client.query('SELECT id FROM games ORDER BY id DESC LIMIT 1;').then(rows => {
+        if (rows.length) badId = rows[0].id + 1;
+        else badId = 1;
+        return chai.request(app).put(`/api/games/${badId}`).set('authorization', token).send(custom);
+      }).then(resp => {
+        expect(resp.status).to.equal(404);
+        expect(resp.error.text).to.equal('Could not find a game with the requested ID');
+        return resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  }):
+
+  it('returns 403 on PUT to non-custom game', () => {
+    return new Promise((resolve, reject) => {
+      chai.request(app).get('/api/search?searchTerm=target_terror').set('authorization', token).then(searchResp => {
+        const tester = searchResp.body.results[0];
+        setTimeout(() => {
+          chai.request(app).put(`/api/games/${tester.id}`).set('authorization', token).send(custom).then(resp => {
+            expect(resp.status).to.equal(403);
+            expect(resp.error.text).to.equal('Cannot update non-custom Giant Bomb games');
+            return resolve();
+          });
+        }, 1000);
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  }).timeout(3000);
+
+  it('returns 403 on PUT to other user\'s game', () => {
+    return new Promise<void>((resolve, reject) => {
+      let secondUserToken: string;
+      chai.request(app).post('/api/games').set('authorization', token).send(custom).then(() => {
+        return chai.request(app).post('/api/external').send({ email: 'test2@test.com', password: 'abc123' });
+      }).then(resp => {
+        if (resp.body.error && resp.body.error.text) throw new Error();
+        secondUserToken = 'jwt ' + resp.body.token;
+        return client.query('SELECT id FROM games WHERE name = $1;', custom.name);
+      }).then(rows => {
+        return chai.request(app).put(`/api/games/${rows[0].id}`).set('authorization', secondUserToken).send({ ...custom, name: 'New name' });
+      }).then(resp => {
+        expect(resp.status).to.equal(403);
+        expect(resp.error.text).to.equal('Cannot update another user\'s custom game');
+        return resolve();
+      }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
 });

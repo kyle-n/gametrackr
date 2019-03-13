@@ -44,7 +44,7 @@ export default function initialize() {
       site_detail_url TEXT,
       resource_type TEXT,
       platforms INTEGER[],
-      custom BOOL DEFAULT false
+      owner_id INTEGER
     );`)
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS game_images(

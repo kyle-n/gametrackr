@@ -16,6 +16,7 @@ export interface GiantBombGame extends Array<any> {
   site_detail_url: string;
   resource_type: string;
   platforms: GiantBombPlatform[];
+  owner_id: number;
 }
 
 export interface GiantBombPlatform {
