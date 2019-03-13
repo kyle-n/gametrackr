@@ -39,6 +39,8 @@ describe('Game API', () => {
       return client.query('DELETE FROM list_entries WHERE list_id IN ($1:list) RETURNING game_id;', rows.map((r: any) => r.id));
     }).then(rows => {
       return client.query('DELETE FROM games WHERE custom = true AND id IN ($1:list);', rows.map((r: any) => r.game_id));
+    }).then(() => {
+      return client.query('DELETE FROM games WHERE name = $1;', custom.name);
     }).then(() => done());
   });
 
