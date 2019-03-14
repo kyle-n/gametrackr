@@ -74,7 +74,33 @@ export const readGame = (req: express.Request, resp: express.Response): void | e
 export const updateGame = (req: express.Request, resp: express.Response): void | express.Response => {
   let error: ServerError = { ...defaultError };
   if (!validate(req.body, CustomGameUpdateSchema).valid) return resp.status(400).send('Must provide a valid new name, description, release date or image');
-
+  client.query('SELECT custom, owner_id FROM games WHERE id = $1;', req.params.gameId).then(rows => {
+    if (!rows.length) {
+      error = { status: 404, msg: 'Could not find a game with the requested ID' };
+      throw new Error();
+    }
+    if (!rows[0].custom) {
+      error = { status: 403, msg: 'Cannot update non-custom Giant Bomb games' };
+      throw new Error();
+    }
+    if (rows[0].owner_id !== resp.locals.id) {
+      error = { status: 403, msg: 'Cannot update another user\'s custom game' };
+      throw new Error();
+    }
+    return client.tx(t => {
+      const queries = [];
+      const update: any = {};
+      if (req.body.name) update.name = req.body.name;
+      if (req.body.deck) update.deck = req.body.deck;
+      if (req.body.original_release_date) update.original_release_date = req.body.original_release_date;
+      if (req.body.image) update.image = req.body.image;
+      for (const field in update) {
+        queries.push(t.query('UPDATE games SET $1~ = $2 WHERE id = $3;', [field, update[field], req.params.gameId]));
+      }
+      return t.batch(queries);
+    });
+  }).then(() => resp.status(200).send())
+  .catch(() => resp.status(error.status).send(error.msg));
 }
 
 export const deleteGame = (req: express.Request, resp: express.Response): void | express.Response => {
