@@ -104,7 +104,25 @@ export const updateGame = (req: express.Request, resp: express.Response): void |
 }
 
 export const deleteGame = (req: express.Request, resp: express.Response): void | express.Response => {
-  return;
+  let error: ServerError = { ...defaultError };
+  client.query('SELECT custom, owner_id FROM games WHERE id = $1;', req.params.gameId).then(rows => {
+    if (!rows.length) {
+      error = { status: 404, msg: 'Could not find a game with the requested ID' };
+      throw new Error();
+    }
+    if (!rows[0].custom) {
+      error = { status: 403, msg: 'Cannot delete non-custom Giant Bomb games' };
+      throw new Error();
+    }
+    if (rows[0].owner_id !== resp.locals.id) {
+      error = { status: 403, msg: 'Cannot delete another user\'s custom game' };
+      throw new Error();
+    }
+    return client.query('DELETE FROM games WHERE id = $1;', req.params.gameId);
+  }).then(() => {
+    return client.query('DELETE FROM list_entries WHERE game_id = $1;', req.params.gameId);
+  }).then(() => resp.status(200).send())
+  .catch(() => resp.status(error.status).send(error.msg));
 }
 
 const fourHundredNotSpecified = (req: express.Request, resp: express.Response) => resp.status(400).send('Request /api/games/game_id, not /api/games');
