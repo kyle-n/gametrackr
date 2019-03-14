@@ -1,4 +1,4 @@
-import { GiantBombGame, CustomGameSchema, CustomGame, ServerError } from '../schemas';
+import { GiantBombGame, CustomGameSchema, CustomGame, ServerError, GiantBombPlatform } from '../schemas';
 import express from 'express';
 import { validate } from 'jsonschema';
 import { client } from '../db';
@@ -31,11 +31,44 @@ export const createGame = (req: express.Request, resp: express.Response): void |
     });
   }).then(rows => {
     return resp.status(200).send();
-  });
+  }).catch(() => resp.status(error.status).send(error.msg));
 }
 
 export const readGame = (req: express.Request, resp: express.Response): void | express.Response => {
-  return;
+  let error: ServerError = { ...defaultError };
+  client.query('SELECT games.*, platforms.id as platform_id, platforms.name as platform_name, platforms.site_detail_url as platform_detail_url FROM games JOIN platforms ON platforms.id = ANY(games.platforms::int[]) WHERE games.id = $1;', req.params.gameId).then(rows => {
+    if (!rows.length) {
+      error = { status: 404, msg: 'Could not find a game with the requested ID' };
+      throw new Error();
+    }
+    const platforms: GiantBombPlatform[] = rows.map((r: any) => {
+      return <GiantBombPlatform>{
+        id: r.platform_id,
+        name: r.platform_name,
+        site_detail_url: r.platform_detail_url,
+        abbreviation: r.abbreviation
+      };
+    });
+    const gameToReturn: GiantBombGame = <GiantBombGame>{
+      aliases: rows[0].aliases,
+      api_detail_url: rows[0].api_detail_url,
+      deck: rows[0].deck,
+      description: rows[0].description,
+      expected_release_day: rows[0].expected_release_day,
+      expected_release_month: rows[0].expected_release_month,
+      expected_release_year: rows[0].expected_release_year,
+      guid: rows[0].guid,
+      id: rows[0].id,
+      name: rows[0].name,
+      image: rows[0].image,
+      original_release_date: rows[0].original_release_date,
+      site_detail_url: rows[0].site_detail_url,
+      resource_type: rows[0].resource_type,
+      platforms,
+      owner_id: rows[0].owner_id
+    };
+    return resp.status(200).json(gameToReturn);
+  }).catch(() => resp.status(error.status).send(error.msg));
 }
 
 export const updateGame = (req: express.Request, resp: express.Response): void | express.Response => {
