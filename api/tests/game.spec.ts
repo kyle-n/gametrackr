@@ -9,7 +9,13 @@ import jwt from 'jsonwebtoken';
 chai.use(chaiHttp);
 let token: string;
 let userId: number;
-const custom = {
+const custom: {
+  name: string;
+  deck: string;
+  original_release_date: string;
+  image: string;
+  lists: number[];
+} = {
   name: '123123123123123123',
   deck: '7329873297459837459837345345',
   original_release_date: '2008-12-21',
@@ -102,6 +108,31 @@ describe('Game API', () => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid name, description, release date and image');
       }).catch(e => {
+        console.log(e);
+        reject();
+      });
+    });
+  });
+
+  it('returns 403 for POST game to another user\'s list', () => {
+    return new Promise<void>((resolve, reject) => {
+      const testMail = 'test2@test.com', testPassword = 'abc123', testTitle = '29948584930322';
+      chai.request(app).post('/api/external').send({ email: testMail, password: testPassword }).then(resp => {
+        return chai.request(app).post('/api/lists').set('authorization', 'jwt ' + resp.body.token).send({ title: testTitle, deck: '2' });
+      }).then(() => {
+        return client.query('SELECT id FROM list_metadata WHERE title = $1;', testTitle);
+      }).then(rows => {
+        const illegalGame = { ...custom };
+        illegalGame.lists.push(rows[0].id);
+        return chai.request(app).post('/api/games').set('authorization', token).send(illegalGame);
+      }).then(resp => {
+        expect(resp.status).to.equal(403);
+        expect(resp.error.text).to.equal('Cannot add a custom game to another user\'s list');
+        return client.query('DELETE FROM users WHERE email = $1 RETURNING id;', testMail);
+      }).then(rows => {
+        return client.query('DELETE FROM list_metadata WHERE user_id = $1;', rows[0].id);
+      }).then(() => resolve())
+      .catch(e => {
         console.log(e);
         reject();
       });
