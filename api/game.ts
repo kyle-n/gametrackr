@@ -1,4 +1,4 @@
-import { GiantBombGame, CustomGameSchema, CustomGame, ServerError, GiantBombPlatform } from '../schemas';
+import { GiantBombGame, CustomGameSchema, CustomGame, ServerError, GiantBombPlatform, CustomGameUpdateSchema } from '../schemas';
 import express from 'express';
 import { validate } from 'jsonschema';
 import { client } from '../db';
@@ -72,7 +72,9 @@ export const readGame = (req: express.Request, resp: express.Response): void | e
 }
 
 export const updateGame = (req: express.Request, resp: express.Response): void | express.Response => {
-  return;
+  let error: ServerError = { ...defaultError };
+  if (!validate(req.body, CustomGameUpdateSchema).valid) return resp.status(400).send('Must provide a valid new name, description, release date or image');
+
 }
 
 export const deleteGame = (req: express.Request, resp: express.Response): void | express.Response => {
