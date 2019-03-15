@@ -51,7 +51,7 @@ export default function initialize() {
     return client.query(`CREATE TABLE IF NOT EXISTS platforms(
       id INTEGER NOT NULL UNIQUE PRIMARY KEY,
       api_detail_url TEXT,
-      name TEXTe
+      name TEXT,
       site_detail_url TEXT,
       abbreviation TEXT
     );`);

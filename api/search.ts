@@ -43,7 +43,7 @@ export const saveGames = (error: ServerError, gbResp: any): number => {
   client.tx(t => {
     const queries = gbResp.data.results.map((g: any) => {
       let platformIds: number[] = [];
-      if (g.platforms && Array.isArray(g.platforms)) platformIds = g.platforms.map(p => p.id);
+      if (g.platforms && Array.isArray(g.platforms)) platformIds = g.platforms.map((p: any) => p.id);
       return client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
         expected_release_month, expected_release_year, guid, id, name, original_release_date, 
         site_detail_url, resource_type, platforms, owner_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);`,

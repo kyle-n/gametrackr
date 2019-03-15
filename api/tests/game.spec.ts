@@ -30,17 +30,22 @@ const custom: {
 
 describe('Game API', () => {
 
-  before(async done => {
-    await client.query('DELETE FROM users WHERE email IN ($1:csv);', [[firstEmail, secondEmail]]);
-    let resp: any = await chai.request(app).post('/api/external').send({ email: firstEmail, password });
-    if (!resp.body.token) throw new Error();
-    firstUserId = resp.body.id;
-    firstToken = 'jwt ' + resp.body.token;
-    custom.lists.push((await client.one('SELECT id FROM list_metadata WHERE user_id = $1;', firstUserId)).id);
-    resp = await chai.request(app).post('/api/external').send({ email: secondEmail, password });
-    if (!resp.body.token) throw new Error();
-    secondUserId = resp.body.id;
-    secondToken = 'jwt ' + resp.body.token;
+  before(done => {
+    setTimeout(async () => {
+      await client.query('DELETE FROM users WHERE email IN ($1:csv);', [[firstEmail, secondEmail]]);
+      let resp: any = await chai.request(app).post('/api/external').send({ email: firstEmail, password });
+      if (!resp.body.token) throw new Error();
+      firstUserId = resp.body.id;
+      firstToken = 'jwt ' + resp.body.token;
+      console.log('x', firstUserId)
+      custom.lists.push((await client.one('SELECT id FROM list_metadata WHERE user_id = $1;', firstUserId)).id);
+      console.log('y');
+      resp = await chai.request(app).post('/api/external').send({ email: secondEmail, password });
+      if (!resp.body.token) throw new Error();
+      secondUserId = resp.body.id;
+      secondToken = 'jwt ' + resp.body.token;
+      return done();
+    }, 500);
   });
 
   afterEach(async done => {
@@ -50,8 +55,8 @@ describe('Game API', () => {
   });
 
   after(async done => {
-    await client.none('DELETE FROM users WHERE email = $1;', firstEmail);
-    await client.none('DELETE FROM users WHERE email = $1;', secondEmail);
+    await client.none('DELETE FROM users WHERE id = $1;', firstUserId);
+    await client.none('DELETE FROM users WHERE id = $1;', secondUserId);
     done();
   });
 
@@ -145,7 +150,7 @@ describe('Game API', () => {
         expect(rows[0].deck).to.equal(custom.deck);
         expect(rows[0].original_release_date).to.equal(custom.original_release_date);
         expect(rows[0].image).to.equal(custom.image);
-        expect(rows[0].owner_id).to.equal(userId);
+        expect(rows[0].owner_id).to.equal(firstUserId);
         return client.query('SELECT id FROM list_entries WHERE list_id IN ($1:list) AND game_id = $2;', [custom.lists, rows[0].id]);
       }).then(rows => {
         expect(rows.length).to.equal(custom.lists.length);
