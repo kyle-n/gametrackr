@@ -30,45 +30,22 @@ const custom: {
 
 describe('Game API', () => {
 
-  before(done => {
-    let idToRemove: number;
-    client.query('DELETE FROM users WHERE email = $1 RETURNING id;', 'test@test.com').then(rows => {
-      if (!rows.length) return new Promise<any[]>((resolve) => resolve([]));
-      else {
-        idToRemove = rows[0].id;
-        return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', idToRemove);
-      }
-    }).then(rows => {
-      if (!rows.length) return new Promise<any[]>(resolve => resolve([]));
-      else return client.query('DELETE FROM list_entries WHERE list_id IN ($1:csv);', rows.map((r: any) => r.id));
-    }).then(rows => {
-      return client.query('DELETE FROM games WHERE owner_id = $1;', idToRemove || -1);
-    }).then(() => {
-      return chai.request(app).post('/api/external').send({ email: 'test@test.com', password: 'abc123' });
-    }).then(resp => {
-      if (!resp.body.token) throw new Error();
-      token = 'jwt ' + resp.body.token;
-      return client.query('SELECT id FROM users WHERE email = $1;', 'test@test.com');
-    }).then(rows => {
-      userId = rows[0].id;
-      return client.query('SELECT id FROM list_metadata WHERE user_id = $1;', userId);
-    }).then(rows => {
-      custom.lists.concat(rows.map((r: any) => r.id));
-      console.log(token);
-      return done();
-    });
+  before(async done => {
+    await client.query('DELETE FROM users WHERE email IN ($1:csv);', [[firstEmail, secondEmail]]);
+    let resp: any = await chai.request(app).post('/api/external').send({ email: firstEmail, password });
+    if (!resp.body.token) throw new Error();
+    firstUserId = resp.body.id;
+    firstToken = 'jwt ' + resp.body.token;
+    resp = await chai.request(app).post('/api/external').send({ email: secondEmail, password });
+    if (!resp.body.token) throw new Error();
+    secondUserId = resp.body.id;
+    secondToken = 'jwt ' + resp.body.token;
   });
 
-  after(done => {
-    client.query('DELETE FROM users WHERE id = $1;', userId).then(rows => {
-      return client.query('DELETE FROM list_metadata WHERE user_id = $1 RETURNING id;', userId);
-    }).then(rows => {
-      return client.query('DELETE FROM list_entries WHERE list_id IN ($1:list) RETURNING game_id;', rows.map((r: any) => r.id));
-    }).then(rows => {
-      return client.query('DELETE FROM games WHERE custom = true AND id IN ($1:list);', rows.map((r: any) => r.game_id));
-    }).then(() => {
-      return client.query('DELETE FROM games WHERE name = $1;', custom.name);
-    }).then(() => done());
+  after(async done => {
+    await client.none('DELETE FROM users WHERE email = $1;', firstEmail);
+    await client.none('DELETE FROM users WHERE email = $1;', secondEmail);
+    done();
   });
 
   // create
