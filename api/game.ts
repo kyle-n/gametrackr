@@ -9,7 +9,7 @@ const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
 export const createGame = (req: express.Request, resp: express.Response): void | express.Response => {
   let error: ServerError = { ...defaultError };
   let gameId: number;
-  if (!validate(req.body, CustomGameSchema).valid) return resp.status(400).send('Must provide a valid name, description, release date and image');
+  if (!validate(req.body, CustomGameSchema).valid) return resp.status(400).send('Must provide a valid name, description, release date and image with at least one list selected');
   client.query('SELECT user_id FROM list_metadata WHERE id IN ($1:csv);', [req.body.lists]).then(rows => {
     const listsBelongToUser: boolean = rows.reduce((allOwned: boolean, r: any) => {
       return allOwned && r.user_id === resp.locals.id;
@@ -18,7 +18,7 @@ export const createGame = (req: express.Request, resp: express.Response): void |
       error = { status: 403, msg: 'Cannot add a custom game to another user\'s list' };
       throw new Error();
     }
-    return client.query('INSERT INTO games(name, deck, original_release_date, image, custom) VALUES ($1, $2, $3, $4, true) RETURNING id;', [req.body.name, req.body.deck, req.body.original_release_date, req.body.image]);
+    return client.query('INSERT INTO games(name, deck, original_release_date, image, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING id;', [req.body.name, req.body.deck, req.body.original_release_date, req.body.image, resp.locals.id]);
   }).then(rows => {
     gameId = rows[0].id;
     return client.query('SELECT MAX(ranking), list_id FROM list_entries WHERE list_id IN ($1:csv) GROUP BY list_id;', [req.body.lists]);
@@ -29,9 +29,12 @@ export const createGame = (req: express.Request, resp: express.Response): void |
       });
       return t.batch(queries);
     });
-  }).then(rows => {
+  }).then(() => {
     return resp.status(200).send();
-  }).catch(() => resp.status(error.status).send(error.msg));
+  }).catch(e => {
+    if (error.status === 500) console.log(e); 
+    resp.status(error.status).send(error.msg);
+  });
 }
 
 export const readGame = (req: express.Request, resp: express.Response): void | express.Response => {
@@ -74,12 +77,12 @@ export const readGame = (req: express.Request, resp: express.Response): void | e
 export const updateGame = (req: express.Request, resp: express.Response): void | express.Response => {
   let error: ServerError = { ...defaultError };
   if (!validate(req.body, CustomGameUpdateSchema).valid) return resp.status(400).send('Must provide a valid new name, description, release date or image');
-  client.query('SELECT custom, owner_id FROM games WHERE id = $1;', req.params.gameId).then(rows => {
+  client.query('SELECT owner_id FROM games WHERE id = $1;', req.params.gameId).then(rows => {
     if (!rows.length) {
       error = { status: 404, msg: 'Could not find a game with the requested ID' };
       throw new Error();
     }
-    if (!rows[0].custom) {
+    if (!rows[0].owner_id) {
       error = { status: 403, msg: 'Cannot update non-custom Giant Bomb games' };
       throw new Error();
     }
@@ -105,12 +108,12 @@ export const updateGame = (req: express.Request, resp: express.Response): void |
 
 export const deleteGame = (req: express.Request, resp: express.Response): void | express.Response => {
   let error: ServerError = { ...defaultError };
-  client.query('SELECT custom, owner_id FROM games WHERE id = $1;', req.params.gameId).then(rows => {
+  client.query('SELECT owner_id FROM games WHERE id = $1;', req.params.gameId).then(rows => {
     if (!rows.length) {
       error = { status: 404, msg: 'Could not find a game with the requested ID' };
       throw new Error();
     }
-    if (!rows[0].custom) {
+    if (!rows[0].owner_id) {
       error = { status: 403, msg: 'Cannot delete non-custom Giant Bomb games' };
       throw new Error();
     }
@@ -128,10 +131,10 @@ export const deleteGame = (req: express.Request, resp: express.Response): void |
 const fourHundredNotSpecified = (req: express.Request, resp: express.Response) => resp.status(400).send('Request /api/games/game_id, not /api/games');
 
 router.route('/').get(fourHundredNotSpecified)
-                 .post(fourHundredNotSpecified)
+                 .post(createGame)
                  .put(fourHundredNotSpecified)
                  .delete(fourHundredNotSpecified)
-router.route('/:gameId').post(createGame)
+router.route('/:gameId').post(fourHundredNotSpecified)
                         .get(readGame)
                         .put(updateGame)
                         .delete(deleteGame);

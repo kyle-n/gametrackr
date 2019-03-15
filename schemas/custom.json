@@ -56,6 +56,7 @@
       "$id": "#/properties/lists",
       "type": "array",
       "title": "The Lists Schema",
+      "minItems": 1,
       "items": {
         "$id": "#/properties/lists/items",
         "type": "integer",
@@ -64,8 +65,7 @@
         "examples": [
           1,
           2
-        ],
-        "minItems": 1
+        ]
       }
     }
   }

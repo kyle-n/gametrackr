@@ -37,14 +37,15 @@ export default function initialize() {
       expected_release_day TEXT,
       expected_release_month TEXT,
       expected_release_year TEXT,
-      guid TEXT NOT NULL,
+      guid TEXT,
       id INTEGER,
       name TEXT,
       original_release_date TEXT,
       site_detail_url TEXT,
       resource_type TEXT,
       platforms INTEGER[],
-      owner_id INTEGER
+      owner_id INTEGER,
+      image TEXT
     );`)
   }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS game_images(
