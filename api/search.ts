@@ -14,17 +14,22 @@ export const savePlatforms = (error: ServerError, gbResp: any): number => {
   const allPlatforms: GiantBombPlatform[] = gbResp.data.results.reduce((arr: GiantBombPlatform[], g: GiantBombGame) => {
     return arr.concat(g.platforms);
   }, []);
-  const previousIds: number[] = [];
   //console.log(allPlatforms);
   // insert platform, which may have new data
-  for (let j = 0; j < allPlatforms.length; j++) {
-    const p: GiantBombPlatform = allPlatforms[j];
-    if (!p || !p.id || previousIds.includes(p.id)) continue;
-    previousIds.push(p.id);
-    client.query('DELETE FROM ONLY platforms WHERE id = $1', [p.id]).then(() => {
-      client.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation) VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
+  client.tx(t => {
+    const previousIds: number[] = [];
+    const filteredPlatforms: GiantBombPlatform[] = allPlatforms.filter(p => {
+      const prev = !previousIds.includes(p.id);
+      if (!prev) previousIds.push(p.id);
+      return prev;
     });
-  }
+    const queries = filteredPlatforms.map(p => {
+      return t.query('DELETE FROM PLATFORMS WHERE id = $1;', p.id);
+    }).concat(filteredPlatforms.map(p => {
+      return t.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
+    }));
+    return t.batch(queries);
+  });
   return 0;
 };
 
@@ -35,20 +40,17 @@ export const saveGames = (error: ServerError, gbResp: any): number => {
     console.log(error);
     return 1;
   }
-  // Max 10 results at a time from API so individual inserts are okay
-  for (let i = 0; i < gbResp.data.results.length; i++) {
-    const g: GiantBombGame = gbResp.data.results[i];
-    let platformIds: number[] = [];
-    if (g.platforms && Array.isArray(g.platforms)) platformIds = g.platforms.map(p => p.id);
-    // insert game, which may have new data
-    client.query('DELETE FROM games WHERE id = $1', [g.id]).then(() => {
-      client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
+  client.tx(t => {
+    const queries = gbResp.data.results.map((g: any) => {
+      let platformIds: number[] = [];
+      if (g.platforms && Array.isArray(g.platforms)) platformIds = g.platforms.map(p => p.id);
+      return client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 
         expected_release_month, expected_release_year, guid, id, name, original_release_date, 
-        site_detail_url, resource_type, platforms, custom) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);`,
-        [g.aliases, g.api_detail_url, g.deck, g.description, g.expected_release_day, g.expected_release_month, g.expected_release_year, g.guid, g.id, g.name, g.original_release_date, g.site_detail_url, g.resource_type, platformIds, false]
-      );
+        site_detail_url, resource_type, platforms, owner_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);`,
+        [g.aliases, g.api_detail_url, g.deck, g.description, g.expected_release_day, g.expected_release_month, g.expected_release_year, g.guid, g.id, g.name, g.original_release_date, g.site_detail_url, g.resource_type, platformIds, null]);
     });
-  }
+    return t.batch(queries);
+  });
   return 0;
 };
 
