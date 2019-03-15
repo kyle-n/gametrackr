@@ -15,7 +15,7 @@ export default function initialize() {
   ).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS list_metadata(
       id SERIAL PRIMARY KEY,
-      user_id INTEGER,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       title TEXT,
       deck TEXT,
       private BOOL DEFAULT true
@@ -24,8 +24,8 @@ export default function initialize() {
     return client.query(`CREATE TABLE IF NOT EXISTS list_entries(
       id SERIAL PRIMARY KEY,
       ranking INTEGER,
-      list_id INTEGER NOT NULL,
-      game_id INTEGER NOT NULL,
+      list_id INTEGER NOT NULL REFERENCES list_metadata(id) ON DELETE CASCADE,
+      game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
       text TEXT
     );`)
   }).then(() => {
@@ -38,33 +38,20 @@ export default function initialize() {
       expected_release_month TEXT,
       expected_release_year TEXT,
       guid TEXT,
-      id INTEGER,
+      id INTEGER PRIMARY KEY,
       name TEXT,
       original_release_date TEXT,
       site_detail_url TEXT,
       resource_type TEXT,
       platforms INTEGER[],
-      owner_id INTEGER,
+      owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       image TEXT
     );`)
   }).then(() => {
-    return client.query(`CREATE TABLE IF NOT EXISTS game_images(
-      game_id INTEGER NOT NULL UNIQUE,
-      icon_url TEXT,
-      medium_url TEXT,
-      screen_url TEXT,
-      screen_large_url TEXT,
-      small_url TEXT,
-      super_url TEXT,
-      thumb_url TEXT,
-      tiny_url TEXT,
-      original_url TEXT
-    );`);
-  }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS platforms(
-      id INTEGER NOT NULL UNIQUE,
+      id INTEGER NOT NULL UNIQUE PRIMARY KEY,
       api_detail_url TEXT,
-      name TEXT,
+      name TEXTe
       site_detail_url TEXT,
       abbreviation TEXT
     );`);

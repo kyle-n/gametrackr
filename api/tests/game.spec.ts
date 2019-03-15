@@ -7,8 +7,13 @@ import { GiantBombGame } from '../../schemas';
 import jwt from 'jsonwebtoken';
 
 chai.use(chaiHttp);
-let token: string;
-let userId: number;
+let firstToken: string;
+let secondToken: string;
+let firstUserId: number
+let secondUserId: number;
+const firstEmail = 'test@test.com';
+const password = 'abc123';
+const secondEmail = 'test2@test.com';
 const custom: {
   name: string;
   deck: string;
