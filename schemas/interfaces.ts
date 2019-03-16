@@ -1,5 +1,3 @@
-import express from 'express';
-
 export interface GiantBombGame extends Array<any> {
   aliases: string;
   api_detail_url: string;
@@ -62,4 +60,11 @@ export interface ListEntry {
 export interface DecodedToken {
   id: number;
   email: string;
+}
+
+export interface Review {
+  id: number;
+  game_id: number;
+  user_id: number;
+  stars: number;
 }

@@ -56,6 +56,13 @@ export default function initialize() {
       abbreviation TEXT
     );`);
   }).then(() => {
+    return client.none(`CREATE TABLE IF NOT EXISTS reviews(
+      id SERIAL PRIMARY KEY,
+      game_id INTEGER REFERENCES games(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      stars REAL
+    );`)
+  }).then(() => {
     console.log('Database initialized');
   }).catch(e => console.log(e));
 
