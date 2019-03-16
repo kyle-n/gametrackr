@@ -15,20 +15,21 @@ export const savePlatforms = (error: ServerError, gbResp: any): number => {
     return arr.concat(g.platforms);
   }, []);
   // insert platform, which may have new data
-  client.tx(t => {
-    const previousIds: number[] = [];
-    const filteredPlatforms: GiantBombPlatform[] = allPlatforms.filter(p => {
-      if (!p) return false;
-      const prev = !previousIds.includes(p.id);
-      if (!prev) previousIds.push(p.id);
-      return prev;
+  const previousIds: number[] = [];
+  const filteredPlatforms: GiantBombPlatform[] = allPlatforms.filter(p => {
+    if (!p) return false;
+    const alreadyUsed = previousIds.includes(p.id);
+    if (!alreadyUsed) previousIds.push(p.id);
+    return !alreadyUsed;
+  });
+  client.none('DELETE FROM platforms WHERE id IN ($1:csv);', [filteredPlatforms.map((fp: any) => fp.id)])
+  .then(() => {
+    return client.tx(t => {
+      const queries = filteredPlatforms.map(p => {
+        return t.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation) VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
+      });
+      return t.batch(queries);
     });
-    const queries = filteredPlatforms.map(p => {
-      return t.query('DELETE FROM PLATFORMS WHERE id = $1;', p.id);
-    }).concat(filteredPlatforms.map(p => {
-      return t.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation) VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
-    }));
-    return t.batch(queries);
   });
   return 0;
 };

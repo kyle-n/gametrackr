@@ -16,9 +16,13 @@ const createList = (req: express.Request, resp: express.Response): void | expres
 
 const readList = (req: express.Request, resp: express.Response): void | express.Response => {
   let error: ServerError = { ...defaultError };
-  client.query('SELECT title, deck, id, private FROM list_metadata WHERE id = $1;', req.params.listId).then(rows => {
+  client.query('SELECT title, deck, id, private, user_id FROM list_metadata WHERE id = $1;', req.params.listId).then(rows => {
     if (!rows.length) {
       error = { status: 404, msg: 'Could not find a list with the requested ID'};
+      throw new Error();
+    }
+    if (rows[0].private && rows[0].user_id !== resp.locals.id) {
+      error = { status: 403, msg: 'Cannot read another user\'s private list' };
       throw new Error();
     }
     return resp.status(200).json({ ...rows[0], entries: [] });
@@ -35,11 +39,17 @@ const readAllLists = (req: express.Request, resp: express.Response): void | expr
 const updateList = (req: express.Request, resp: express.Response): void | express.Response => {
   let error = { ...defaultError };
   if (!validate(req.body, ListUpdateSchema).valid) return resp.status(400).send('Must provide a valid title and deck');
-  client.query('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3 RETURNING id;', [req.body.title, req.body.deck, req.params.listId]).then(rows => {
+  client.query('SELECT user_id FROM list_metadata WHERE id = $1;', req.params.listId).then(rows => {
     if (!rows.length) {
       error = { status: 404, msg: 'Cannot find a list with the requested ID' };
       throw new Error();
     }
+    if (rows[0].user_id !== resp.locals.id) {
+      error = { status: 403, msg: 'Cannot update another user\'s list' };
+      throw new Error();
+    }
+    return client.none('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3;', [req.body.title, req.body.deck, req.params.listId]);
+  }).then(() => {
     return resp.status(200).send();
   }).catch(() => resp.status(error.status).send(error.msg));
 }

@@ -153,13 +153,11 @@ describe('Router list api interface', () => {
         secondUserToken = 'jwt ' + resp.body.token;
         return client.query('SELECT id FROM list_metadata WHERE title = $1;', title);
       }).then(rows => {
-        return chai.request(app).put(`/api/lists/${rows[0].id}`).set('authorization', secondUserToken).send({ title: 'New title', deck });
+        return chai.request(app).get(`/api/lists/${rows[0].id}`).set('authorization', secondUserToken);
       }).then(resp => {
-        expect(resp.status).to.equal(400);
-        expect(resp.error.text).to.equal('Cannot update another user\'s list');
-        return client.query('DELETE FROM users WHERE email = $1 RETURNING id;', 'test2@test.com');
-      }).then(rows => {
-        return client.query('DELETE FROM list_metadata WHERE user_id = $1;', rows[0].id);
+        expect(resp.status).to.equal(403);
+        expect(resp.error.text).to.equal('Cannot read another user\'s private list');
+        return client.query('DELETE FROM users WHERE email = $1;', 'test2@test.com');
       }).then(() => resolve())
       .catch(e => {
         console.log(e);

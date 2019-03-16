@@ -47,7 +47,6 @@ export const createUser = (req: express.Request, resp: express.Response): number
     newUser = { id: rows[0].id, email: req.body.email };
     return client.query('INSERT INTO list_metadata (user_id, title, deck) VALUES ($1, $2, $3);', [rows[0].id, 'Played games', '']);
   }).then(rows => {
-    console.log('done inserting list');
     const newToken = jwt.sign(newUser, <string>process.env.SECRET_KEY);
     resp.status(200).json({ token: newToken, id: newUser.id });
   }).catch(e => {

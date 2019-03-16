@@ -53,10 +53,10 @@ describe('Game API', () => {
     return;
   });
 
-  after(async done => {
+  after(async () => {
     await client.none('DELETE FROM users WHERE id = $1;', firstUserId);
     await client.none('DELETE FROM users WHERE id = $1;', secondUserId);
-    done();
+    return;
   });
 
   // create
@@ -205,7 +205,7 @@ describe('Game API', () => {
             expect(game.body.site_detail_url).to.equal(gb.site_detail_url);
             return resolve();
           });
-        }, 1000);
+        }, 800);
       }).catch(e => {
         console.log(e);
         reject();
