@@ -14,6 +14,7 @@ let token: string;
 const email = 'test@test.com', password = 'abc123';
 let userId: number;
 let review: Review;
+let secondReview: Review;
 
 describe('Review API', () => {
 
@@ -29,6 +30,7 @@ describe('Review API', () => {
         game_id: resp.body.results[0].id,
         stars: 2.5
       };
+      secondReview = <Review>{ game_id: resp.body.results[1].id, stars: 5 };
       return done();
     }, 800);
   });
@@ -130,4 +132,94 @@ describe('Review API', () => {
     }
   });
 
-})
+  // read
+  it('returns 404 for GET nonexistent review', async () => {
+    try {
+      const rows = await client.query('SELECT id FROM reviews ORDER BY id DESC LIMIT 1;');
+      let badId: number;
+      if (rows.length) badId = rows[0].id + 1;
+      else badId = 1;
+      const resp: Response = await chai.request(app).get(`/api/reviews/${badId}`).set('authorization', token);
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find a review with the requested ID');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('GETs all of a user\'s reviews on req /api/reviews', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(secondReview);
+      const resp: Response = await chai.request(app).get('/api/reviews').set('authorization', token);
+      expect(resp.status).to.equal(200);
+      expect(resp.body.reviews).to.be.an('array');
+      expect(resp.body.reviews.length).to.equal(2);
+      const returnedFirstReview = resp.body.reviews.find((r: any) => r.game_id === review.game_id);
+      const returnedSecondReview = resp.body.reviews.find((r: any) => r.game_id === secondReview.game_id);
+      expect(returnedFirstReview.stars).to.equal(review.stars);
+      expect(returnedSecondReview.stars).to.equal(secondReview.stars);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 500 for invalid value in GET review set query param', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      const rows = await client.query('SELECT id FROM reviews ORDER BY id DESC LIMIT 1;');
+      let badId: number;
+      if (rows.length) badId = rows[0].id + 1;
+      else badId = 1;
+      let resp: Response = await chai.request(app).get(`/api/reviews?ids=${reviewId},${badId}`)
+      expect(resp.status).to.equal(500);
+      expect(resp.error.text).to.equal('Internal server error');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('GETs a set of reviews in query param', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(secondReview);
+      const reviewIds: number[] = (await client.many('SELECT id FROM reviews WHERE user_id = $1;', userId)).map((r: any) => r.id);
+      const idString: string = reviewIds.join(',');
+      const resp: Response = await chai.request(app).get(`/api/reviews?ids=${idString}`).set('authorization', token);
+      expect(resp.status).to.equal(200);
+      expect(resp.body.reviews).to.be.an('array');
+      expect(resp.body.reviews.length).to.equal(2);
+      const returnedFirstReview = resp.body.reviews.find((r: any) => r.game_id === review.game_id);
+      const returnedSecondReview = resp.body.reviews.find((r: any) => r.game_id === secondReview.game_id);
+      expect(returnedFirstReview.stars).to.equal(review.stars);
+      expect(returnedSecondReview.stars).to.equal(secondReview.stars);
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('GETs a single review on request', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      let resp: Response = await chai.request(app).get(`/api/reviews/${reviewId}`).set('authorization', token);
+      expect(resp.status).to.equal(200);
+      expect(resp.body.id).to.equal(reviewId);
+      expect(resp.body.game_id).to.equal(review.game_id);
+      expect(resp.body.stars).to.equal(review.stars);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+});
