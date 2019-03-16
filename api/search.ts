@@ -14,11 +14,11 @@ export const savePlatforms = (error: ServerError, gbResp: any): number => {
   const allPlatforms: GiantBombPlatform[] = gbResp.data.results.reduce((arr: GiantBombPlatform[], g: GiantBombGame) => {
     return arr.concat(g.platforms);
   }, []);
-  //console.log(allPlatforms);
   // insert platform, which may have new data
   client.tx(t => {
     const previousIds: number[] = [];
     const filteredPlatforms: GiantBombPlatform[] = allPlatforms.filter(p => {
+      if (!p) return false;
       const prev = !previousIds.includes(p.id);
       if (!prev) previousIds.push(p.id);
       return prev;
@@ -26,7 +26,7 @@ export const savePlatforms = (error: ServerError, gbResp: any): number => {
     const queries = filteredPlatforms.map(p => {
       return t.query('DELETE FROM PLATFORMS WHERE id = $1;', p.id);
     }).concat(filteredPlatforms.map(p => {
-      return t.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
+      return t.query('INSERT INTO platforms(id, api_detail_url, name, site_detail_url, abbreviation) VALUES ($1, $2, $3, $4, $5);', [p.id, p.api_detail_url, p.name, p.site_detail_url, p.abbreviation]);
     }));
     return t.batch(queries);
   });

@@ -3,8 +3,8 @@ import { app } from '../../server';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import { client } from '../../db';
-import { GiantBombGame } from '../../schemas';
-import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config({ path: __dirname + '/.env' });
 
 chai.use(chaiHttp);
 let firstToken: string;
@@ -37,9 +37,8 @@ describe('Game API', () => {
       if (!resp.body.token) throw new Error();
       firstUserId = resp.body.id;
       firstToken = 'jwt ' + resp.body.token;
-      console.log('x', firstUserId)
-      custom.lists.push((await client.one('SELECT id FROM list_metadata WHERE user_id = $1;', firstUserId)).id);
-      console.log('y');
+      const userListId: number = (await client.one('SELECT id FROM list_metadata WHERE user_id = $1;', firstUserId)).id;
+      custom.lists.push(userListId);
       resp = await chai.request(app).post('/api/external').send({ email: secondEmail, password });
       if (!resp.body.token) throw new Error();
       secondUserId = resp.body.id;
@@ -48,10 +47,10 @@ describe('Game API', () => {
     }, 500);
   });
 
-  afterEach(async done => {
-    const customId: number = (await client.query('DELETE FROM games WHERE name = $1 RETURNING id;', custom.name))[0].id;
-    await client.none('DELETE FROM list_entries WHERE game_id = $1;', customId);
-    return done();
+  afterEach(async () => {
+    const rows: any = (await client.query('DELETE FROM games WHERE name = $1 RETURNING id;', custom.name));
+    if (rows.length) await client.none('DELETE FROM list_entries WHERE game_id = $1;', rows[0].id);
+    return;
   });
 
   after(async done => {
@@ -151,7 +150,7 @@ describe('Game API', () => {
         expect(rows[0].original_release_date).to.equal(custom.original_release_date);
         expect(rows[0].image).to.equal(custom.image);
         expect(rows[0].owner_id).to.equal(firstUserId);
-        return client.query('SELECT id FROM list_entries WHERE list_id IN ($1:list) AND game_id = $2;', [custom.lists, rows[0].id]);
+        return client.query('SELECT id FROM list_entries WHERE list_id IN ($1:csv) AND game_id = $2;', [custom.lists, rows[0].id]);
       }).then(rows => {
         expect(rows.length).to.equal(custom.lists.length);
         return resolve();

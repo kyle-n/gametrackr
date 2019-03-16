@@ -45,10 +45,11 @@ export const createUser = (req: express.Request, resp: express.Response): number
     return client.query(`INSERT INTO users (email, password, confirmed) VALUES ($1, $2, $3) RETURNING id;`, [req.body.email, hashed, false]);
   }).then(rows => {
     newUser = { id: rows[0].id, email: req.body.email };
-    return client.query('INSERT INTO list_metadata (user_id, title, deck) VALUES ($1, $2, $3) RETURNING id;', [rows[0].id, 'Played games', '']);
+    return client.query('INSERT INTO list_metadata (user_id, title, deck) VALUES ($1, $2, $3);', [rows[0].id, 'Played games', '']);
   }).then(rows => {
+    console.log('done inserting list');
     const newToken = jwt.sign(newUser, <string>process.env.SECRET_KEY);
-    resp.status(200).json({ token: newToken, id: rows[0].id });
+    resp.status(200).json({ token: newToken, id: newUser.id });
   }).catch(e => {
     if (e.msg) resp.status(e.status).send(e.msg);
     else resp.status(defaultError.status).send(JSON.stringify(defaultError.msg));

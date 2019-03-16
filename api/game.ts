@@ -18,13 +18,19 @@ export const createGame = (req: express.Request, resp: express.Response): void |
       error = { status: 403, msg: 'Cannot add a custom game to another user\'s list' };
       throw new Error();
     }
-    return client.query('INSERT INTO games(name, deck, original_release_date, image, owner_id) VALUES ($1, $2, $3, $4, $5) RETURNING id;', [req.body.name, req.body.deck, req.body.original_release_date, req.body.image, resp.locals.id]);
+    return client.query('SELECT id FROM games WHERE id > $1 ORDER BY id DESC LIMIT 1;', parseInt(<string>process.env.CUSTOM_GAME_ID_FLOOR));
+  }).then(rows => {
+    if (rows.length) gameId = rows[0].length;
+    else gameId = parseInt(<string>process.env.CUSTOM_GAME_ID_FLOOR) + 1;
+    return client.query('INSERT INTO games(name, deck, original_release_date, image, owner_id, id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [req.body.name, req.body.deck, req.body.original_release_date, req.body.image, resp.locals.id, gameId]);
   }).then(rows => {
     gameId = rows[0].id;
     return client.query('SELECT MAX(ranking), list_id FROM list_entries WHERE list_id IN ($1:csv) GROUP BY list_id;', [req.body.lists]);
   }).then(rows => {
     return client.tx(t => {
-      const queries = rows.map((r: any) => {
+      const queries = req.body.lists.map((listId: number) => {
+        let r = rows.find((row: any) => row.id === listId);
+        if (!r) r = { ranking: 0, list_id: listId };
         return t.query('INSERT INTO list_entries (ranking, list_id, game_id) VALUES ($1, $2, $3);', [r.ranking + 1, r.list_id, gameId]);
       });
       return t.batch(queries);
