@@ -222,4 +222,37 @@ describe('Review API', () => {
     }
   });
 
+  // update
+  it('returns 400 for PUT review without id', async () => {
+    try {
+      const resp: Response = await chai.request(app).put('/api/reviews').set('authorization', token).send(review);
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal('Request /api/reviews/review_id, not /api/reviews');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 404 for PUT to nonexistent review', async () => {
+    try {
+      let badId: number;
+      const rows = await client.query('SELECT id FROM reviews ORDER BY id DESC LIMIT 1;');
+      if (rows.length) badId = rows[0].id + 1;
+      else badId = 1;
+      const resp: Response = await chai.request(app).put(`/api/reviews/${badId}`).set('authorization', token).send(review);
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find a review with the requested ID');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 403 for PUT to other user\'s review', async () => {
+
+  })
+
 });
