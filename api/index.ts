@@ -1,5 +1,5 @@
 import discover from './discover';
-import review from './review';
+import { router as review } from './review';
 import { router as search } from './search';
 import { router as user } from './user';
 import { router as external } from './external';
