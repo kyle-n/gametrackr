@@ -10,9 +10,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: __dirname + '/.env' });
 
 chai.use(chaiHttp);
-let token: string;
-const email = 'test@test.com', password = 'abc123';
-let userId: number;
+let token: string, secondToken: string;
+const email = 'test@test.com', password = 'abc123', secondEmail = 'test2@test.com';
+let userId: number, secondUserId: number;
 let review: Review;
 let secondReview: Review;
 
@@ -20,7 +20,7 @@ describe('Review API', () => {
 
   before(done => {
     setTimeout(async () => {
-      await client.none('DELETE FROM users WHERE email = $1;', email);
+      await client.none('DELETE FROM users WHERE email IN ($1:csv);', [[email, secondEmail]]);
       let resp: Response = await chai.request(app).post('/api/external').send({ email, password });
       if (!resp.body.token) throw new Error();
       token = 'jwt ' + resp.body.token;
@@ -31,6 +31,10 @@ describe('Review API', () => {
         stars: 2.5
       };
       secondReview = <Review>{ game_id: resp.body.results[1].id, stars: 5 };
+      resp = await chai.request(app).post('/api/external').send({ email: secondEmail, password });
+      if (!resp.body.token) throw new Error();
+      secondToken = 'jwt ' + resp.body.token;
+      secondUserId = (await client.one('SELECT id FROM users WHERE email = $1;', secondEmail)).id;
       return done();
     }, 800);
   });
@@ -252,7 +256,128 @@ describe('Review API', () => {
   });
 
   it('returns 403 for PUT to other user\'s review', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', secondToken).send(review);
+      expect(resp.status).to.equal(403);
+      expect(resp.error.text).to.equal('Cannot update another user\'s review');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
 
-  })
+  it('returns 400 for PUT that tries to change game_id', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ game_id: -1, stars: 3 });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal('Cannot change a review\'s game ID');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 400 for PUT review invalid/missing star rating', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ useless: 'data' });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal('Must provide a valid star rating');
+      resp = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: 6 });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal('Must provide a valid star rating');
+      resp = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: -1 });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal('Must provide a valid star rating');
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('PUTs an update to a review correctly', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: 3 });
+      expect(resp.status).to.equal(200);
+      const dbReview: any = await client.one('SELECT * FROM reviews WHERE id = $1;', reviewId);
+      expect(dbReview.game_id).to.equal(review.game_id);
+      expect(dbReview.user_id).to.equal(userId);
+      expect(dbReview.stars).to.equal(3);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  // delete
+  it('returns 404 for delete nonexistent review', async () => {
+    try {
+      const rows = await client.query('SELECT id FROM reviews ORDER BY id DESC LIMIT 1;');
+      let badId: number;
+      if (rows.length) badId = rows[0].id + 1;
+      else badId = 1;
+      const resp: Response = await chai.request(app).delete(`/api/reviews/${badId}`).set('authorization', token);
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find a review with the requested ID');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 403 for delete another user\'s review', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      let resp: Response = await chai.request(app).delete(`/api/reviews/${reviewId}`).set('authorization', secondToken);
+      expect(resp.status).to.equal(403);
+      expect(resp.error.text).to.equal('Cannot delete another user\'s review');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('DELETEs all of a user\'s reviews', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(secondReview);
+      const resp: Response = await chai.request(app).delete('/api/reviews').set('authorization', token);
+      expect(resp.status).to.equal(200);
+      const rows: any[] = await client.query('SELECT id FROM reviews WHERE user_id = $1;', userId);
+      expect(rows.length).to.equal(0);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('DELETEs a user review', async () => {
+    try {
+      await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
+      const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
+      const resp: Response = await chai.request(app).delete(`/api/reviews/${reviewId}`).set('authorization', token);
+      expect(resp.status).to.equal(200);
+      const rows: any[] = await client.query('SELECT id FROM reviews WHERE user_id = $1;', userId);
+      expect(rows.length).to.equal(0);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
 
 });
