@@ -20,3 +20,20 @@ const createReview = async (req: express.Request, resp: express.Response): Promi
     return resp.status(error.status).send(error.msg);
   }
 }
+
+const readAllReviews = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  let error: ServerError = defaultError;
+  try {
+    const rows: any[] = await client.query('SELECT id, game_id, stars FROM reviews WHERE user_id = $1;', resp.locals.id);
+    return resp.status(200).json({ reviews: rows });
+  } catch (e) {
+    return resp.status(error.status).send(error.msg);
+  }
+}
+
+const readReview = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  let error: ServerError = defaultError;
+  try {
+    if ()
+  }
+}
