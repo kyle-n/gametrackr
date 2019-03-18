@@ -257,13 +257,13 @@ describe('Review API', () => {
     }
   });
 
-  it('returns 403 for PUT to other user\'s review', async () => {
+  it('returns 404 for PUT to other user\'s review', async () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
       let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', secondToken).send(review);
-      expect(resp.status).to.equal(403);
-      expect(resp.error.text).to.equal('Cannot update another user\'s review');
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find a review with the requested ID');
       return;
     } catch (e) {
       console.log(e);
@@ -277,7 +277,7 @@ describe('Review API', () => {
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
       let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ game_id: -1, stars: 3 });
       expect(resp.status).to.equal(400);
-      expect(resp.error.text).to.equal('Cannot change a review\'s game ID');
+      expect(resp.error.text).to.equal('Must provide a valid star rating');
       return;
     } catch (e) {
       console.log(e);
@@ -338,19 +338,19 @@ describe('Review API', () => {
     }
   });
 
-  it('returns 403 for delete another user\'s review', async () => {
+  it('returns 404 for delete another user\'s review', async () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
       let resp: Response = await chai.request(app).delete(`/api/reviews/${reviewId}`).set('authorization', secondToken);
-      expect(resp.status).to.equal(403);
-      expect(resp.error.text).to.equal('Cannot delete another user\'s review');
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find a review with the requested ID');
       return;
     } catch (e) {
       console.log(e);
       throw new Error();
     }
-  });
+  })
 
   it('DELETEs all of a user\'s reviews', async () => {
     try {

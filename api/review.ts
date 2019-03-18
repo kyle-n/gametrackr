@@ -61,7 +61,7 @@ const updateReview = async (req: express.Request, resp: express.Response): Promi
   let error: ServerError = defaultError;
   try {
     if (!validate(req.body, UpdateReviewSchema).valid) {
-      error = { status: 400, msg: 'Must provide only req.body.stars' };
+      error = { status: 400, msg: 'Must provide a valid star rating' };
       throw new Error();
     }
     const rows: any[] = await client.query('UPDATE reviews SET stars = $1 WHERE id = $2 AND user_id = $3 RETURNING id;', [req.body.stars, req.params.reviewId, resp.locals.id]);
@@ -107,4 +107,4 @@ router.route('/').get(readAllReviews)
                  .delete(deleteAllReviews);
 router.route('/:reviewId').get(readReview)
                           .put(updateReview)
-                          .delete(deleteAllReviews);
+                          .delete(deleteReview);
