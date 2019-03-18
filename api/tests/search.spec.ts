@@ -49,8 +49,6 @@ describe('Router search interface', () => {
     return new Promise((resolve, reject) => {
       client.query('DELETE FROM games WHERE id < 0;').then(() => {
         return client.query('DELETE FROM platforms WHERE id < 0;');
-      }).then(() => {
-        return client.query('DELETE FROM game_images WHERE game_id < 0;');
       }).then(() => resolve()).catch(e => { console.log(e); reject(); });
     });
   });
