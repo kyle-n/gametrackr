@@ -45,7 +45,7 @@ describe('Review API', () => {
   });
 
   after(async () => {
-    await client.none('DELETE FROM users WHERE email IN ($1:csv);', [[userId, secondUserId]]);
+    await client.none('DELETE FROM users WHERE id IN ($1:csv);', [[userId, secondUserId]]);
     return;
   });
 
@@ -247,7 +247,7 @@ describe('Review API', () => {
       const rows = await client.query('SELECT id FROM reviews ORDER BY id DESC LIMIT 1;');
       if (rows.length) badId = rows[0].id + 1;
       else badId = 1;
-      const resp: Response = await chai.request(app).put(`/api/reviews/${badId}`).set('authorization', token).send(review);
+      const resp: Response = await chai.request(app).put(`/api/reviews/${badId}`).set('authorization', token).send({ stars: 5 });
       expect(resp.status).to.equal(404);
       expect(resp.error.text).to.equal('Could not find a review with the requested ID');
       return;
@@ -261,7 +261,7 @@ describe('Review API', () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
-      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', secondToken).send(review);
+      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', secondToken).send({ stars: 5 });
       expect(resp.status).to.equal(404);
       expect(resp.error.text).to.equal('Could not find a review with the requested ID');
       return;
