@@ -133,4 +133,21 @@ describe('List entry API', () => {
     }
   });
 
+  it('creates a new list entry on POST and returns entry', async () => {
+    try {
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      expect(resp.status).to.equal(200);
+      const dbEntry: ListEntry = <ListEntry>(await client.one('SELECT * FROM list_entries WHERE user_id = $1;', firstUserId));
+      expect(dbEntry.game_id).to.equal(entryOne.game_id).to.equal(resp.body.game_id);
+      expect(dbEntry.id).to.equal(resp.body.id);
+      expect(dbEntry.list_id).to.equal(firstListId).to.equal(resp.body.list_id);
+      expect(dbEntry.ranking).to.equal(1).to.equal(resp.body.ranking);
+      expect(dbEntry.text).to.equal(entryOne.text).to.equal(resp.body.text);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
 });
