@@ -1,0 +1,24 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "stars"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "stars": {
+      "$id": "#/properties/stars",
+      "type": "number",
+      "title": "The Stars Schema",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 5,
+      "examples": [
+        2
+      ]
+    }
+  }
+}

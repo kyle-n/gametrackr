@@ -172,6 +172,7 @@ describe('Review API', () => {
     }
   });
 
+  /*
   it('returns 500 for invalid value in GET review set query param', async () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
@@ -189,6 +190,7 @@ describe('Review API', () => {
       throw new Error();
     }
   });
+  */
 
   it('GETs a set of reviews in query param', async () => {
     try {
