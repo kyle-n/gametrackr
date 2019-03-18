@@ -53,6 +53,7 @@ export interface List {
 export interface ListEntry {
   id: number;
   game_id: number;
+  list_id: number;
   ranking: number;
   text: string;
 }
