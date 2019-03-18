@@ -150,4 +150,63 @@ describe('List entry API', () => {
     }
   });
 
+  // read
+  it('returns 404 for GET nonexistent entry', async () => {
+    try {
+      const resp: Response = await chai.request(app).get(route + '/1').set('authorization', firstToken);
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find a list entry with the requested ID');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns all entries on a list on GET /api/lists/list_id/entries', async () => {
+    try {
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
+      const resp: Response = await chai.request(app).get(route).set('authorization', firstToken);
+      expect(resp.status).to.equal(200);
+      expect(resp.body.entries).to.be.an('array');
+      expect(resp.body.entries.length).to.equal(2);
+      expect(resp.body.entries[0].game_id).to.equal(entryOne.game_id);
+      expect(resp.body.entries[1].game_id).to.equal(entryTwo.game_id);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns entries even for another user GET', async () => {
+    try {
+      const resp: Response = await chai.request(app).get(route).set('authorization', secondToken);
+      expect(resp.status).to.equal(200);
+      expect(resp.body.entries).to.be.an('array');
+      expect(resp.body.entries.length).to.equal(0);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns a single entry on GET', async () => {
+    try {
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const entryId: number = (await client.one('SELECT id FROM list_entries WHERE user_id = $1;', firstUserId)).id;
+      const resp: Response = await chai.request(app).get(route + '/' + entryId).set('authorization', firstToken);
+      expect(resp.status).to.equal(200);
+      expect(resp.body.entry).to.be.an('object');
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  // update
+
 });
