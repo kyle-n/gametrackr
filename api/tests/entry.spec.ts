@@ -14,6 +14,7 @@ const password = 'abc123';
 let entryOne: ListEntry, entryTwo: ListEntry;
 const testList = { title: '3837467564673738239327467456645', deck: 'test' };
 let route: string;
+const tooLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non arcu leo. Vestibulum dignissim consequat velit nec accumsan. Phasellus molestie vel metus nec vulputate. Phasellus sit amet elementum erat. Nulla sollicitudin dolor ut bibendum tempor. Proin vitae cursus felis. Ut aliquam erat quis molestie interdum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer consectetur leo congue, faucibus arcu at, porttitor eros. Donec consectetur justo sed ultrices rutrum. Etiam tincidunt, leo nec consequat pharetra, dolor ligula vehicula elit, vel ultricies erat nibh a nisi. Duis euismod sem orci, a ornare sem fermentum et.';
 
 describe('List entry API', () => {
 
@@ -85,7 +86,6 @@ describe('List entry API', () => {
 
   it('returns 400 for POST entry with an invalid text field', async () => {
     try {
-      const tooLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non arcu leo. Vestibulum dignissim consequat velit nec accumsan. Phasellus molestie vel metus nec vulputate. Phasellus sit amet elementum erat. Nulla sollicitudin dolor ut bibendum tempor. Proin vitae cursus felis. Ut aliquam erat quis molestie interdum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer consectetur leo congue, faucibus arcu at, porttitor eros. Donec consectetur justo sed ultrices rutrum. Etiam tincidunt, leo nec consequat pharetra, dolor ligula vehicula elit, vel ultricies erat nibh a nisi. Duis euismod sem orci, a ornare sem fermentum et.';
       const fourHundredMsg = 'Must provide a valid game ID, entry text and list ID';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, text: tooLong });
       expect(resp.status).to.equal(400);
@@ -208,5 +208,84 @@ describe('List entry API', () => {
   });
 
   // update
+  it('returns 400 for PATCH entry missing both fields', async () => {
+    try {
+      const fourHundredMsg = 'Must provide a valid new ranking or entry text';
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const patchRoute = route + '/' + resp.body.entry.id;
+      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ useless: 'data' });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal(fourHundredMsg);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 400 for PATCH invalid text', async () => {
+    try {
+      const fourHundredMsg = 'Must provide a valid new ranking or entry text';
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const patchRoute = route + '/' + resp.body.entry.id;
+      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ text: tooLong });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal(fourHundredMsg);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 400 for PATCH ranking outside list length', async () => {
+    try {
+      const msg = 'Must provide a ranking within the number of games in the list';
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const patchRoute = route + '/' + resp.body.entry.id;
+      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ ranking: 2 });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal(msg);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('correctly PATCHes entry text', async () => {
+    try {
+      const editedText = 'xyz';
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const patchRoute = route + '/' + resp.body.entry.id;
+      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ text: editedText });
+      expect(resp.status).to.equal(200);
+      expect(resp.body.entry).to.be.an('object');
+      const dbText: string = (await client.one('SELECT text FROM list_entries WHERE user_id = $1;', firstUserId)).text;
+      expect(resp.body.entry.text).to.equal(editedText).to.equal(dbText);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('correctly PATCHes entry ranking', async () => {
+    try {
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const patchRoute = route + '/' + resp.body.entry.id;
+      const entryId: number = resp.body.entry.id;
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
+      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ ranking: 2 });
+      const dbRanking: number = (await client.one('SELECT ranking FROM list_entries WHERE id = $1;', entryId)).ranking;
+      expect(resp.status).to.equal(200);
+      expect(resp.body.entry).to.be.an('object');
+      expect(resp.body.entry.ranking).to.equal(dbRanking).to.equal(2);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
 
 });
