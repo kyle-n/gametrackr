@@ -2,7 +2,7 @@ import { describe, it, before, after, afterEach } from 'mocha';
 import { app } from '../../server';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
-import { client } from '../../db';j
+import { client } from '../../db';
 import { Response } from 'superagent';
 import { Review } from '../../schemas';
 import jwt from 'jsonwebtoken';
@@ -40,12 +40,12 @@ describe('Review API', () => {
   });
 
   afterEach(async () => {
-    await client.none('DELETE FROM reviews WHERE user_id = $1;', userId);
+    await client.none('DELETE FROM reviews WHERE user_id IN ($1:csv);', [[userId, secondUserId]]);
     return;
   });
 
   after(async () => {
-    await client.none('DELETE FROM users WHERE email = $1;', email);
+    await client.none('DELETE FROM users WHERE email IN ($1:csv);', [[userId, secondUserId]]);
     return;
   });
 
@@ -110,7 +110,7 @@ describe('Review API', () => {
       const badToken: string = 'jwt ' + jwt.sign({ id: badUserId, email }, <string>process.env.SECRET_KEY);
       let resp: Response = await chai.request(app).post('/api/reviews').set('authorization', badToken).send(review);
       expect(resp.status).to.equal(500);
-      expect(resp.status).to.equal('Internal server error');
+      expect(resp.error.text).to.equal('Internal server error');
       return;
     } catch (e) {
       console.log(e);

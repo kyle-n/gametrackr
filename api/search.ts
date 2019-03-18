@@ -41,8 +41,16 @@ export const saveGames = (error: ServerError, gbResp: any): number => {
     console.log(error);
     return 1;
   }
+  let filteredGames: any[];
+  const gameIds: number[] = gbResp.data.results.map((g: any) => g.id);
+  client.query('SELECT id FROM games WHERE id IN ($1:csv);', [gameIds]).then(rows => {
+    const rowIds: number[] = rows.map((r: any) => r.id);
+    filteredGames = gbResp.data.results.filter((g: any) => {
+      return !rowIds.includes(g.id);
+    });
+  });
   client.tx(t => {
-    const queries = gbResp.data.results.map((g: any) => {
+    const queries = filteredGames.map((g: any) => {
       let platformIds: number[] = [];
       if (g.platforms && Array.isArray(g.platforms)) platformIds = g.platforms.map((p: any) => p.id);
       return client.query(`INSERT INTO games(aliases, api_detail_url, deck, description, expected_release_day, 

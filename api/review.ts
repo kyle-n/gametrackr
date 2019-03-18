@@ -25,7 +25,7 @@ const readReviewSet = async (req: express.Request, resp: express.Response): Prom
   let error: ServerError = defaultError;
   try {
     const reviewIds: number[] = req.query.ids.split(',').map((id: string) => parseInt(id));
-    const rows: any[] = await client.query('SELECT id, game_id, stars FROM reviews WHERE user_id = $1 AND id IN ($:csv);', [resp.locals.id, reviewIds]);
+    const rows: any[] = await client.query('SELECT id, game_id, stars FROM reviews WHERE user_id = $1 AND id IN ($2:csv);', [resp.locals.id, reviewIds]);
     return resp.status(200).json({ reviews: rows });
   } catch (e) {
     return resp.status(error.status).send(error.msg);
@@ -51,7 +51,7 @@ const readReview = async (req: express.Request, resp: express.Response): Promise
       error = { status: 404, msg: 'Could not find a review with the requested ID' };
       throw new Error();
     }
-    return resp.status(200).json({ review: rows[0] });
+    return resp.status(200).json(rows[0]);
   } catch (e) {
     return resp.status(error.status).send(error.msg);
   }

@@ -21,14 +21,6 @@ export default function initialize() {
       private BOOL DEFAULT true
       );`)
   }).then(() => {
-    return client.query(`CREATE TABLE IF NOT EXISTS list_entries(
-      id SERIAL PRIMARY KEY,
-      ranking INTEGER,
-      list_id INTEGER NOT NULL REFERENCES list_metadata(id) ON DELETE CASCADE,
-      game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
-      text TEXT
-    );`)
-  }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS games(
       aliases TEXT,
       api_detail_url TEXT,
@@ -48,6 +40,14 @@ export default function initialize() {
       image TEXT
     );`)
   }).then(() => {
+    return client.query(`CREATE TABLE IF NOT EXISTS list_entries(
+      id SERIAL PRIMARY KEY,
+      ranking INTEGER,
+      list_id INTEGER NOT NULL REFERENCES list_metadata(id) ON DELETE CASCADE,
+      game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+      text TEXT
+    );`)
+  }).then(() => {
     return client.query(`CREATE TABLE IF NOT EXISTS platforms(
       id INTEGER NOT NULL UNIQUE PRIMARY KEY,
       api_detail_url TEXT,
@@ -64,6 +64,9 @@ export default function initialize() {
     );`)
   }).then(() => {
     console.log('Database initialized');
-  }).catch(e => console.log(e));
+  }).catch(e => {
+    console.log(e, 'DB INIT ERR');
+    throw new Error();
+  });
 
 }
