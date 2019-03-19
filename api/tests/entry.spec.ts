@@ -51,17 +51,13 @@ describe('List entry API', () => {
         text: 'Second entry here',
         list_id: firstListId
       };
-      const x: any[] = await client.query('SELECT * FROM list_metadata WHERE user_id IN ($1:csv);', [[firstUserId, secondUserId]]);
-      console.log(x, 'before all');
       return done();
-    } catch (e) { console.log(e); throw new Error(); }
-    }, 800);
+    } catch (e) { console.log(e, 'caughte'); throw new Error(); }
+    }, 500);
   });
 
   afterEach(async () => {
     await client.none('DELETE FROM list_entries WHERE user_id IN ($1:csv);', [[firstUserId, secondUserId]]);
-    const x: any[] = await client.query('SELECT * FROM list_metadata WHERE user_id IN ($1:csv);', [[firstUserId, secondUserId]]);
-    console.log(x, 'after each');
     return;
   });
 
@@ -107,7 +103,6 @@ describe('List entry API', () => {
       let rows: any[] = await client.query('SELECT id FROM games ORDER BY id DESC LIMIT 1;');
       if (rows.length) badGameId = rows[0].id + 1;
       else badGameId = 1;
-      console.log(badGameId, 'bgid');
       rows = await client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;');
       if (rows.length) badListId = rows[0].id + 1;
       else badListId = 1;
@@ -124,7 +119,6 @@ describe('List entry API', () => {
       throw new Error();
     }
   });
-  return;
 
   it('returns 404 for POST entry to other person\'s list', async () => {
     try {

@@ -27,11 +27,9 @@ const createEntry = async (req: express.Request, resp: express.Response): Promis
       else newRanking = 1;
     }
 
-    const insertedEntry: ListEntry = <ListEntry>(await client.one('INSERT INTO list_entries (game_id, list_id, ranking, text) VALUES ($1, $2, $3, $4) RETURNING id, game_id, list_id, ranking, text;', [req.body.game_id, req.body.list_id, newRanking, req.body.text]))
+    const insertedEntry: ListEntry = <ListEntry>(await client.one('INSERT INTO list_entries (game_id, list_id, ranking, text, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING *;', [req.body.game_id, req.params.listId, newRanking, req.body.text, resp.locals.id]))
     return resp.status(200).json(insertedEntry);
   } catch (e) {
-    console.log(e, 'router error');
-    console.log(req.params.listId, 'listId');
     return resp.status(error.status).send(error.msg);
   }
 };
