@@ -276,11 +276,82 @@ describe('List entry API', () => {
       const patchRoute = route + '/' + resp.body.entry.id;
       const entryId: number = resp.body.entry.id;
       await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
       resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ ranking: 2 });
-      const dbRanking: number = (await client.one('SELECT ranking FROM list_entries WHERE id = $1;', entryId)).ranking;
+      const rows: any[] = await client.query('SELECT game_id, ranking FROM list_entries WHERE list_id = $1;', firstListId);
+      let one: any, two: any, three: any;
+      rows.forEach((r: any) => {
+        if (r.id === 1) one = r;
+        else if (two == undefined) two = r;
+        else three = r;
+      });
+      expect(one.ranking).to.equal(2);
+      expect(two.ranking).to.not.equal(2);
+      expect(three.ranking).to.not.equal(2);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  // delete
+  it('returns 404 for DELETE nonexistent entry', async () => {
+    try {
+      let badEntryId: number;
+      const fourOhFourMsg = 'Could not find a list entry with the requested ID';
+      const rows: any[] = await client.query('SELECT id FROM list_entries ORDER BY id DESC LIMIT 1;');
+      if (rows.length) badEntryId = rows[0].id + 1;
+      else badEntryId = 1;
+      const resp: Response = await chai.request(app).delete(route + '/' + badEntryId).set('authorization', firstToken);
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal(fourOhFourMsg);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('DELETEs all list entries on request /api/lists/:id/entries', async () => {
+    try {
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const resp: Response = await chai.request(app).delete(route).set('authorization', firstToken);
       expect(resp.status).to.equal(200);
-      expect(resp.body.entry).to.be.an('object');
-      expect(resp.body.entry.ranking).to.equal(dbRanking).to.equal(2);
+      const rows: any[] = await client.query('SELECT id FROM list_entries WHERE user_id = $1;', firstUserId);
+      expect(rows.length).to.equal(0);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('DELETEs an entry on request', async () => {
+    try {
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const deleteRoute = route + '/' + resp.body.entry.id;
+      const entryId: number = resp.body.entry.id;
+      resp = await chai.request(app).delete(deleteRoute).set('authorization', firstToken);
+      expect(resp.status).to.equal(200);
+      await client.none('SELECT id FROM list_entries WHERE id = $1;', entryId);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('Returns 404 on DELETE another user\'s entries', async () => {
+    try {
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const deleteRoute = route + '/' + resp.body.entry.id;
+      const entryId: number = resp.body.entry.id;
+      resp = await chai.request(app).delete(deleteRoute).set('authorization', secondToken);
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find an entry with the requested ID');
+      await client.one('SELECT id FROM list_entries WHERE id = $1;', entryId);
       return;
     } catch (e) {
       console.log(e);
