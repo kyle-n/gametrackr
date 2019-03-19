@@ -5,6 +5,7 @@ import chaiHttp from 'chai-http';
 import { client } from '../../db';
 import { ListEntry } from '../../schemas';
 import { Response } from 'superagent';
+import { objectEmpty } from '../../utils';
 
 chai.use(chaiHttp);
 let firstToken: string, secondToken: string;
@@ -154,7 +155,7 @@ describe('List entry API', () => {
     try {
       const resp: Response = await chai.request(app).get(route + '/1').set('authorization', firstToken);
       expect(resp.status).to.equal(404);
-      expect(resp.error.text).to.equal('Could not find a list entry with the requested ID');
+      expect(resp.error.text).to.equal('Could not find an entry with the requested ID');
       return;
     } catch (e) {
       console.log(e);
@@ -198,7 +199,10 @@ describe('List entry API', () => {
       const entryId: number = (await client.one('SELECT id FROM list_entries WHERE user_id = $1;', firstUserId)).id;
       const resp: Response = await chai.request(app).get(route + '/' + entryId).set('authorization', firstToken);
       expect(resp.status).to.equal(200);
-      expect(resp.body.entry).to.be.an('object');
+      expect(objectEmpty(resp.body)).to.equal(false);
+      expect(resp.body.id).to.equal(entryId);
+      expect(resp.body.game_id).to.equal(entryOne.game_id);
+      expect(resp.body.text).to.equal(entryOne.text);
       return;
     } catch (e) {
       console.log(e);
@@ -209,9 +213,9 @@ describe('List entry API', () => {
   // update
   it('returns 400 for PATCH entry missing both fields', async () => {
     try {
-      const fourHundredMsg = 'Must provide entry text';
+      const fourHundredMsg = 'Must provide valid new entry text';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const patchRoute = route + '/' + resp.body.entry.id;
+      const patchRoute = route + '/' + resp.body.id;
       resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ useless: 'data' });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal(fourHundredMsg);
@@ -224,27 +228,12 @@ describe('List entry API', () => {
 
   it('returns 400 for PATCH invalid text', async () => {
     try {
-      const fourHundredMsg = 'Must provide entry text';
+      const fourHundredMsg = 'Must provide valid new entry text';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const patchRoute = route + '/' + resp.body.entry.id;
+      const patchRoute = route + '/' + resp.body.id;
       resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ text: tooLong });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal(fourHundredMsg);
-      return;
-    } catch (e) {
-      console.log(e);
-      throw new Error();
-    }
-  });
-
-  it('returns 400 for PATCH ranking outside list length', async () => {
-    try {
-      const msg = 'Must provide a ranking within the number of games in the list';
-      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const patchRoute = route + '/' + resp.body.entry.id;
-      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ ranking: 2 });
-      expect(resp.status).to.equal(400);
-      expect(resp.error.text).to.equal(msg);
       return;
     } catch (e) {
       console.log(e);
@@ -256,12 +245,28 @@ describe('List entry API', () => {
     try {
       const editedText = 'xyz';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const patchRoute = route + '/' + resp.body.entry.id;
+      const patchRoute = route + '/' + resp.body.id;
       resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ text: editedText });
       expect(resp.status).to.equal(200);
-      expect(resp.body.entry).to.be.an('object');
+      expect(resp.body).to.be.an('object');
       const dbText: string = (await client.one('SELECT text FROM list_entries WHERE user_id = $1;', firstUserId)).text;
-      expect(resp.body.entry.text).to.equal(editedText).to.equal(dbText);
+      expect(resp.body.text).to.equal(editedText).to.equal(dbText);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
+    }
+  });
+
+  it('returns 400 on PATCH without all entry IDs in list', async () => {
+    try {
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const entryId: number = resp.body.id;
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
+      const entries = [{ id: entryId, ranking: 2 }];
+      resp = await chai.request(app).patch(route).set('authorization', firstToken).send({ entries });
+      expect(resp.status).to.equal(400);
+      expect(resp.error.text).to.equal(`You provided 1 list entries but the database has 2`);
       return;
     } catch (e) {
       console.log(e);
@@ -272,27 +277,29 @@ describe('List entry API', () => {
   it('correctly PATCHes entry ranking', async () => {
     try {
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const patchRoute = route + '/' + resp.body.entry.id;
-      const entryId: number = resp.body.entry.id;
-      await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
-      await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
-      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ ranking: 2 });
-      const rows: any[] = await client.query('SELECT game_id, ranking FROM list_entries WHERE list_id = $1;', firstListId);
-      let one: any, two: any, three: any;
-      rows.forEach((r: any) => {
-        if (r.id === 1) one = r;
-        else if (two == undefined) two = r;
-        else three = r;
-      });
-      expect(one.ranking).to.equal(2);
-      expect(two.ranking).to.not.equal(2);
-      expect(three.ranking).to.not.equal(2);
+      const patchRoute = route + '/' + resp.body.id;
+      const one: number = resp.body.id;
+      resp = await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
+      const two: number = resp.body.id;
+      resp = await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
+      const three: number = resp.body.id;
+      const entries = [{ id: one, ranking: 2 }, { id: two, ranking: 1 }, { id: three, ranking: 3 }];
+      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ entries });
+      expect(resp.body.entries).to.be.an('array');
+      expect(resp.body.entries.length).to.equal(3);
+      expect(resp.body.entries[0].id).to.equal(one);
+      expect(resp.body.entries[0].ranking).to.equal(2);
+      expect(resp.body.entries[1].id).to.equal(two);
+      expect(resp.body.entries[1].ranking).to.equal(1);
+      expect(resp.body.entries[2].id).to.equal(three);
+      expect(resp.body.entries[2].ranking).to.equal(3);
       return;
     } catch (e) {
       console.log(e);
       throw new Error();
     }
   });
+  return;
 
   // delete
   it('returns 404 for DELETE nonexistent entry', async () => {
@@ -330,8 +337,8 @@ describe('List entry API', () => {
   it('DELETEs an entry on request', async () => {
     try {
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const deleteRoute = route + '/' + resp.body.entry.id;
-      const entryId: number = resp.body.entry.id;
+      const deleteRoute = route + '/' + resp.body.id;
+      const entryId: number = resp.body.id;
       resp = await chai.request(app).delete(deleteRoute).set('authorization', firstToken);
       expect(resp.status).to.equal(200);
       await client.none('SELECT id FROM list_entries WHERE id = $1;', entryId);
@@ -345,8 +352,8 @@ describe('List entry API', () => {
   it('Returns 404 on DELETE another user\'s entries', async () => {
     try {
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const deleteRoute = route + '/' + resp.body.entry.id;
-      const entryId: number = resp.body.entry.id;
+      const deleteRoute = route + '/' + resp.body.id;
+      const entryId: number = resp.body.id;
       resp = await chai.request(app).delete(deleteRoute).set('authorization', secondToken);
       expect(resp.status).to.equal(404);
       expect(resp.error.text).to.equal('Could not find an entry with the requested ID');

@@ -23,7 +23,7 @@ const createEntry = async (req: express.Request, resp: express.Response): Promis
     if (req.body.ranking) newRanking = req.body.ranking;
     else {
       const rows: any[] = await client.query('SELECT ranking FROM list_entries WHERE user_id = $1 AND list_id = $2 ORDER BY ranking DESC LIMIT 1;', [resp.locals.id, req.params.listId]);
-      if (rows.length) newRanking = rows[0] + 1;
+      if (rows.length) newRanking = rows[0].ranking + 1;
       else newRanking = 1;
     }
 
@@ -51,7 +51,7 @@ const readEntry = async (req: express.Request, resp: express.Response): Promise<
 const readAllEntries = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
   let error: ServerError = defaultError;
   try {
-    const entries: ListEntry[] = await client.query('SELECT * FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
+    const entries: ListEntry[] = await client.query('SELECT * FROM list_entries WHERE list_id = $1 AND user_id = $2 ORDER BY ranking ASC;', [req.params.listId, resp.locals.id]);
     return resp.status(200).json({ entries });
   } catch (e) {
     return resp.status(error.status).send(error.msg);
@@ -62,7 +62,7 @@ const updateEntry = async (req: express.Request, resp: express.Response): Promis
   let error: ServerError = defaultError;
   try {
     if (!validate(req.body, UpdateEntrySchema).valid) {
-      error = { status: 400, msg: 'Must provide a valid new ranking or entry text' }
+      error = { status: 400, msg: 'Must provide valid new entry text' }
       throw new Error();
     }
     const rows: ListEntry[] = await client.query('UPDATE list_entries SET text = $1 WHERE list_id = $2 AND user_id = $3 RETURNING *;', [req.body.text, req.params.listId, resp.locals.id]);
@@ -83,13 +83,18 @@ const updateAllEntries = async (req: express.Request, resp: express.Response): P
       error = { status: 400, msg: 'Must provide a list of objects with entry IDs and rankings' };
       throw new Error();
     }
+    const rows: any[] = await client.query('SELECT id FROM list_entries WHERE id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
+    if (rows.length !== req.body.entries.length) {
+      error = { status: 400, msg: `You provided ${req.body.entries.length} list entries but the database has ${rows.length}` };
+      throw new Error();
+    }
     await client.tx(t => {
       const queries = req.body.entries.map((entry: any) => {
         return client.none('UPDATE list_entries SET ranking = $1 WHERE id = $2 AND user_id = $3;', [entry.ranking, entry.id, resp.locals.id]);
       });
       return t.batch(queries);
     });
-    const updatedEntries: ListEntry[] = await client.query('SELECT * FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
+    const updatedEntries: ListEntry[] = await client.query('SELECT * FROM list_entries WHERE list_id = $1 AND user_id = $2 ORDER BY ranking ASC;', [req.params.listId, resp.locals.id]);
     return resp.status(200).json({ entries: updatedEntries });
   } catch (e) {
     return resp.status(error.status).send(error.msg);
