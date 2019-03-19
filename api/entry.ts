@@ -9,13 +9,13 @@ const createEntry = async (req: express.Request, resp: express.Response): Promis
   let error: ServerError = defaultError;
   try {
     if (!validate(req.body, CreateEntrySchema).valid) {
-      error = { status: 400, msg: 'Must provide a valid game ID, entry text and list ID' };
+      error = { status: 400, msg: 'Must provide a valid game ID and entry text' };
       throw new Error();
     }
 
     const userList: any[] = await client.query('SELECT id FROM list_metadata WHERE user_id = $1 AND id = $2;', [resp.locals.id, req.params.listId]);
     if (!userList.length) {
-      error = { status: 403, msg: 'Cannot add an entry to another user\'s list' };
+      error = { status: 404, msg: 'Could not find a list with the requested ID' };
       throw new Error();
     }
 
@@ -30,6 +30,8 @@ const createEntry = async (req: express.Request, resp: express.Response): Promis
     const insertedEntry: ListEntry = <ListEntry>(await client.one('INSERT INTO list_entries (game_id, list_id, ranking, text) VALUES ($1, $2, $3, $4) RETURNING id, game_id, list_id, ranking, text;', [req.body.game_id, req.body.list_id, newRanking, req.body.text]))
     return resp.status(200).json(insertedEntry);
   } catch (e) {
+    console.log(e, 'router error');
+    console.log(req.params.listId, 'listId');
     return resp.status(error.status).send(error.msg);
   }
 };
@@ -120,11 +122,11 @@ const deleteEntry = async (req: express.Request, resp: express.Response): Promis
   }
 };
 
-const fourHundredNotSpecified = (req: express.Request, resp: express.Response) => resp.status(400).send('Request /api/games/game_id, not /api/games');
+const fourHundredNotSpecified = (req: express.Request, resp: express.Response) => resp.status(400).send('Request /api/lists/list_id/entries/entry_id, not /api/lists/list_id/entries');
 
-export const router: express.Router = express.Router();
+export const router: express.Router = express.Router({ mergeParams: true });
 router.route('/').get(readAllEntries)
-                 .post(fourHundredNotSpecified)
+                 .post(createEntry)
                  .patch(updateAllEntries)
                  .delete(deleteAllEntries)
 router.route('/:entryId').get(readEntry)

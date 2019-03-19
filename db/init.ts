@@ -45,6 +45,7 @@ export default function initialize() {
       ranking INTEGER,
       list_id INTEGER NOT NULL REFERENCES list_metadata(id) ON DELETE CASCADE,
       game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       text TEXT
     );`)
   }).then(() => {

@@ -2,6 +2,7 @@ import express from 'express';
 import { ListUpdateSchema, ServerError }from '../schemas'
 import { validate } from 'jsonschema';
 import { client } from '../db';
+import { router as entry } from './entry';
 
 export const router: express.Router = express.Router();
 const defaultError: ServerError = { status: 500, msg: 'Internal server error' }
@@ -76,3 +77,4 @@ router.route('/').get(readAllLists)
 router.route('/:listId').get(readList)
                         .put(updateList)
                         .delete(deleteList);
+router.use('/:listId/entries', entry);

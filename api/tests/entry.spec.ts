@@ -20,6 +20,7 @@ describe('List entry API', () => {
 
   before(done => {
     setTimeout(async () => {
+      try {
       await client.none('DELETE FROM users WHERE email IN ($1:csv);', [[firstEmail, secondEmail]]);
 
       // first user
@@ -50,12 +51,17 @@ describe('List entry API', () => {
         text: 'Second entry here',
         list_id: firstListId
       };
+      const x: any[] = await client.query('SELECT * FROM list_metadata WHERE user_id IN ($1:csv);', [[firstUserId, secondUserId]]);
+      console.log(x, 'before all');
       return done();
+    } catch (e) { console.log(e); throw new Error(); }
     }, 800);
   });
 
   afterEach(async () => {
     await client.none('DELETE FROM list_entries WHERE user_id IN ($1:csv);', [[firstUserId, secondUserId]]);
+    const x: any[] = await client.query('SELECT * FROM list_metadata WHERE user_id IN ($1:csv);', [[firstUserId, secondUserId]]);
+    console.log(x, 'after each');
     return;
   });
 
@@ -68,10 +74,10 @@ describe('List entry API', () => {
   it('returns 400 for POST entry missing a required field', async () => {
     try {
       const fourHundredMsg = 'Must provide a valid game ID and entry text';
-      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, game_id: undefined });
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send({ text: entryOne.text });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal(fourHundredMsg);
-      resp = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, text: undefined });
+      resp = await chai.request(app).post(route).set('authorization', firstToken).send({ game_id: entryOne.game_id });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal(fourHundredMsg);
       return;
@@ -83,7 +89,7 @@ describe('List entry API', () => {
 
   it('returns 400 for POST entry with an invalid text field', async () => {
     try {
-      const fourHundredMsg = 'Must provide a valid game ID, entry text and list ID';
+      const fourHundredMsg = 'Must provide a valid game ID and entry text';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, text: tooLong });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal(fourHundredMsg);
@@ -98,17 +104,18 @@ describe('List entry API', () => {
     try {
       const internal = 'Internal server error';
       let badGameId: number, badListId: number;
-      let rows: any[] = await client.query('SELECT id FROM games GROUP BY id DESC LIMIT 1;');
-      if (rows.length) badGameId = rows[0] + 1;
+      let rows: any[] = await client.query('SELECT id FROM games ORDER BY id DESC LIMIT 1;');
+      if (rows.length) badGameId = rows[0].id + 1;
       else badGameId = 1;
-      rows = await client.query('SELECT id FROM lists GROUP BY id DESC LIMIT 1;');
-      if (rows.length) badListId = rows[0] + 1;
+      console.log(badGameId, 'bgid');
+      rows = await client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;');
+      if (rows.length) badListId = rows[0].id + 1;
       else badListId = 1;
 
       let resp: Response = await chai.request(app).post(`/api/lists/${badListId}/entries`).set('authorization', firstToken).send(entryOne);
-      expect(resp.status).to.equal(500);
-      expect(resp.error.text).to.equal(internal);
-      resp = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, game_id: badGameId });
+      expect(resp.status).to.equal(404);
+      expect(resp.error.text).to.equal('Could not find a list with the requested ID');
+      resp = await chai.request(app).post(route).set('authorization', firstToken).send({ text: entryOne.text, game_id: badGameId });
       expect(resp.status).to.equal(500);
       expect(resp.error.text).to.equal(internal);
       return;
@@ -117,6 +124,7 @@ describe('List entry API', () => {
       throw new Error();
     }
   });
+  return;
 
   it('returns 404 for POST entry to other person\'s list', async () => {
     try {
