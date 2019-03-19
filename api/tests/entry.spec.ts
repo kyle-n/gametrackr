@@ -67,14 +67,11 @@ describe('List entry API', () => {
   // create
   it('returns 400 for POST entry missing a required field', async () => {
     try {
-      const fourHundredMsg = 'Must provide a valid game ID, entry text and list ID';
+      const fourHundredMsg = 'Must provide a valid game ID and entry text';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, game_id: undefined });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal(fourHundredMsg);
       resp = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, text: undefined });
-      expect(resp.status).to.equal(400);
-      expect(resp.error.text).to.equal(fourHundredMsg);
-      resp = await chai.request(app).post(route).set('authorization', firstToken).send({ ...entryOne, list_id: undefined });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal(fourHundredMsg);
       return;
