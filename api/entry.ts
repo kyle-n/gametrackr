@@ -1,5 +1,5 @@
 import express from 'express';
-import { ListEntry, ServerError, CreateEntrySchema, UpdateEntrySchema } from '../schemas';
+import { ListEntry, ServerError, CreateEntrySchema, UpdateEntrySchema, UpdateEntriesOrderSchema } from '../schemas';
 import { client } from '../db';
 import { validate } from 'jsonschema';
 
@@ -76,14 +76,57 @@ const updateEntry = async (req: express.Request, resp: express.Response): Promis
   }
 };
 
-const updateAllEntries = (req: express.Request, resp: express.Response): Promise<express.Response> => {
-  
+const updateAllEntries = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  let error: ServerError = defaultError;
+  try {
+    if (!validate(req.body, UpdateEntriesOrderSchema).valid) {
+      error = { status: 400, msg: 'Must provide a list of objects with entry IDs and rankings' };
+      throw new Error();
+    }
+    await client.tx(t => {
+      const queries = req.body.entries.map((entry: any) => {
+        return client.none('UPDATE list_entries SET ranking = $1 WHERE id = $2 AND user_id = $3;', [entry.ranking, entry.id, resp.locals.id]);
+      });
+      return t.batch(queries);
+    });
+    const updatedEntries: ListEntry[] = await client.query('SELECT * FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
+    return resp.status(200).json({ entries: updatedEntries });
+  } catch (e) {
+    return resp.status(error.status).send(error.msg);
+  }
 };
 
-const deleteAllEntries = (req: express.Request, resp: express.Response): Promise<express.Response> => {
-
+const deleteAllEntries = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  let error: ServerError = defaultError;
+  try {
+    await client.query('DELETE FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
+    return resp.status(200);
+  } catch (e) {
+    return resp.status(error.status).send(error.msg);
+  }
 };
 
-const deleteEntry = (req: express.Request, resp: express.Response): Promise<express.Response> => {
-
+const deleteEntry = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  let error: ServerError = defaultError;
+  try {
+    const rows: any[] = await client.query('DELETE FROM list_entries WHERE list_id = $1 AND id = $2 AND user_id = $3;', [req.params.listId, req.params.entryId, resp.locals.id]);
+    if (!rows.length) {
+      error = { status: 404, msg: 'Could not find a status with the requested ID' };
+      throw new Error();
+    }
+    return resp.status(200).send();
+  } catch (e) {
+    return resp.status(error.status).send(error.msg);
+  }
 };
+
+const fourHundredNotSpecified = (req: express.Request, resp: express.Response) => resp.status(400).send('Request /api/games/game_id, not /api/games');
+
+export const router: express.Router = express.Router();
+router.route('/').get(readAllEntries)
+                 .post(fourHundredNotSpecified)
+                 .patch(updateAllEntries)
+                 .delete(deleteAllEntries)
+router.route('/:entryId').get(readEntry)
+                         .patch(updateEntry)
+                         .delete(deleteEntry);
