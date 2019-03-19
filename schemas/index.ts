@@ -5,6 +5,7 @@ import cu from './custom_update.json';
 import cr from './create_review.json';
 import ur from './update_review.json';
 import ce from './create_entry.json';
+import uet from './update_entry_text.json';
 
 export const SearchResultSchema = srs;
 export * from './interfaces';
@@ -14,3 +15,4 @@ export const CustomGameUpdateSchema = cu;
 export const CreateReviewSchema = cr;
 export const UpdateReviewSchema = ur;
 export const CreateEntrySchema = ce;
+export const UpdateEntrySchema = uet;

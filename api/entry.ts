@@ -1,5 +1,5 @@
 import express from 'express';
-import { ListEntry, ServerError, CreateEntrySchema } from '../schemas';
+import { ListEntry, ServerError, CreateEntrySchema, UpdateEntrySchema } from '../schemas';
 import { client } from '../db';
 import { validate } from 'jsonschema';
 
@@ -30,7 +30,7 @@ const createEntry = async (req: express.Request, resp: express.Response): Promis
     const insertedEntry: ListEntry = <ListEntry>(await client.one('INSERT INTO list_entries (game_id, list_id, ranking, text) VALUES ($1, $2, $3, $4) RETURNING id, game_id, list_id, ranking, text;', [req.body.game_id, req.body.list_id, newRanking, req.body.text]))
     return resp.status(200).json(insertedEntry);
   } catch (e) {
-    resp.status(error.status).send(error.msg);
+    return resp.status(error.status).send(error.msg);
   }
 };
 
@@ -44,7 +44,7 @@ const readEntry = async (req: express.Request, resp: express.Response): Promise<
     }
     return resp.status(200).json(rows[0]);
   } catch (e) {
-    resp.status(error.status).send(error.msg);
+    return resp.status(error.status).send(error.msg);
   }
 };
 
@@ -54,12 +54,30 @@ const readAllEntries = async (req: express.Request, resp: express.Response): Pro
     const entries: ListEntry[] = await client.query('SELECT * FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
     return resp.status(200).json({ entries });
   } catch (e) {
-    resp.status(error.status).send(error.msg);
+    return resp.status(error.status).send(error.msg);
   }
 };
 
-const updateEntry = (req: express.Request, resp: express.Response): Promise<express.Response> => {
+const updateEntry = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  let error: ServerError = defaultError;
+  try {
+    if (!validate(req.body, UpdateEntrySchema).valid) {
+      error = { status: 400, msg: 'Must provide a valid new ranking or entry text' }
+      throw new Error();
+    }
+    const rows: ListEntry[] = await client.query('UPDATE list_entries SET text = $1 WHERE list_id = $2 AND user_id = $3 RETURNING *;', [req.body.text, req.params.listId, resp.locals.id]);
+    if (!rows.length) {
+      error = { status: 404, msg: 'Could not find an entry with the requested ID' };
+      throw new Error();
+    }
+    return resp.status(200).json(rows[0]);
+  } catch (e) {
+    return resp.status(error.status).send(error.msg);
+  }
+};
 
+const updateAllEntries = (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  
 };
 
 const deleteAllEntries = (req: express.Request, resp: express.Response): Promise<express.Response> => {

@@ -207,7 +207,7 @@ describe('List entry API', () => {
   // update
   it('returns 400 for PATCH entry missing both fields', async () => {
     try {
-      const fourHundredMsg = 'Must provide a valid new ranking or entry text';
+      const fourHundredMsg = 'Must provide entry text';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
       const patchRoute = route + '/' + resp.body.entry.id;
       resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ useless: 'data' });
@@ -222,7 +222,7 @@ describe('List entry API', () => {
 
   it('returns 400 for PATCH invalid text', async () => {
     try {
-      const fourHundredMsg = 'Must provide a valid new ranking or entry text';
+      const fourHundredMsg = 'Must provide entry text';
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
       const patchRoute = route + '/' + resp.body.entry.id;
       resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ text: tooLong });
