@@ -364,13 +364,24 @@ describe('List entry API', () => {
 
   it('fixes ranking order on DELETE', async () => {
     try {
-      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
       await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
       const entryId: number = resp.body.id;
       const deleteRoute = route + '/' + entryId;
-      
+      resp = await chai.request(app).delete(deleteRoute).set('authorization', firstToken);
+      const entries: ListEntry[] = await client.query('SELECT id, ranking FROM list_entries WHERE list_id = $1 ORDER BY ranking ASC;', firstListId);
+      expect(resp.body.entries).to.be.an('array');
+      expect(entries.length).to.equal(2);
+      expect(resp.body.entries[0].id).to.equal(entries[0].id);
+      expect(resp.body.entries[0].ranking).to.equal(entries[0].ranking).to.equal(1);
+      expect(resp.body.entries[1].id).to.equal(entries[1].id);
+      expect(resp.body.entries[1].ranking).to.equal(entries[1].ranking).to.equal(2);
+      return;
+    } catch (e) {
+      console.log(e);
+      throw new Error();
     }
-  })
+  });
 
 });
