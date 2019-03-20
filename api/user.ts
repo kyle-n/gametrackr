@@ -134,8 +134,8 @@ const fourHundredNotSpecified = (req: express.Request, resp: express.Response) =
 
 export const router: express.Router = express.Router();
 router.route('/').get(fourHundredNotSpecified)
-                 .put(fourHundredNotSpecified)
+                 .patch(fourHundredNotSpecified)
                  .delete(fourHundredNotSpecified);
 router.route('/:userId').get(readUser)
-                        .put(updateUser)
+                        .patch(updateUser)
                         .delete(deleteUser);

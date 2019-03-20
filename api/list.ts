@@ -72,9 +72,9 @@ const fourHundredNotSpecified = (req: express.Request, resp: express.Response): 
 
 router.route('/').get(readAllLists)
                  .post(createList)
-                 .put(fourHundredNotSpecified)
+                 .patch(fourHundredNotSpecified)
                  .delete(fourHundredNotSpecified);
 router.route('/:listId').get(readList)
-                        .put(updateList)
+                        .patch(updateList)
                         .delete(deleteList);
 router.use('/:listId/entries', entry);

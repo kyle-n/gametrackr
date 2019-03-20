@@ -229,9 +229,9 @@ describe('Review API', () => {
   });
 
   // update
-  it('returns 400 for PUT review without id', async () => {
+  it('returns 400 for PATCH review without id', async () => {
     try {
-      const resp: Response = await chai.request(app).put('/api/reviews').set('authorization', token).send(review);
+      const resp: Response = await chai.request(app).patch('/api/reviews').set('authorization', token).send(review);
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal('Request /api/reviews/review_id, not /api/reviews');
       return;
@@ -241,13 +241,13 @@ describe('Review API', () => {
     }
   });
 
-  it('returns 404 for PUT to nonexistent review', async () => {
+  it('returns 404 for PATCH to nonexistent review', async () => {
     try {
       let badId: number;
       const rows = await client.query('SELECT id FROM reviews ORDER BY id DESC LIMIT 1;');
       if (rows.length) badId = rows[0].id + 1;
       else badId = 1;
-      const resp: Response = await chai.request(app).put(`/api/reviews/${badId}`).set('authorization', token).send({ stars: 5 });
+      const resp: Response = await chai.request(app).patch(`/api/reviews/${badId}`).set('authorization', token).send({ stars: 5 });
       expect(resp.status).to.equal(404);
       expect(resp.error.text).to.equal('Could not find a review with the requested ID');
       return;
@@ -257,11 +257,11 @@ describe('Review API', () => {
     }
   });
 
-  it('returns 404 for PUT to other user\'s review', async () => {
+  it('returns 404 for PATCH to other user\'s review', async () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
-      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', secondToken).send({ stars: 5 });
+      let resp: Response = await chai.request(app).patch(`/api/reviews/${reviewId}`).set('authorization', secondToken).send({ stars: 5 });
       expect(resp.status).to.equal(404);
       expect(resp.error.text).to.equal('Could not find a review with the requested ID');
       return;
@@ -271,11 +271,11 @@ describe('Review API', () => {
     }
   });
 
-  it('returns 400 for PUT that tries to change game_id', async () => {
+  it('returns 400 for PATCH that tries to change game_id', async () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
-      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ game_id: -1, stars: 3 });
+      let resp: Response = await chai.request(app).patch(`/api/reviews/${reviewId}`).set('authorization', token).send({ game_id: -1, stars: 3 });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal('Must provide a valid star rating');
       return;
@@ -285,17 +285,17 @@ describe('Review API', () => {
     }
   });
 
-  it('returns 400 for PUT review invalid/missing star rating', async () => {
+  it('returns 400 for PATCH review invalid/missing star rating', async () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
-      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ useless: 'data' });
+      let resp: Response = await chai.request(app).patch(`/api/reviews/${reviewId}`).set('authorization', token).send({ useless: 'data' });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal('Must provide a valid star rating');
-      resp = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: 6 });
+      resp = await chai.request(app).patch(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: 6 });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal('Must provide a valid star rating');
-      resp = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: -1 });
+      resp = await chai.request(app).patch(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: -1 });
       expect(resp.status).to.equal(400);
       expect(resp.error.text).to.equal('Must provide a valid star rating');
     } catch (e) {
@@ -304,11 +304,11 @@ describe('Review API', () => {
     }
   });
 
-  it('PUTs an update to a review correctly', async () => {
+  it('PATCHs an update to a review correctly', async () => {
     try {
       await chai.request(app).post('/api/reviews').set('authorization', token).send(review);
       const reviewId: number = (await client.one('SELECT id FROM reviews WHERE user_id = $1;', userId)).id;
-      let resp: Response = await chai.request(app).put(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: 3 });
+      let resp: Response = await chai.request(app).patch(`/api/reviews/${reviewId}`).set('authorization', token).send({ stars: 3 });
       expect(resp.status).to.equal(200);
       const dbReview: any = await client.one('SELECT * FROM reviews WHERE id = $1;', reviewId);
       expect(dbReview.game_id).to.equal(review.game_id);

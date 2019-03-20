@@ -138,9 +138,9 @@ const fourHundredNotSpecified = (req: express.Request, resp: express.Response) =
 
 router.route('/').get(fourHundredNotSpecified)
                  .post(createGame)
-                 .put(fourHundredNotSpecified)
+                 .patch(fourHundredNotSpecified)
                  .delete(fourHundredNotSpecified)
 router.route('/:gameId').post(fourHundredNotSpecified)
                         .get(readGame)
-                        .put(updateGame)
+                        .patch(updateGame)
                         .delete(deleteGame);

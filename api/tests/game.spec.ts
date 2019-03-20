@@ -214,14 +214,14 @@ describe('Game API', () => {
   }).timeout(3000);
 
   // update
-  it('returns 400 on PUT with no useful params', () => {
+  it('returns 400 on PATCH with no useful params', () => {
     return new Promise<void>((resolve, reject) => {
       let gameId: number;
       chai.request(app).post('/api/games').set('authorization', firstToken).send(custom).then(() => {
         return client.query('SELECT id FROM games WHERE name = $1;', custom.name);
       }).then(rows => {
         gameId = rows[0].id;
-        return chai.request(app).put(`/api/games/${gameId}`).set('authorization', firstToken).send({ useless: 'data' });
+        return chai.request(app).patch(`/api/games/${gameId}`).set('authorization', firstToken).send({ useless: 'data' });
       }).then(resp => {
         expect(resp.status, '400 status').to.equal(400);
         expect(resp.error.text, 'Correct error msg').to.equal('Must provide a valid new name, description, release date or image');
@@ -233,13 +233,13 @@ describe('Game API', () => {
     });
   });
 
-  it('returns 404 on PUT to nonexistent game', () => {
+  it('returns 404 on PATCH to nonexistent game', () => {
     return new Promise<void>((resolve, reject) => {
       let badId: number;
       client.query('SELECT id FROM games ORDER BY id DESC LIMIT 1;').then(rows => {
         if (rows.length) badId = rows[0].id + 1;
         else badId = 1;
-        return chai.request(app).put(`/api/games/${badId}`).set('authorization', firstToken).send(custom);
+        return chai.request(app).patch(`/api/games/${badId}`).set('authorization', firstToken).send(custom);
       }).then(resp => {
         expect(resp.status).to.equal(404);
         expect(resp.error.text).to.equal('Could not find a game with the requested ID');
@@ -251,12 +251,12 @@ describe('Game API', () => {
     });
   });
 
-  it('returns 403 on PUT to non-custom game', () => {
+  it('returns 403 on PATCH to non-custom game', () => {
     return new Promise((resolve, reject) => {
       chai.request(app).get('/api/search?searchTerm=target_terror').set('authorization', firstToken).then(searchResp => {
         const tester = searchResp.body.results[0];
         setTimeout(() => {
-          chai.request(app).put(`/api/games/${tester.id}`).set('authorization', firstToken).send(custom).then(resp => {
+          chai.request(app).patch(`/api/games/${tester.id}`).set('authorization', firstToken).send(custom).then(resp => {
             expect(resp.status).to.equal(403);
             expect(resp.error.text).to.equal('Cannot update non-custom Giant Bomb games');
             return resolve();
@@ -269,13 +269,13 @@ describe('Game API', () => {
     });
   }).timeout(3000);
 
-  it('returns 403 on PUT to other user\'s game', () => {
+  it('returns 403 on PATCH to other user\'s game', () => {
     return new Promise<void>((resolve, reject) => {
       chai.request(app).post('/api/games').set('authorization', firstToken).send(custom)
       .then(() => {
         return client.query('SELECT id FROM games WHERE name = $1;', custom.name);
       }).then(rows => {
-        return chai.request(app).put(`/api/games/${rows[0].id}`).set('authorization', secondToken).send({ ...custom, name: 'New name' });
+        return chai.request(app).patch(`/api/games/${rows[0].id}`).set('authorization', secondToken).send({ ...custom, name: 'New name' });
       }).then(resp => {
         expect(resp.status).to.equal(403);
         expect(resp.error.text).to.equal('Cannot update another user\'s custom game');
@@ -287,7 +287,7 @@ describe('Game API', () => {
     });
   });
 
-  it('PUTs an update correctly to a custom game', async () => {
+  it('PATCHs an update correctly to a custom game', async () => {
     try {
       const mod = {
         name: 'New name',
@@ -297,7 +297,7 @@ describe('Game API', () => {
       };
       await chai.request(app).post('/api/games').set('authorization', firstToken).send(custom);
       const gameId: number = (await client.one('SELECT id FROM games WHERE name = $1;', custom.name)).id;
-      const resp: any = await chai.request(app).put(`/api/games/${gameId}`).set('authorization', firstToken).send(mod);
+      const resp: any = await chai.request(app).patch(`/api/games/${gameId}`).set('authorization', firstToken).send(mod);
       expect(resp.status).to.equal(200);
       const dbVersion = await client.one('SELECT * FROM games WHERE id = $1;', gameId);
       expect(dbVersion.name).to.equal(mod.name);

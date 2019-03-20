@@ -200,30 +200,30 @@ describe('Router list api interface', () => {
   });
 
   // update
-  it('returns 400 for a bad PUT', () => {
+  it('returns 400 for a bad PATCH', () => {
     return new Promise<void>((resolve, reject) => {
       let listId: number;
       const validWarning = 'Must provide a valid title and deck';
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         listId = resp.body.listId;
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title });
       }).then(resp => {
         expect(resp.status, 'No deck, resp.status should be 400').to.equal(400);
         expect(resp.error.text, 'No deck, error text should be a string').to.be.a('string');
         expect(resp.error.text, `No deck, error text should be "${validWarning}"`).to.equal(validWarning);
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ deck });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ deck });
       }).then(resp => {
         expect(resp.status, 'No title, resp.status should be 400').to.equal(400);
         expect(resp.error.text, 'No title, error text should be a string').to.be.a('string');
         expect(resp.error.text, `No title, error text should be "${validWarning}"`).to.equal(validWarning);
         const tooLong = 'String of more than twenty characters, the limit for titles';
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: tooLong, deck });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title: tooLong, deck });
       }).then(resp => {
         expect(resp.status, 'Too long title, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long title, error text should be a string').to.be.a('string');
         expect(resp.error.text, `Too long title, error text should be "${validWarning}"`).to.equal(validWarning);
         const tooLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non arcu leo. Vestibulum dignissim consequat velit nec accumsan. Phasellus molestie vel metus nec vulputate. Phasellus sit amet elementum erat. Nulla sollicitudin dolor ut bibendum tempor. Proin vitae cursus felis. Ut aliquam erat quis molestie interdum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Integer consectetur leo congue, faucibus arcu at, porttitor eros. Donec consectetur justo sed ultrices rutrum. Etiam tincidunt, leo nec consequat pharetra, dolor ligula vehicula elit, vel ultricies erat nibh a nisi. Duis euismod sem orci, a ornare sem fermentum et.';
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title, deck: tooLong });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title, deck: tooLong });
       }).then(resp => {
         expect(resp.status, 'Too long deck, status should be 400').to.equal(400);
         expect(resp.error.text, 'Too long deck, error text should be a string').to.be.a('string');
@@ -236,12 +236,12 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('returns 404 for PUT to nonexistent list', () => {
+  it('returns 404 for PATCH to nonexistent list', () => {
     return new Promise<void>((resolve, reject) => {
       client.query('SELECT id FROM list_metadata ORDER BY id DESC LIMIT 1;').then(rows => {
         let badId = 1;
         if (rows.length) badId = rows[0].id + 1;
-        return chai.request(app).put(`/api/lists/${badId}`).set('authorization', token).send({ title, deck });
+        return chai.request(app).patch(`/api/lists/${badId}`).set('authorization', token).send({ title, deck });
       }).then(resp => {
         expect(resp.status, '404 status').to.equal(404);
         expect(resp.error.text, 'Correct error msg').to.equal('Cannot find a list with the requested ID');
@@ -253,7 +253,7 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('returns 403 for PUT to another user\'s list', () => {
+  it('returns 403 for PATCH to another user\'s list', () => {
     return new Promise<void>((resolve, reject) => {
       let listId: number;
       const secondMail = 'test2@test.com', secondPw = 'abc123';
@@ -265,7 +265,7 @@ describe('Router list api interface', () => {
       }).then(resp => {
         if (!resp.body.token) throw new Error();
         secondUserToken = 'jwt ' + resp.body.token;
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', secondUserToken).send({ title: 'New title', deck });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', secondUserToken).send({ title: 'New title', deck });
       }).then(resp => {
         expect(resp.status).to.equal(403);
         expect(resp.error.text).to.equal('Cannot update another user\'s list');
@@ -280,13 +280,13 @@ describe('Router list api interface', () => {
     });
   });
 
-  it('updates a list correctly on PUT', () => {
+  it('updates a list correctly on PATCH', () => {
     return new Promise<void>((resolve, reject) => {
       const editedTitle = '', editedDeck = '';
       let listId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         listId = resp.body.listId;
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: editedDeck });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: editedDeck });
       }).then(resp => {
         expect(resp.status, 'Response to valid update should be 200').to.equal(200);
         return client.query('SELECT title, deck FROM list_metadata WHERE id = $1;', listId);
@@ -296,10 +296,10 @@ describe('Router list api interface', () => {
         expect(rows[0].deck, 'Db deck should equal updated deck').to.equal(editedDeck);
         return client.query('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3;', [title, deck, listId]);
       }).then(rows => {
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: '' });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: '' });
       }).then(resp => {
         expect(resp.status, 'Resp.status to update just title should be 200').to.equal(200);
-        return chai.request(app).put(`/api/lists/${listId}`).set('authorization', token).send({ title: '', deck: editedDeck });
+        return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title: '', deck: editedDeck });
       }).then(resp => {
         expect(resp.status, 'Resp.status to update just deck should be 200').to.equal(200);
         return client.query('SELECT title, deck FROM list_metadata WHERE id = $1;', listId);

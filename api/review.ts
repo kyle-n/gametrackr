@@ -103,8 +103,8 @@ const fourHundredNotSpecified = (req: express.Request, resp: express.Response) =
 
 router.route('/').get(readAllReviews)
                  .post(createReview)
-                 .put(fourHundredNotSpecified)
+                 .patch(fourHundredNotSpecified)
                  .delete(deleteAllReviews);
 router.route('/:reviewId').get(readReview)
-                          .put(updateReview)
+                          .patch(updateReview)
                           .delete(deleteReview);
