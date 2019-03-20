@@ -351,6 +351,7 @@ describe('Game API', () => {
         setTimeout(() => {
           chai.request(app).delete(`/api/games/${badId}`).set('authorization', firstToken)
           .then(resp => {
+            console.log('rstatus');
             expect(resp.status).to.equal(403);
             expect(resp.error.text).to.equal('Cannot delete non-custom Giant Bomb games');
             resolve();

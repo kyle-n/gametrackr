@@ -31,7 +31,7 @@ export const createGame = (req: express.Request, resp: express.Response): void |
       const queries = req.body.lists.map((listId: number) => {
         let r = rows.find((row: any) => row.id === listId);
         if (!r) r = { ranking: 0, list_id: listId };
-        return t.query('INSERT INTO list_entries (ranking, list_id, game_id) VALUES ($1, $2, $3);', [r.ranking + 1, r.list_id, gameId]);
+        return t.query('INSERT INTO list_entries (ranking, list_id, game_id, user_id) VALUES ($1, $2, $3, $4);', [r.ranking + 1, r.list_id, gameId, resp.locals.id]);
       });
       return t.batch(queries);
     });
@@ -127,9 +127,9 @@ export const deleteGame = (req: express.Request, resp: express.Response): void |
       error = { status: 403, msg: 'Cannot delete another user\'s custom game' };
       throw new Error();
     }
-    return client.query('DELETE FROM games WHERE id = $1;', req.params.gameId);
+    return client.query('DELETE FROM games WHERE id = $1 AND owner_id = $2;', [req.params.gameId, resp.locals.id]);
   }).then(() => {
-    return client.query('DELETE FROM list_entries WHERE game_id = $1;', req.params.gameId);
+    return client.query('DELETE FROM list_entries WHERE game_id = $1 AND user_id = $2;', [req.params.gameId, resp.locals.id]);
   }).then(() => resp.status(200).send())
   .catch(() => resp.status(error.status).send(error.msg));
 }
