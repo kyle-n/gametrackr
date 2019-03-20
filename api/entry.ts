@@ -83,7 +83,7 @@ const updateAllEntries = async (req: express.Request, resp: express.Response): P
       error = { status: 400, msg: 'Must provide a list of objects with entry IDs and rankings' };
       throw new Error();
     }
-    const rows: any[] = await client.query('SELECT id FROM list_entries WHERE id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
+    const rows: any[] = await client.query('SELECT id FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
     if (rows.length !== req.body.entries.length) {
       error = { status: 400, msg: `You provided ${req.body.entries.length} list entries but the database has ${rows.length}` };
       throw new Error();
@@ -105,7 +105,7 @@ const deleteAllEntries = async (req: express.Request, resp: express.Response): P
   let error: ServerError = defaultError;
   try {
     await client.query('DELETE FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
-    return resp.status(200);
+    return resp.status(200).send();
   } catch (e) {
     return resp.status(error.status).send(error.msg);
   }
@@ -114,12 +114,14 @@ const deleteAllEntries = async (req: express.Request, resp: express.Response): P
 const deleteEntry = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
   let error: ServerError = defaultError;
   try {
-    const rows: any[] = await client.query('DELETE FROM list_entries WHERE list_id = $1 AND id = $2 AND user_id = $3;', [req.params.listId, req.params.entryId, resp.locals.id]);
+    const rows: any[] = await client.query('DELETE FROM list_entries WHERE list_id = $1 AND id = $2 AND user_id = $3 RETURNING ranking;', [req.params.listId, req.params.entryId, resp.locals.id]);
     if (!rows.length) {
-      error = { status: 404, msg: 'Could not find a status with the requested ID' };
+      error = { status: 404, msg: 'Could not find an entry with the requested ID' };
       throw new Error();
     }
-    return resp.status(200).send();
+    await client.query('UPDATE list_entries SET ranking = ranking - 1 WHERE list_id = $1 AND user_id = $2 AND ranking > $3;', [req.params.listId, resp.locals.id, rows[0].ranking]);
+    const updatedEntries: ListEntry[] = await client.query('SELECT * FROM list_entries WHERE list_id = $1 AND user_id = $2;', [req.params.listId, resp.locals.id]);
+    return resp.status(200).json({ entries: updatedEntries });
   } catch (e) {
     return resp.status(error.status).send(error.msg);
   }

@@ -20,8 +20,8 @@ const tooLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin 
 describe('List entry API', () => {
 
   before(done => {
+    try {
     setTimeout(async () => {
-      try {
       await client.none('DELETE FROM users WHERE email IN ($1:csv);', [[firstEmail, secondEmail]]);
 
       // first user
@@ -37,7 +37,6 @@ describe('List entry API', () => {
       secondUserId = (await client.one('SELECT id FROM users WHERE email = $1;', secondEmail)).id;
 
       // list
-      if (resp.status !== 200) throw new Error();
       firstListId = (await client.one('SELECT id FROM list_metadata WHERE user_id = $1;', firstUserId)).id;
       secondListId = (await client.one('SELECT id FROM list_metadata WHERE user_id = $1;', secondUserId)).id;
       route = `/api/lists/${firstListId}/entries`;
@@ -53,8 +52,8 @@ describe('List entry API', () => {
         list_id: firstListId
       };
       return done();
-    } catch (e) { console.log(e, 'caughte'); throw new Error(); }
     }, 500);
+    } catch (e) { console.log(e, 'caughte'); throw new Error(); }
   });
 
   afterEach(async () => {
@@ -277,20 +276,19 @@ describe('List entry API', () => {
   it('correctly PATCHes entry ranking', async () => {
     try {
       let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
-      const patchRoute = route + '/' + resp.body.id;
       const one: number = resp.body.id;
       resp = await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
       const two: number = resp.body.id;
       resp = await chai.request(app).post(route).set('authorization', firstToken).send(entryTwo);
       const three: number = resp.body.id;
       const entries = [{ id: one, ranking: 2 }, { id: two, ranking: 1 }, { id: three, ranking: 3 }];
-      resp = await chai.request(app).patch(patchRoute).set('authorization', firstToken).send({ entries });
+      resp = await chai.request(app).patch(route).set('authorization', firstToken).send({ entries });
       expect(resp.body.entries).to.be.an('array');
       expect(resp.body.entries.length).to.equal(3);
-      expect(resp.body.entries[0].id).to.equal(one);
-      expect(resp.body.entries[0].ranking).to.equal(2);
-      expect(resp.body.entries[1].id).to.equal(two);
-      expect(resp.body.entries[1].ranking).to.equal(1);
+      expect(resp.body.entries[0].id).to.equal(two);
+      expect(resp.body.entries[0].ranking).to.equal(1);
+      expect(resp.body.entries[1].id).to.equal(one);
+      expect(resp.body.entries[1].ranking).to.equal(2);
       expect(resp.body.entries[2].id).to.equal(three);
       expect(resp.body.entries[2].ranking).to.equal(3);
       return;
@@ -299,13 +297,12 @@ describe('List entry API', () => {
       throw new Error();
     }
   });
-  return;
 
   // delete
   it('returns 404 for DELETE nonexistent entry', async () => {
     try {
       let badEntryId: number;
-      const fourOhFourMsg = 'Could not find a list entry with the requested ID';
+      const fourOhFourMsg = 'Could not find an entry with the requested ID';
       const rows: any[] = await client.query('SELECT id FROM list_entries ORDER BY id DESC LIMIT 1;');
       if (rows.length) badEntryId = rows[0].id + 1;
       else badEntryId = 1;
@@ -364,5 +361,16 @@ describe('List entry API', () => {
       throw new Error();
     }
   });
+
+  it('fixes ranking order on DELETE', async () => {
+    try {
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      let resp: Response = await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      await chai.request(app).post(route).set('authorization', firstToken).send(entryOne);
+      const entryId: number = resp.body.id;
+      const deleteRoute = route + '/' + entryId;
+      
+    }
+  })
 
 });
