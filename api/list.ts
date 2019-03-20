@@ -10,8 +10,8 @@ const defaultError: ServerError = { status: 500, msg: 'Internal server error' }
 const createList = (req: express.Request, resp: express.Response): void | express.Response => {
   let error = { ...defaultError };
   if (!validate(req.body, ListUpdateSchema).valid) return resp.status(400).send('Must provide a valid title and deck');
-  client.query('INSERT INTO list_metadata(title, deck, user_id, private) VALUES ($1, $2, $3, $4) RETURNING id;', [req.body.title, req.body.deck, resp.locals.id, true]).then(rows => {
-    return resp.status(200).json({ listId: rows[0].id });
+  client.query('INSERT INTO list_metadata(title, deck, user_id, private) VALUES ($1, $2, $3, $4) RETURNING *;', [req.body.title, req.body.deck, resp.locals.id, true]).then(rows => {
+    return resp.status(200).json(rows[0]);
   }).catch(e => { console.log(e); resp.status(error.status).send(error.msg); });
 }
 
@@ -26,7 +26,7 @@ const readList = (req: express.Request, resp: express.Response): void | express.
       error = { status: 403, msg: 'Cannot read another user\'s private list' };
       throw new Error();
     }
-    return resp.status(200).json({ ...rows[0], entries: [] });
+    return resp.status(200).json({ ...rows[0] });
   }).catch(() => resp.status(error.status).send(error.msg));
 }
 
@@ -49,9 +49,9 @@ const updateList = (req: express.Request, resp: express.Response): void | expres
       error = { status: 403, msg: 'Cannot update another user\'s list' };
       throw new Error();
     }
-    return client.none('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3;', [req.body.title, req.body.deck, req.params.listId]);
-  }).then(() => {
-    return resp.status(200).send();
+    return client.one('UPDATE list_metadata SET title = $1, deck = $2 WHERE id = $3 RETURNING *;', [req.body.title, req.body.deck, req.params.listId]);
+  }).then(list => {
+    return resp.status(200).json(list);
   }).catch(() => resp.status(error.status).send(error.msg));
 }
 

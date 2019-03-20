@@ -14,8 +14,8 @@ const createReview = async (req: express.Request, resp: express.Response): Promi
       error = { status: 400, msg: 'Must provide a valid game ID and star rating' };
       throw new Error();
     }
-    await client.none('INSERT INTO reviews (game_id, user_id, stars) VALUES ($1, $2, $3);', [req.body.game_id, resp.locals.id, req.body.stars]);
-    return resp.status(200).send();
+    const review = await client.one('INSERT INTO reviews (game_id, user_id, stars) VALUES ($1, $2, $3) RETURNING *;', [req.body.game_id, resp.locals.id, req.body.stars]);
+    return resp.status(200).json(review);
   } catch (e) {
     return resp.status(error.status).send(error.msg);
   }
@@ -64,12 +64,12 @@ const updateReview = async (req: express.Request, resp: express.Response): Promi
       error = { status: 400, msg: 'Must provide a valid star rating' };
       throw new Error();
     }
-    const rows: any[] = await client.query('UPDATE reviews SET stars = $1 WHERE id = $2 AND user_id = $3 RETURNING id;', [req.body.stars, req.params.reviewId, resp.locals.id]);
+    const rows: any[] = await client.query('UPDATE reviews SET stars = $1 WHERE id = $2 AND user_id = $3 RETURNING *;', [req.body.stars, req.params.reviewId, resp.locals.id]);
     if (!rows.length) {
       error = { status: 404, msg: 'Could not find a review with the requested ID' };
       throw new Error();
     }
-    return resp.status(200).send();
+    return resp.status(200).json(rows[0]);
   } catch (e) {
     return resp.status(error.status).send(error.msg);
   }

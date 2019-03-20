@@ -82,9 +82,9 @@ describe('Router list api interface', () => {
       let listRespId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
         expect(resp.status, 'Create list status should be 200').to.equal(200);
-        expect(resp.body.listId, 'server should return list id').to.be.a('number');
-        listRespId = resp.body.listId;
-        return client.query('SELECT * FROM list_metadata WHERE id = $1;', resp.body.listId);
+        expect(resp.body.id, 'server should return list id').to.be.a('number');
+        listRespId = resp.body.id;
+        return client.query('SELECT * FROM list_metadata WHERE id = $1;', resp.body.id);
       }).then(rows => {
         expect(rows.length, 'test user should have only one list').to.equal(1);
         expect(rows[0].id, 'response id should equal db id').to.equal(listRespId);
@@ -170,7 +170,7 @@ describe('Router list api interface', () => {
     return new Promise<void>((resolve, reject) => {
       let list: List;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
-        return chai.request(app).get(`/api/lists/${resp.body.listId}`).set('authorization', token);
+        return chai.request(app).get(`/api/lists/${resp.body.id}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status, 'Get list status should be 200').to.equal(200);
         expect(objectEmpty(resp.body), 'Response body should not be empty').to.not.equal(true);
@@ -205,7 +205,7 @@ describe('Router list api interface', () => {
       let listId: number;
       const validWarning = 'Must provide a valid title and deck';
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
-        listId = resp.body.listId;
+        listId = resp.body.id;
         return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title });
       }).then(resp => {
         expect(resp.status, 'No deck, resp.status should be 400').to.equal(400);
@@ -259,8 +259,8 @@ describe('Router list api interface', () => {
       const secondMail = 'test2@test.com', secondPw = 'abc123';
       let secondUserToken: string;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
-        if (!resp.body.listId) throw new Error();
-        listId = resp.body.listId;
+        if (!resp.body.id) throw new Error();
+        listId = resp.body.id;
         return chai.request(app).post('/api/external').send({ email: secondMail, password: secondPw });
       }).then(resp => {
         if (!resp.body.token) throw new Error();
@@ -285,7 +285,7 @@ describe('Router list api interface', () => {
       const editedTitle = '', editedDeck = '';
       let listId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
-        listId = resp.body.listId;
+        listId = resp.body.id;
         return chai.request(app).patch(`/api/lists/${listId}`).set('authorization', token).send({ title: editedTitle, deck: editedDeck });
       }).then(resp => {
         expect(resp.status, 'Response to valid update should be 200').to.equal(200);
@@ -343,7 +343,7 @@ describe('Router list api interface', () => {
     return new Promise<void>((resolve, reject) => {
       let listId: number;
       chai.request(app).post('/api/lists').set('authorization', token).send({ title, deck }).then(resp => {
-        listId = resp.body.listId;
+        listId = resp.body.id;
         return chai.request(app).delete(`/api/lists/${listId}`).set('authorization', token);
       }).then(resp => {
         expect(resp.status, 'Valid delete status 200').to.equal(200);

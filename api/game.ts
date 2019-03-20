@@ -9,6 +9,7 @@ const defaultError: ServerError = { status: 500, msg: 'Internal server error' };
 export const createGame = (req: express.Request, resp: express.Response): void | express.Response => {
   let error: ServerError = { ...defaultError };
   let gameId: number;
+  let insertedGame: GiantBombGame;
   if (!validate(req.body, CustomGameSchema).valid) return resp.status(400).send('Must provide a valid name, description, release date and image with at least one list selected');
   client.query('SELECT user_id FROM list_metadata WHERE id IN ($1:csv);', [req.body.lists]).then(rows => {
     const listsBelongToUser: boolean = rows.reduce((allOwned: boolean, r: any) => {
@@ -22,9 +23,10 @@ export const createGame = (req: express.Request, resp: express.Response): void |
   }).then(rows => {
     if (rows.length) gameId = rows[0].length;
     else gameId = parseInt(<string>process.env.CUSTOM_GAME_ID_FLOOR) + 1;
-    return client.query('INSERT INTO games(name, deck, original_release_date, image, owner_id, id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;', [req.body.name, req.body.deck, req.body.original_release_date, req.body.image, resp.locals.id, gameId]);
+    return client.query('INSERT INTO games(name, deck, original_release_date, image, owner_id, id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;', [req.body.name, req.body.deck, req.body.original_release_date, req.body.image, resp.locals.id, gameId]);
   }).then(rows => {
     gameId = rows[0].id;
+    insertedGame = rows[0];
     return client.query('SELECT MAX(ranking), list_id FROM list_entries WHERE list_id IN ($1:csv) GROUP BY list_id;', [req.body.lists]);
   }).then(rows => {
     return client.tx(t => {
@@ -36,7 +38,7 @@ export const createGame = (req: express.Request, resp: express.Response): void |
       return t.batch(queries);
     });
   }).then(() => {
-    return resp.status(200).send();
+    return resp.status(200).json(insertedGame);
   }).catch(e => {
     if (error.status === 500) console.log(e); 
     resp.status(error.status).send(error.msg);
@@ -108,7 +110,9 @@ export const updateGame = (req: express.Request, resp: express.Response): void |
       }
       return t.batch(queries);
     });
-  }).then(() => resp.status(200).send())
+  }).then(() => {
+    return client.one('SELECT * FROM games WHERE id = $1 AND owner_id = $2;', [req.params.gameId, resp.locals.id]);
+  }).then(game => resp.status(200).json(game))
   .catch(() => resp.status(error.status).send(error.msg));
 }
 
