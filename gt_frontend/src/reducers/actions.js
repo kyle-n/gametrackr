@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT } from './definitions';
+import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW } from './definitions';
 
 export function alert(text, status) {
   if (status) return {
@@ -64,4 +64,27 @@ export function setUserData(id, email, token) {
     type: SET_USER_DATA,
     id, email, token
   };
+}
+
+export function setReview(id, game_id, stars) {
+  return {
+    type: SET_REVIEW,
+    review: { id, game_id, stars }
+  };
+}
+
+export function createReview(game_id, stars) {
+  return function (dispatch) {
+    return axios.post('/api/reviews', { game_id, stars }).then(resp => {
+      dispatch(setReview(resp.body.id, resp.body.game_id, resp.body.stars));
+    }, e => console.log(e, 'create review err'));
+  }
+}
+
+export function updateReview(id, stars) {
+  return function (dispatch) {
+    return axios.patch(`/api/reviews/${id}`, { stars }).then(resp => {
+      dispatch(setReview(resp.body.id, resp.body.game_id, resp.body.stars));
+    }, e => console.log(e, 'edit review err'));
+  }
 }

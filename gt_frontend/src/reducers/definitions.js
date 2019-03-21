@@ -5,5 +5,4 @@ export const SET_LOADING = 'SET_LOADING';
 export const LOG_OUT = 'LOG_OUT';
 export const SET_USER_DATA = 'SET_USER_DATA';
 
-export const BEGIN_SEARCH = 'BEGIN_SEARCH';
-export const PROCESS_SEARCH_RESULTS = 'PROCESS_SEARCH_RESULTS';
+export const SET_REVIEW = 'SET_REVIEW';
