@@ -13,13 +13,6 @@ export function alert(text, status) {
   };
 }
 
-export function beginSearch(query) {
-  return function (dispatch) {
-    dispatch(beginSearch());
-    return axios.get(`/api/search?searchTerm=${query}`).then(resp => console.log(resp), e => console.log(e, 'promise rejected'));
-  }
-}
-
 export function setLoading(isLoading) {
   return {
     type: SET_LOADING,

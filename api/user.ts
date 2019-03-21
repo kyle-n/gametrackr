@@ -100,10 +100,13 @@ export const updateUser = (req: express.Request, resp: express.Response): number
     if (req.body.password) return bcrypt.hash(req.body.password, 10);
     else return new Promise<string>(resolve => resolve(''));
   }).then(hashed => {
-    if (req.body.email && !hashed) return client.query('UPDATE users SET email = $1, confirmed = false WHERE id = $2;', [req.body.email, uId]);
-    else if (!req.body.email && hashed) return client.query('UPDATE users SET password = $1 WHERE id = $2;', [hashed, uId]);
-    else return client.query('UPDATE users SET email = $1, password = $2, confirmed = false WHERE id = $3;', [req.body.email, hashed, uId]);
-  }).then(() => resp.status(200).send())
+    if (req.body.email && !hashed) return client.one('UPDATE users SET email = $1, confirmed = false WHERE id = $2 RETURNING id, email;', [req.body.email, uId]);
+    else if (!req.body.email && hashed) return client.one('UPDATE users SET password = $1 WHERE id = $2 RETURNING id, email;', [hashed, uId]);
+    else return client.one('UPDATE users SET email = $1, password = $2, confirmed = false WHERE id = $3 RETURNING id, email;', [req.body.email, hashed, uId]);
+  }).then(row => {
+    const token: string = jwt.sign(row, <string>process.env.SECRET_KEY);
+    return resp.status(200).json({ token, email: row.email, id: row.id });
+  })
   .catch(e => {
     if (e.msg) error = { ...e };
     resp.status(error.status).send(error.msg);
