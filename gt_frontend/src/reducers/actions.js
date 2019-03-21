@@ -32,6 +32,7 @@ export function signup(email, password) {
     dispatch(setLoading(true));
     return axios.post('/api/external', { email, password }).then(resp => {
       dispatch(setLoading(false));
+      axios.defaults.headers.common['authorization'] = 'jwt ' + resp.body.token;
       dispatch(setUserData(resp.body.id, email, resp.body.token));
     }, e => console.log(e, 'signuperr'));
   }
@@ -42,8 +43,16 @@ export function login(email, password) {
     dispatch(setLoading(true));
     return axios.post('/api/external/login', { email, password }).then(resp => {
       dispatch(setLoading(false));
+      axios.defaults.headers.common['authorization'] = 'jwt ' + resp.body.token;
       dispatch(setUserData(resp.body.id, email, resp.body.token));
     }, e => console.log(e, 'loginerr'));
+  }
+}
+
+export function updateProfile(id, email, password) {
+  return function (dispatch) {
+    dispatch(setLoading(true));
+    return axios.patch(`/api/users/${id}`, { email, password });
   }
 }
 
