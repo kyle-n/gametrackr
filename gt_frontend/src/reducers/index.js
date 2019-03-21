@@ -1,3 +1,4 @@
 import { combineReducers } from 'redux';
+import ui from './ui';
 
-export default combineReducers();
+export default combineReducers(ui);

@@ -25,7 +25,7 @@ const login = (req: express.Request, resp: express.Response) => {
       throw new Error();
     }
     const token = jwt.sign({ id: profile.id, email: req.body.email }, <string>process.env.SECRET_KEY);
-    return resp.status(200).json({ token });
+    return resp.status(200).json({ token, email: req.body.email, id: profile.id });
   }).catch(() => resp.status(error.status).send(error.msg));
 }
 
