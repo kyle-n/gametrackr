@@ -16,3 +16,5 @@ const profile = function profile(state = defaultState, action) {
       return state;
   }
 }
+
+export default profile;

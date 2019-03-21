@@ -45,7 +45,11 @@ export function login(email, password) {
 export function updateProfile(id, email, password) {
   return function (dispatch) {
     dispatch(setLoading(true));
-    return axios.patch(`/api/users/${id}`, { email, password });
+    return axios.patch(`/api/users/${id}`, { email, password }).then(resp => {
+      dispatch(setLoading(false));
+      axios.defaults.headers.common['authorization'] = 'jwt ' + resp.body.token;
+      dispatch(setUserData(resp.body.id, resp.body.email, resp.body.token));
+    }, e => console.log(e, 'patch profile err'));
   }
 }
 
