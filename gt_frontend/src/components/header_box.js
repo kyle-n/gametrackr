@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { logIn, signup } from '../reducers/actions';
 import { config } from '../constants';
+import { Link } from 'react-router-dom';
 
 import LoginBox from './login_box';
 
@@ -27,6 +28,7 @@ class HeaderBox extends Component {
       <header>
         <SiteTitle title={config.siteTitle} />
         <LoginBoxDropdownButton handler={this.toggleLoginShowing} />
+        <Link to="/signup">Sign up</Link>
         {loginDropdown}
       </header>
     )
