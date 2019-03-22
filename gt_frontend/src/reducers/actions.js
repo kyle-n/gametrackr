@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW } from './definitions';
+import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT } from './definitions';
 import { config } from '../constants';
 
 const { serverUrl } = config;
@@ -11,7 +11,7 @@ export function alert(text, status) {
     status
   };
   else return {
-    type: ALERT,
+    type: ERROR_ALERT,
     text
   };
 }
@@ -91,5 +91,21 @@ export function updateReview(id, stars) {
     return axios.patch(`${serverUrl}/api/reviews/${id}`, { stars }).then(resp => {
       dispatch(setReview(resp.data.id, resp.data.game_id, resp.data.stars));
     }, e => console.log(e, 'edit review err'));
+  }
+}
+
+export function search(query) {
+  return function (dispatch) {
+    dispatch(setLoading(true));
+    return axios.get(`${serverUrl}/api/search?searchTerm=${query}`).then(resp => {
+      dispatch(setLoading(false));
+      dispatch(processSearchResults(resp.data.results));
+    }, e => dispatch(alert(e.error.text, e.status)));
+  }
+}
+function processSearchResults(results) {
+  return {
+    type: PROCESS_SEARCH_RESULTS,
+    results
   }
 }
