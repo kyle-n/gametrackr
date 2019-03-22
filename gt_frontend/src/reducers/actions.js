@@ -21,9 +21,11 @@ export function setLoading(isLoading) {
 }
 
 export function signup(email, password) {
+  console.log('signup action');
   return function (dispatch) {
     dispatch(setLoading(true));
     return axios.post('/api/external', { email, password }).then(resp => {
+      console.log(resp.body, 'got resp');
       dispatch(setLoading(false));
       axios.defaults.headers.common['authorization'] = 'jwt ' + resp.body.token;
       dispatch(setUserData(resp.body.id, email, resp.body.token));

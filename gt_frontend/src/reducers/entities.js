@@ -10,4 +10,7 @@ const reviews = function reviews(state = {}, action) {
   }
 }
 
-const entries = combineReducers(reviews);
+const entries = combineReducers({
+  reviews
+});
+export default entries;

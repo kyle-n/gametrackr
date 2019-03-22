@@ -1,28 +1,39 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { signup } from './reducers/actions';
+import { connect } from 'react-redux';
+
+const mapStateToProps = state => {
+  return {
+    token: state.profile.token
+  }
+}
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { email: '', password: '' }
+    this.updateField = this.updateField.bind(this);
+  }
+  updateField(field, text) {
+    const newState = {};
+    newState[field] = text;
+    this.setState(newState);
+  }
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <main>
+        <p>Test code</p>
+        <form onSubmit={e => { e.preventDefault(); this.props.signup(this.state.email, this.state.password); }}>
+          <input key={0} type="text" value={this.state.email} onChange={e => this.updateField('email', e.target.value)} />
+          <input key={1} type="text" value={this.state.password} onChange={e => this.updateField('password', e.target.value)} />
+          <button type="submit">Save</button>
+        </form>
+        <p>Token is {this.props.token}</p>
+      </main>
     );
   }
 }
 
-export default App;
+export default connect(mapStateToProps, { signup })(App);
