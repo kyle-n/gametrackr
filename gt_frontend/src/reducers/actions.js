@@ -36,7 +36,7 @@ export function signup(email, password) {
   }
 }
 
-export function login(email, password) {
+export function logIn(email, password) {
   return function (dispatch) {
     dispatch(setLoading(true));
     return axios.post(serverUrl + '/api/external/login', { email, password }).then(resp => {
