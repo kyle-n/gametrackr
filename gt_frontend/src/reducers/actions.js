@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT } from './definitions';
+import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT, AVAILABLE_EMAIL } from './definitions';
 import { config } from '../constants';
 
 const { serverUrl } = config;
@@ -24,7 +24,6 @@ export function setLoading(isLoading) {
 }
 
 export function signup(email, password) {
-  console.log('signup action');
   return function (dispatch) {
     dispatch(setLoading(true));
     return axios.post(serverUrl + '/api/external', { email, password }).then(resp => {
@@ -34,6 +33,23 @@ export function signup(email, password) {
       console.log('resp process done');
     }, e => console.log(e, 'signuperr'));
   }
+}
+
+export function checkEmailAvailable(name) {
+  return function (dispatch) {
+    dispatch(setLoading(true));
+    return axios.get(`${serverUrl}/api/external/email-taken?email=${name}`).then(resp => {
+      dispatch(setLoading(false));
+      dispatch(setAvailableEmail(email));
+    }, e => console.log(e));
+  }
+}
+
+export function setAvailableEmail(email) {
+  return {
+    type: AVAILABLE_EMAIL,
+    email
+  };
 }
 
 export function logIn(email, password) {

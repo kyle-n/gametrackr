@@ -4,6 +4,7 @@ export const SET_LOADING = 'SET_LOADING';
 
 export const LOG_OUT = 'LOG_OUT';
 export const SET_USER_DATA = 'SET_USER_DATA';
+export const AVAILABLE_EMAIL = 'AVAILABLE_EMAIL';
 
 export const SET_REVIEW = 'SET_REVIEW';
 

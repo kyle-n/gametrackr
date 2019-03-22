@@ -27,7 +27,23 @@ const login = (req: express.Request, resp: express.Response) => {
     const token = jwt.sign({ id: profile.id, email: req.body.email }, <string>process.env.SECRET_KEY);
     return resp.status(200).json({ token, email: req.body.email, id: profile.id });
   }).catch(() => resp.status(error.status).send(error.msg));
-}
+};
+
+const checkEmail = async (req: express.Request, resp: express.Response): Promise<express.Response> => {
+  let error: ServerError = defaultError;
+  try {
+    if (!req.query.email) {
+      error = { status: 400, msg: 'Must include an email to check' };
+      throw new Error();
+    }
+    const rows: any[] = await client.query('SELECT id FROM users WHERE email = $1 LIMIT 1;', req.query.email);
+    const taken = rows.length > 0;
+    return resp.status(200).json({ taken });
+  } catch (e) {
+    return resp.status(error.status).send(error.msg);
+  }
+};
 
 router.route('/login').post(login);
+router.route('/email-taken').get(checkEmail);
 router.route('/').post(createUser);
