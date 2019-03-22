@@ -50,6 +50,7 @@ export const createUser = (req: express.Request, resp: express.Response): number
     const newToken = jwt.sign(newUser, <string>process.env.SECRET_KEY);
     resp.status(200).json({ token: newToken, id: newUser.id });
   }).catch(e => {
+    console.log(e);
     if (e.msg) resp.status(e.status).send(e.msg);
     else resp.status(defaultError.status).send(JSON.stringify(defaultError.msg));
   });
