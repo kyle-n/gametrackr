@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { signup } from '../reducers/actions';
 import PropTypes from 'prop-types';
 import { config } from '../constants';
+import EmailChecker from './email_checker';
 
 const mapStateToProps = state => {
   return {};
@@ -11,11 +12,19 @@ const mapStateToProps = state => {
 class SignupPage extends Component {
   constructor(props) {
     super(props);
+    this.state = { email: '', password: '' };
+    this.setEmail = this.setEmail.bind(this);
+  }
+  setEmail(email) {
+    this.setState({ email });
   }
   render() {
     return (
-      <SignupHeader />
-    )
+      <div>
+        <SignupHeader />
+        <EmailChecker val={this.state.email} sendVerified={this.setEmail} />
+      </div>
+    );
   }
 }
 

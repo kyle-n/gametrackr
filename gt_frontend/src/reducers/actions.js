@@ -35,23 +35,6 @@ export function signup(email, password) {
   }
 }
 
-export function checkEmailAvailable(name) {
-  return function (dispatch) {
-    dispatch(setLoading(true));
-    return axios.get(`${serverUrl}/api/external/email-taken?email=${name}`).then(resp => {
-      dispatch(setLoading(false));
-      dispatch(setAvailableEmail(email));
-    }, e => console.log(e));
-  }
-}
-
-export function setAvailableEmail(email) {
-  return {
-    type: AVAILABLE_EMAIL,
-    email
-  };
-}
-
 export function logIn(email, password) {
   return function (dispatch) {
     dispatch(setLoading(true));
