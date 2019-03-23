@@ -1,18 +1,10 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { debounce, validEmail } from '../utils';
 import { config } from '../constants';
 
 const { serverUrl } = config;
-
-const mapStateToProps = state => {
-  return {
-    available: state.profile.availableEmail.email && !state.profile.availableEmail.taken,
-    taken: state.profile.availableEmail.email && state.profile.availableEmail.taken
-  };
-}
 
 export default class EmailChecker extends Component {
   constructor(props) {
@@ -22,10 +14,11 @@ export default class EmailChecker extends Component {
   }
   updateState(email) {
     this.setState({ email });
+    if (email.length < 3) return;
+    if (validEmail(email)) this.setState({ status: '', msg: '' });
     this.sendToServer(email);
   }
   sendToServer(email) {
-    if (email.length < 3) return;
     if (!validEmail(email)) return this.setState({ status: 'error', msg: 'Invalid email address' });
     axios.get(`${serverUrl}/api/external/email-taken?email=${email}`).then(resp => {
       if (resp.data.taken === false) {
@@ -50,5 +43,5 @@ export default class EmailChecker extends Component {
 
 EmailChecker.propTypes = {
   sendVerified: PropTypes.func.isRequired,
-  val: PropTypes.string
+  val: PropTypes.string.isRequired
 };
