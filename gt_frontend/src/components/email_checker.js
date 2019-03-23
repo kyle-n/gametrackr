@@ -33,7 +33,7 @@ export default class EmailChecker extends Component {
     else if (this.state.status === 'success') checkmark = (<span>&#x2713;</span>);
     return (
       <div>
-        <input type="email" id="email-signup" value={this.state.email} onChange={e => this.updateState(e.target.value)} />
+        <input type="email" id="email-checker" value={this.state.email} onChange={e => this.updateState(e.target.value)} />
         {checkmark}
         {message}
       </div>
