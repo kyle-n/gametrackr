@@ -37,7 +37,9 @@ class HeaderBox extends Component {
 
 function SiteTitle(props) {
   return (
-    <h1>{props.title}</h1>
+    <Link to="/">
+      <h1>{props.title}</h1>
+    </Link>
   )
 }
 
