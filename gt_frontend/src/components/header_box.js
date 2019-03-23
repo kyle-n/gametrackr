@@ -25,10 +25,13 @@ class HeaderBox extends Component {
   render() {
     const loginDropdown = this.state.loginShowing ? (<LoginBox />) : null;
     return (
-      <header>
+      <header className="row col s12">
         <SiteTitle title={config.siteTitle} />
-        <LoginBoxDropdownButton handler={this.toggleLoginShowing} />
-        <Link to="/signup">Sign up</Link>
+        <div className="row center-align">
+          <LoginBoxDropdownButton class="col s6" handler={this.toggleLoginShowing} />
+          <Link class="col s6" to="/signup">Sign up</Link>
+        </div>
+        <div className="divider"></div>
         {loginDropdown}
       </header>
     )
@@ -37,15 +40,17 @@ class HeaderBox extends Component {
 
 function SiteTitle(props) {
   return (
-    <Link to="/">
-      <h1>{props.title}</h1>
+    <Link className="row valign-wrapper" to="/">
+      <i className="material-icons large col s2 l1">gamepad</i>
+      <div className="col l1"></div>
+      <h1 className="col s10 offset-left">{props.title}</h1>
     </Link>
   )
 }
 
 function LoginBoxDropdownButton(props) {
   return (
-    <button onClick={props.handler}>Log In</button>
+    <button className="btn-large red waves-effect waves-light" onClick={props.handler}>Log In</button>
   )
 }
 

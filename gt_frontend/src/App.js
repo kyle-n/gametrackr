@@ -16,11 +16,8 @@ class App extends Component {
     super(props);
   }
   render() {
-    const styles = {
-      padding: '1rem'
-    }
     return (
-        <main style={styles}>
+        <main className="container" >
           <HeaderBox />
           <Link to="/home">Home</Link>
           <Route path="/home" component={HomePage} />
