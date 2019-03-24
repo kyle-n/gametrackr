@@ -26,24 +26,34 @@ class HeaderBox extends Component {
     const loginDropdown = this.state.loginShowing ? (<LoginBox />) : null;
     return (
       <header className="row col s12">
-        <SiteTitle title={config.siteTitle} />
-        <div className="row center-align">
-          <LoginBoxDropdownButton class="col s6" handler={this.toggleLoginShowing} />
-          <Link class="col s6" to="/signup">Sign up</Link>
-        </div>
-        <div className="divider"></div>
-        {loginDropdown}
+        <LoggedOutNavBar />
       </header>
     )
   }
 }
 
+const LoggedOutNavBar = props => (
+  <nav className="nav-extended col s12">
+    <div className="nav-content">
+      <ul className="tabs tabs-transparent">
+        <NavTab to="/">Welcome</NavTab>
+        <NavTab to="/login">Log In</NavTab>
+        <NavTab to="/signup">Sign Up</NavTab>
+      </ul>
+    </div>
+  </nav>
+);
+
+const NavTab = props => (
+  <li className="tab"><Link to={props.to}>{props.children}</Link></li>
+)
+
 function SiteTitle(props) {
   return (
-    <Link className="row valign-wrapper" to="/">
-      <i className="material-icons large col s2 l1">gamepad</i>
-      <div className="col l1"></div>
-      <h1 className="col s10 offset-left">{props.title}</h1>
+    <Link className="" to="/">
+      <i className="">gamepad</i>
+      <div className=""></div>
+      <h1 className="">{props.title}</h1>
     </Link>
   )
 }
