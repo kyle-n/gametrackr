@@ -1,19 +1,10 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { logIn, signup } from '../reducers/actions';
 import { config } from '../constants';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 import LoginBox from './login_box';
 
-const mapStateToProps = state => {
-  return {
-    loggedIn: state.profile.id != undefined,
-    email: state.profile.email
-  }
-}
-
-class HeaderBox extends Component {
+class HeaderBoxCpt extends Component {
   constructor(props) {
     super(props);
     this.state = { loginShowing: false }
@@ -26,27 +17,41 @@ class HeaderBox extends Component {
     const loginDropdown = this.state.loginShowing ? (<LoginBox />) : null;
     return (
       <header className="row col s12">
-        <LoggedOutNavBar />
+        <LoggedOutNavBar path={this.props.location.pathname} />
       </header>
     )
   }
 }
 
-const LoggedOutNavBar = props => (
-  <nav className="nav-extended col s12">
-    <div className="nav-content">
-      <ul className="tabs tabs-transparent">
-        <NavTab to="/">Welcome</NavTab>
-        <NavTab to="/login">Log In</NavTab>
-        <NavTab to="/signup">Sign Up</NavTab>
-      </ul>
-    </div>
-  </nav>
-);
+const LoggedOutNavBar = props => {
+  const tabs = [
+    { to: '/', tabName: 'Welcome' },
+    { to: '/login', tabName: 'Log In' },
+    { to: '/signup', tabName: 'Sign Up' }
+  ];
+  const tabMarkup = tabs.map(t => {
+    let active = false;
+    if (props.path.startsWith(t.to)) active = true;
+    return (<NavTab key={t.to} active={active} to={t.to}>{t.tabName}</NavTab>);
+  });
+  return (
+    <nav className="nav-extended col s12">
+      <div className="nav-content">
+        <ul className="tabs tabs-transparent">
+          {tabMarkup}
+        </ul>
+      </div>
+    </nav>
+  );
+};
 
-const NavTab = props => (
-  <li className="tab"><Link to={props.to}>{props.children}</Link></li>
-)
+const NavTab = props => {
+  let classes = 'tab';
+  if (props.active) classes += ' active';
+  return (
+    <li className={classes}><Link to={props.to}>{props.children}</Link></li>
+  );
+};
 
 function SiteTitle(props) {
   return (
@@ -64,4 +69,5 @@ function LoginBoxDropdownButton(props) {
   )
 }
 
-export default connect(mapStateToProps, { logIn, signup })(HeaderBox);
+const HeaderBox = withRouter(HeaderBoxCpt);
+export default HeaderBox;

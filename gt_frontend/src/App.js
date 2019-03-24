@@ -17,11 +17,13 @@ class App extends Component {
   }
   render() {
     return (
-        <main className="container" >
+        <main >
           <HeaderBox />
-          <Link to="/home">Home</Link>
-          <Route path="/home" component={HomePage} />
-          <Route path="/signup" component={SignupPage} />
+          <div className="content container">
+            <Link to="/home">Home</Link>
+            <Route path="/home" component={HomePage} />
+            <Route path="/signup" component={SignupPage} />
+          </div>
         </main>
     );
   }
