@@ -41,12 +41,6 @@ class NavBar extends Component {
     if (e.target.tagName === 'A') this.sidebar.close();
   }
   render() {
-    //const circleButtonCss = { borderRadius: '50%', width: '5rem', height: '5rem', position: 'relative', top: '0' };
-    const circleButtonCss = { borderRadius: '50%', width: 'auto', height: '3.5rem' };
-    const titleCss = { fontSize: '3rem' };
-    const titleBoxCss = { padding: '0', height: '3.5rem' };
-    const ctr = { height: '3.5rem' }
-    const navStyle = { padding: '1rem 0 0 0' };
     const tabMarkup = this.tabs.map(t => {
       let active = false;
       if (this.props.path.startsWith(t.to)) {
@@ -55,17 +49,20 @@ class NavBar extends Component {
       }
       return (<NavTab key={t.to} active={active} to={t.to}>{t.tabName}</NavTab>);
     });
+    const circleButtonCss = { borderRadius: '50%', width: '100%', height: '100%' };
+    const titleCss = { fontSize: '3rem', verticalAlign: 'bottom' };
     return (
       <div>
-        <nav className="nav-extended col s12 valign-wrapper" style={navStyle}>
-          <div className="row col s12 valign-wrapper left bordered" style={ctr}>
-            <div className="col s2 bordered">
+        <nav className="nav-wrapper col s12">
+          <div className="row col s12 valign-wrapper left ">
+            <div className="col s2">
               <a href="#" style={circleButtonCss} className="btn transparent sidenav-trigger z-depth-2 blue lighten-1 hide-on-med-and-up col s2" data-target="mobile-nav">
                 <i className="material-icons z-depth-0">menu</i>
               </a>
             </div>
-            <div className="col s10 center-align bordered" style={titleBoxCss}>
-              <Link to="/" className="" style={titleCss}>{config.siteTitle}</Link>
+            <div className="col s1 m0"></div>
+            <div className="col s9">
+              <Link to="/" style={titleCss} >{config.siteTitle}</Link>
             </div>
             <ul id="nav-desktop" className="right col m5 hide-on-small-only">
               {tabMarkup}
