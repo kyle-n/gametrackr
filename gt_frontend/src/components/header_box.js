@@ -49,16 +49,13 @@ class NavBar extends Component {
       }
       return (<NavTab key={t.to} active={active} to={t.to}>{t.tabName}</NavTab>);
     });
-    const circleButtonCss = { borderRadius: '50%', width: '100%', height: '100%' };
     const titleCss = { fontSize: '3rem', verticalAlign: 'bottom' };
     return (
       <div>
         <nav className="nav-wrapper col s12">
           <div className="row col s12 valign-wrapper left ">
             <div className="col s2">
-              <a href="#" style={circleButtonCss} className="btn transparent sidenav-trigger z-depth-2 blue lighten-1 hide-on-med-and-up col s2" data-target="mobile-nav">
-                <i className="material-icons z-depth-0">menu</i>
-              </a>
+              <SidenavMenuButton />
             </div>
             <div className="col s1 m0"></div>
             <div className="col s9">
@@ -77,6 +74,12 @@ class NavBar extends Component {
   }
 };
 
+const SidenavMenuButton = () => (
+  <a href="#" style={{ borderRadius: '50%', width: '100%', height: '100%' }} className="btn transparent sidenav-trigger z-depth-2 blue lighten-1 hide-on-med-and-up col s2" data-target="mobile-nav">
+    <i className="material-icons z-depth-0">menu</i>
+  </a>
+);
+
 const NavTab = props => {
   let classes = 'tab';
   if (props.active) classes += ' active';
@@ -84,12 +87,6 @@ const NavTab = props => {
     <li className={classes}><Link className="white-text" to={props.to}>{props.children}</Link></li>
   );
 };
-
-function LoginBoxDropdownButton(props) {
-  return (
-    <button className="btn-large red waves-effect waves-light" onClick={props.handler}>Log In</button>
-  )
-}
 
 const HeaderBox = withRouter(HeaderBoxCpt);
 export default HeaderBox;
