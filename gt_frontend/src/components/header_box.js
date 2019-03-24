@@ -41,7 +41,8 @@ class NavBar extends Component {
     if (e.target.tagName === 'A') this.sidebar.close();
   }
   render() {
-    const circleButtonCss = { borderRadius: '50%', width: 'auto' };
+    const circleButtonCss = { borderRadius: '50%', width: 'auto', height: 'auto' };
+    const reduceTitleFontSize = { fontSize: '3rem' }
     const tabMarkup = this.tabs.map(t => {
       let active = false;
       if (this.props.path.startsWith(t.to)) {
@@ -52,12 +53,17 @@ class NavBar extends Component {
     });
     return (
       <div>
-        <nav className="nav-wrapper col s12">
-          <div className="nav-content">
-            <a href="#" style={circleButtonCss} className="btn transparent sidenav-trigger z-depth-2 blue lighten-1 hide-on-med-and-up" data-target="mobile-nav">
+        <div className="row red lighten-2 white-text">
+          <a href="#" style={circleButtonCss} className="btn transparent sidenav-trigger z-depth-2 blue lighten-1 hide-on-med-and-up col s2" data-target="mobile-nav">
               <i className="material-icons z-depth-0">menu</i>
             </a>
-            <ul id="nav-desktop" className="right hide-on-small-only">
+          <h1 style={reduceTitleFontSize} className="col s8">
+            <Link to="/">{config.siteTitle}</Link>
+          </h1>
+        </div>
+        <nav className="nav-wrapper col s12">
+          <div className="row valign-wrapper left">
+            <ul id="nav-desktop" className="right col m5 hide-on-small-only">
               {tabMarkup}
             </ul>
           </div>
@@ -77,16 +83,6 @@ const NavTab = props => {
     <li className={classes}><Link className="white-text" to={props.to}>{props.children}</Link></li>
   );
 };
-
-function SiteTitle(props) {
-  return (
-    <Link className="" to="/">
-      <i className="">gamepad</i>
-      <div className=""></div>
-      <h1 className="">{config.siteTitle}</h1>
-    </Link>
-  )
-}
 
 function LoginBoxDropdownButton(props) {
   return (
