@@ -4,7 +4,7 @@ import './App.css';
 import { signup, search } from './reducers/actions';
 import { connect } from 'react-redux';
 import { Route, Link } from 'react-router-dom';
-import { HomePage, HeaderBox, SignupPage } from './components';
+import { HomePage, HeaderBox, SignupPage, LoginPage } from './components';
 
 const mapStateToProps = state => {
   return {
@@ -20,8 +20,8 @@ class App extends Component {
         <main >
           <HeaderBox />
           <div className="content container">
-            <Link to="/home">Home</Link>
             <Route path="/home" component={HomePage} />
+            <Route path="/login" component={LoginPage} />
             <Route path="/signup" component={SignupPage} />
           </div>
         </main>

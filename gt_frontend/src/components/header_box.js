@@ -3,8 +3,6 @@ import { config } from '../constants';
 import { Link, withRouter } from 'react-router-dom';
 import M from 'materialize-css/dist/js/materialize.min';
 
-import LoginBox from './login_box';
-
 class HeaderBoxCpt extends Component {
   constructor(props) {
     super(props);
@@ -15,7 +13,6 @@ class HeaderBoxCpt extends Component {
     this.setState({ loginShowing: !this.state.loginShowing });
   }
   render() {
-    const loginDropdown = this.state.loginShowing ? (<LoginBox />) : null;
     return (
       <header className="row col s12">
         <NavBar path={this.props.location.pathname} />

@@ -7,7 +7,7 @@ const mapStateToProps = state => {
   return {};
 }
 
-class LoginBox extends Component {
+class LoginPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -52,4 +52,4 @@ function LoginForm(props) {
   )
 }
 
-export default connect(mapStateToProps, { logIn })(LoginBox);
+export default connect(mapStateToProps, { logIn })(LoginPage);
