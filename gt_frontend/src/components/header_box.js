@@ -53,17 +53,19 @@ class NavBar extends Component {
     return (
       <div>
         <nav className="nav-wrapper col s12">
-          <div className="row col s12 valign-wrapper left ">
-            <div className="col s2">
+          <div className="row col s12 valign-wrapper left">
+            <div className="col s2 hide-on-med-and-up">
               <SidenavMenuButton />
             </div>
-            <div className="col s1 m0"></div>
-            <div className="col s9">
+            <div className="col s1 hide-on-med-and-up"></div>
+            <div className="col s9 m4">
               <Link to="/" style={titleCss} >{config.siteTitle}</Link>
             </div>
-            <ul id="nav-desktop" className="right col m5 hide-on-small-only">
-              {tabMarkup}
-            </ul>
+            <div class="col m8 hide-on-small-only">
+              <ul className="right" id="nav-desktop">
+                {tabMarkup}
+              </ul>
+            </div>
           </div>
         </nav>
         <ul id="mobile-nav" onClick={this.closeSidebar} className="sidenav red lighten-2 white-text">
