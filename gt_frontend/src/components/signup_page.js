@@ -19,21 +19,19 @@ class SignupPage extends Component {
       passwordTwo: '',
       validity: {
         valid: false,
-        oneInvalid: false,
-        twoInvalid: false,
         noMatch: false
       }
     };
     this.setEmail = this.setEmail.bind(this);
     this.setPasswordField = this.setPasswordField.bind(this);
     this.processSignup = this.processSignup.bind(this);
-    this.checkPasswords = debounce(this.checkPasswords, 2000);
+    this.checkPasswords = debounce(this.checkPasswords, 1000);
   }
   setEmail(email) {
     this.setState({ email });
   }
   setPasswordField(oneOrTwo, value) {
-    const update = {};
+    const update = { validity: { valid: false, noMatch: true } };
     update[oneOrTwo] = value;
     this.setState(update);
     if (this.state.passwordOne && oneOrTwo === 'passwordTwo' && value) this.checkPasswords();
@@ -41,8 +39,6 @@ class SignupPage extends Component {
   checkPasswords() {
     console.log('checking pw');
     const update = { validity: {} };
-    update.validity.oneInvalid = !validPassword(this.state.passwordOne);
-    update.validity.twoInvalid = !validPassword(this.state.passwordTwo);
     update.validity.noMatch = this.state.passwordOne !== this.state.passwordTwo;
     update.validity.valid = !update.validity.oneInvalid && !update.validity.twoInvalid && !update.validity.noMatch;
     this.setState(update);
@@ -58,32 +54,38 @@ class SignupPage extends Component {
         <SignupHeader />
         <SignupForm submit={this.processSignup} setEmail={this.setEmail} setPw={this.setPasswordField}
                     email={this.state.email} pwOne={this.state.passwordOne} pwTwo={this.state.passwordTwo} 
-                    disabled={!this.state.validity.valid} oneInvalid={this.state.validity.oneInvalid}
-                    twoInvalid={this.state.validity.twoInvalid} noMatch={this.state.validity.noMatch} />
+                    disabled={!this.state.validity.valid} noMatch={this.state.validity.noMatch} />
       </div>
     );
   }
 }
 
-const SignupForm = props => (
-  <form onSubmit={props.submit}>
-    <EmailChecker val={props.email} sendVerified={props.setEmail} />
-    <div className="input-field">
-      <i className="material-icons prefix">vpn_key</i>
-      <label htmlFor="signup-password">Password</label>
-      <input type="password" id="signup-password" value={props.pwOne} onChange={e => props.setPw('passwordOne', e.target.value)} />
-      <PasswordWarning display={props.oneInvalid} type="invalid" />
-    </div>
-    <div className="input-field">
-      <i className="material-icons prefix"></i>
-      <label htmlFor="repeat-password">Password (again)</label>
-      <input type="password" id="repeat-password" value={props.pwTwo} onChange={e => props.setPw('passwordTwo', e.target.value)} />
-      <PasswordWarning display={props.twoInvalid} type="invalid" />
-    </div>
-    <PasswordWarning display={props.noMatch} type="noMatch" />
-    <button className="btn" type="submit" disabled={props.disabled}>Sign up<i className="material-icons right">send</i></button>
-  </form>
-);
+
+const SignupForm = props => {
+  const pwPattern = '.{6,}'
+  const pwErrMsg = 'Passwords must be at least 6 characters';
+  return (
+    <form onSubmit={props.submit} className="section">
+      <EmailChecker val={props.email} sendVerified={props.setEmail} />
+      <div className="input-field">
+        <i className="material-icons prefix">vpn_key</i>
+        <label htmlFor="signup-password">Password</label>
+        <input type="password" id="signup-password" value={props.pwOne} onChange={e => props.setPw('passwordOne', e.target.value)} 
+          pattern={pwPattern} className="validate" required />
+        <span className="helper-text" data-error={pwErrMsg}></span>
+      </div>
+      <div className="input-field">
+        <i className="material-icons prefix"></i>
+        <label htmlFor="repeat-password">Password (again)</label>
+        <input type="password" id="repeat-password" value={props.pwTwo} onChange={e => props.setPw('passwordTwo', e.target.value)} 
+          pattern={pwPattern} className="validate" />
+        <span className="helper-text" data-error={pwErrMsg}></span>
+      </div>
+      <span className={props.noMatch ? 'helper-text' : 'hide' } data-error="Passwords must match"></span>
+      <button className="btn" type="submit" disabled={props.disabled}>Sign up<i className="material-icons right">send</i></button>
+    </form>
+  );
+};
 
 SignupForm.propTypes = {
   submit: PropTypes.func.isRequired,
@@ -92,7 +94,8 @@ SignupForm.propTypes = {
   pwOne: PropTypes.string.isRequired,
   pwTwo: PropTypes.string.isRequired,
   setPw: PropTypes.func.isRequired,
-  disabled: PropTypes.bool.isRequired
+  disabled: PropTypes.bool.isRequired,
+  noMatch: PropTypes.bool.isRequired
 };
 
 const SignupHeader = props => (
@@ -121,7 +124,7 @@ const PasswordWarning = props => {
       break;
   }
   return (
-    <div className="form-warning">{msg}</div>
+    <div className="helper-text red-text">{msg}</div>
   );
 };
 

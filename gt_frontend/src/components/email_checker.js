@@ -3,45 +3,37 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import { debounce, validEmail } from '../utils';
 import { config } from '../constants';
-import M from 'materialize-css/dist/js/materialize.min';
 
 const { serverUrl } = config;
 
 export default class EmailChecker extends Component {
   constructor(props) {
     super(props);
-    this.state = { email: this.props.val, status: '', msg: '' };
+    this.state = { email: this.props.val, taken: false };
     this.sendToServer = debounce(this.sendToServer, 2000);
-  }
-  componentDidMount() {
-    M.updateTextFields();
   }
   updateState(email) {
     this.setState({ email });
     if (email.length < 3) return;
-    if (validEmail(email)) this.setState({ status: '', msg: '' });
     this.sendToServer(email);
   }
   sendToServer(email) {
-    if (!validEmail(email)) return this.setState({ status: 'error', msg: 'Invalid email address' });
+    if (!validEmail(email)) return;
     axios.get(`${serverUrl}/api/external/email-taken?email=${email}`).then(resp => {
       if (resp.data.taken === false) {
-        this.setState({ status: 'success', msg: '' });
         this.props.sendVerified(email);
-      } else this.setState({ status: 'error', msg: 'Email is already taken' });
+      } else this.setState({ taken: true });
     });
   }
   render() {
-    let message, checkmark;
-    if (this.state.status === 'error') message = (<div>Error: {this.state.msg}</div>);
-    else if (this.state.status === 'success') checkmark = (<span>&#x2713;</span>);
     return (
       <div className="input-field">
         <i className="material-icons prefix">email</i>
-        <label htmlFor="email-checker" className="active">Email</label>
-        <input type="email" id="email-checker" value={this.state.email} onChange={e => this.updateState(e.target.value)} />
-        {checkmark}
-        {message}
+        <label htmlFor="email-checker">Email</label>
+        <input type="email" className="validate" id="email-checker" value={this.state.email} 
+          onChange={e => this.updateState(e.target.value)} />
+        <span className="helper-text" data-error="Must provide a valid email address"></span>
+        <span className={this.state.taken ? "helper-text red-text" : "hide"}>Email is already taken</span>
       </div>
     )
   }
