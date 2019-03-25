@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import { debounce, validEmail } from '../utils';
 import { config } from '../constants';
+import M from 'materialize-css/dist/js/materialize.min';
 
 const { serverUrl } = config;
 
@@ -11,6 +12,9 @@ export default class EmailChecker extends Component {
     super(props);
     this.state = { email: this.props.val, status: '', msg: '' };
     this.sendToServer = debounce(this.sendToServer, 2000);
+  }
+  componentDidMount() {
+    M.updateTextFields();
   }
   updateState(email) {
     this.setState({ email });
@@ -32,7 +36,9 @@ export default class EmailChecker extends Component {
     if (this.state.status === 'error') message = (<div>Error: {this.state.msg}</div>);
     else if (this.state.status === 'success') checkmark = (<span>&#x2713;</span>);
     return (
-      <div>
+      <div className="input-field">
+        <i className="material-icons prefix">email</i>
+        <label htmlFor="email-checker" className="active">Email</label>
         <input type="email" id="email-checker" value={this.state.email} onChange={e => this.updateState(e.target.value)} />
         {checkmark}
         {message}

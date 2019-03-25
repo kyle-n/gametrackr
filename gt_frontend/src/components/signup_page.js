@@ -67,22 +67,21 @@ class SignupPage extends Component {
 
 const SignupForm = props => (
   <form onSubmit={props.submit}>
-    <div className="form-control">
-      <label htmlFor="email-checker">Email</label>
-      <EmailChecker val={props.email} sendVerified={props.setEmail} />
-    </div>
-    <div className="form-control">
+    <EmailChecker val={props.email} sendVerified={props.setEmail} />
+    <div className="input-field">
+      <i className="material-icons prefix">vpn_key</i>
       <label htmlFor="signup-password">Password</label>
       <input type="password" id="signup-password" value={props.pwOne} onChange={e => props.setPw('passwordOne', e.target.value)} />
       <PasswordWarning display={props.oneInvalid} type="invalid" />
     </div>
-    <div className="form-control">
+    <div className="input-field">
+      <i className="material-icons prefix"></i>
       <label htmlFor="repeat-password">Password (again)</label>
       <input type="password" id="repeat-password" value={props.pwTwo} onChange={e => props.setPw('passwordTwo', e.target.value)} />
       <PasswordWarning display={props.twoInvalid} type="invalid" />
     </div>
     <PasswordWarning display={props.noMatch} type="noMatch" />
-    <button type="submit" disabled={props.disabled}>Sign up</button>
+    <button className="btn" type="submit" disabled={props.disabled}>Sign up<i className="material-icons right">send</i></button>
   </form>
 );
 

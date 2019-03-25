@@ -58,7 +58,7 @@ class NavBar extends Component {
             <div className="col s9 m4">
               <Link to="/" style={titleCss} >{config.siteTitle}</Link>
             </div>
-            <div class="col m8 hide-on-small-only">
+            <div className="col m8 hide-on-small-only">
               <ul className="right" id="nav-desktop">
                 {tabMarkup}
               </ul>
