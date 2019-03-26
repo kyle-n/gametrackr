@@ -17,32 +17,46 @@ class SignupPage extends Component {
       email: '',
       passwordOne: '',
       passwordTwo: '',
-      validity: {
-        valid: false,
-        noMatch: false
-      }
+      valid: false,
+      oneInvalid: false,
+      twoInvalid: false,
+      noMatch: false
     };
     this.setEmail = this.setEmail.bind(this);
     this.setPasswordField = this.setPasswordField.bind(this);
     this.processSignup = this.processSignup.bind(this);
-    this.checkPasswords = debounce(this.checkPasswords, 1000);
+    this.checkPwMatch = this.checkPwMatch.bind(this);
+    this.checkValidPw = this.checkValidPw.bind(this);
   }
   setEmail(email) {
     this.setState({ email });
   }
   setPasswordField(oneOrTwo, value) {
-    const update = { validity: { valid: false, noMatch: true } };
+    const update = { valid: false, noMatch: true };
     update[oneOrTwo] = value;
-    this.setState(update);
-    if (this.state.passwordOne && oneOrTwo === 'passwordTwo' && value) this.checkPasswords();
+    this.setState(update, () => {
+      const invalidField = oneOrTwo === 'passwordOne' ? 'oneInvalid' : 'twoInvalid';
+      if (this.state[invalidField]) {
+        console.log('checking', oneOrTwo);
+        this.checkValidPw(oneOrTwo);
+      }
+    });
   }
-  checkPasswords() {
-    console.log('checking pw');
-    const update = { validity: {} };
-    update.validity.noMatch = this.state.passwordOne !== this.state.passwordTwo;
-    update.validity.valid = !update.validity.oneInvalid && !update.validity.twoInvalid && !update.validity.noMatch;
+  checkValidPw(oneOrTwo) {
+    const update = {};
+    const invalidField = oneOrTwo === 'passwordOne' ? 'oneInvalid' : 'twoInvalid';
+    update[invalidField] = !validPassword(this.state[oneOrTwo]);
+    const other = oneOrTwo === 'passwordOne' ? 'twoInvalid' : 'oneInvalid';
+    update.valid = !this.state.noMatch && !this.state[other] && !update[invalidField];
+    console.log(update, this.state[oneOrTwo]);
+    return this.setState(update);
+  }
+  checkPwMatch() {
+    console.log('checking pw match');
+    const update = {};
+    update.noMatch = this.state.passwordOne === this.state.passwordTwo;
+    update.valid = !update.noMatch && !this.state.oneInvalid && !this.state.twoInvalid;
     this.setState(update);
-    console.log(update, 'update');
   }
   processSignup(e) {
     e.preventDefault();
@@ -54,7 +68,9 @@ class SignupPage extends Component {
         <SignupHeader />
         <SignupForm submit={this.processSignup} setEmail={this.setEmail} setPw={this.setPasswordField}
                     email={this.state.email} pwOne={this.state.passwordOne} pwTwo={this.state.passwordTwo} 
-                    disabled={!this.state.validity.valid} noMatch={this.state.validity.noMatch} />
+                    disabled={!this.state.valid} noMatch={this.state.noMatch}
+                    checkValidPw={this.checkValidPw} checkMatch={this.checkPwMatch}
+                    oneInvalid={this.state.oneInvalid} twoInvalid={this.state.twoInvalid} />
       </div>
     );
   }
@@ -63,22 +79,24 @@ class SignupPage extends Component {
 
 const SignupForm = props => {
   const pwPattern = '.{6,}'
-  const pwErrMsg = 'Passwords must be at least 6 characters';
+  const pwErrMsg = 'Passwords must have at least 6 characters and 1 number';
   return (
     <form onSubmit={props.submit} className="section">
+      <p>{JSON.stringify(props)}</p>
       <EmailChecker val={props.email} sendVerified={props.setEmail} />
       <div className="input-field">
         <i className="material-icons prefix">vpn_key</i>
         <label htmlFor="signup-password">Password</label>
         <input type="password" id="signup-password" value={props.pwOne} onChange={e => props.setPw('passwordOne', e.target.value)} 
-          pattern={pwPattern} className="validate" required />
+          pattern={pwPattern} className={props.oneInvalid ? 'invalid' : ''} required
+          onBlur={() => props.checkValidPw('passwordOne')} />
         <span className="helper-text" data-error={pwErrMsg}></span>
       </div>
       <div className="input-field">
         <i className="material-icons prefix"></i>
         <label htmlFor="repeat-password">Password (again)</label>
         <input type="password" id="repeat-password" value={props.pwTwo} onChange={e => props.setPw('passwordTwo', e.target.value)} 
-          pattern={pwPattern} className="validate" />
+          pattern={pwPattern} className={props} />
         <span className="helper-text" data-error={pwErrMsg}></span>
       </div>
       <span className={props.noMatch ? 'helper-text' : 'hide' } data-error="Passwords must match"></span>
