@@ -3,13 +3,18 @@ a {
 }
 
 .bordered {
-  border: 2px solid black !important;
+  border: 2px solid white !important;
 }
 
 input {
   color: white;
 }
 
-#email-checker::after {
-  content: 'xy';
+.loading-container {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  left: 50%;
+  margin-left: -3rem;
+  margin-top: -3rem;
 }

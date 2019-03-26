@@ -4,10 +4,11 @@ import './App.css';
 import { signup, search } from './reducers/actions';
 import { connect } from 'react-redux';
 import { Route, Link } from 'react-router-dom';
-import { HomePage, HeaderBox, SignupPage, LoginPage } from './components';
+import { HomePage, HeaderBox, SignupPage, LoginPage, Loading } from './components';
 
 const mapStateToProps = state => {
   return {
+    loading: state.ui.loading
   }
 }
 
@@ -19,6 +20,7 @@ class App extends Component {
     return (
         <main >
           <HeaderBox />
+          <Loading show={this.props.loading} />
           <div className="content container">
             <Route path="/home" component={HomePage} />
             <Route path="/login" component={LoginPage} />

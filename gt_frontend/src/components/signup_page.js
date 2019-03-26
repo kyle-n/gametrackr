@@ -19,8 +19,8 @@ class SignupPage extends Component {
       passwordOne: '',
       passwordTwo: '',
       valid: false,
-      oneInvalid: false,
-      twoInvalid: false,
+      oneInvalid: undefined,
+      twoInvalid: undefined,
       noMatch: false
     };
     this.setEmail = this.setEmail.bind(this);
@@ -38,7 +38,6 @@ class SignupPage extends Component {
     this.setState(update, () => {
       const invalidField = oneOrTwo === 'passwordOne' ? 'oneInvalid' : 'twoInvalid';
       if (this.state[invalidField]) {
-        console.log('checking', oneOrTwo);
         this.checkValidPw(oneOrTwo);
       }
     });
@@ -48,23 +47,21 @@ class SignupPage extends Component {
     const invalidField = oneOrTwo === 'passwordOne' ? 'oneInvalid' : 'twoInvalid';
     update[invalidField] = !validPassword(this.state[oneOrTwo]);
     const other = oneOrTwo === 'passwordOne' ? 'twoInvalid' : 'oneInvalid';
-    update.valid = !this.state.noMatch && !this.state[other] && !update[invalidField]
+    update.valid = !this.state.noMatch && this.state[other] === false && update[invalidField] === false
       && this.state.passwordOne && this.state.passwordTwo && this.state.email;
-    console.log(update, this.state[oneOrTwo]);
     return this.setState(update, () => {
       if (oneOrTwo === 'passwordTwo') this.checkPwMatch();
     });
   }
   checkPwMatch() {
-    console.log('checking pw match');
     const update = {};
     update.noMatch = this.state.passwordOne !== this.state.passwordTwo;
-    update.valid = !update.noMatch && !this.state.oneInvalid && !this.state.twoInvalid && this.state.email;
+    update.valid = !update.noMatch && this.state.oneInvalid === false && this.state.twoInvalid === false && this.state.email;
     this.setState(update);
   }
   processSignup(e) {
     e.preventDefault();
-    this.signup(this.state.email, this.state.passwordOne);
+    this.props.signup(this.state.email, this.state.passwordOne);
   }
   render() {
     return (
@@ -83,12 +80,13 @@ class SignupPage extends Component {
 
 const SignupForm = props => {
   const pwErrMsg = 'Passwords must have at least 6 characters and 1 number';
-  let pOneCss = '';
+  let pOneCss = '', pTwoCss = '';
   if (props.oneInvalid) pOneCss = 'invalid';
-  if (!props.oneInvalid && props.passwordOne) pOneCss = 'valid';
+  else if (props.oneInvalid === false) pOneCss = 'valid';
+  if (props.twoInvalid) pTwoCss = 'invalid';
+  else if (props.twoInvalid === false) pTwoCss = 'valid';
   return (
     <form onSubmit={props.submit} className="section">
-      <p>{JSON.stringify(props)}</p>
       <EmailChecker val={props.email} sendVerified={props.setEmail} />
       <div className="input-field">
         <i className="material-icons prefix">vpn_key</i>
@@ -102,7 +100,7 @@ const SignupForm = props => {
         <i className="material-icons prefix"></i>
         <label htmlFor="repeat-password">Password (again)</label>
         <input type="password" id="repeat-password" value={props.pwTwo} onChange={e => props.setPw('passwordTwo', e.target.value)} 
-          className={props.twoInvalid ? 'invalid' : '' } required onBlur={() => props.checkValidPw('passwordTwo')} />
+          className={pTwoCss} required onBlur={() => props.checkValidPw('passwordTwo')} />
         <span className="helper-text" data-error={pwErrMsg}></span>
         <div className={props.noMatch ? 'helper-text red-text' : 'hide' }>Passwords must match</div>
       </div>
@@ -132,29 +130,5 @@ const SignupHeader = props => (
     </ul>
   </div>
 );
-
-const PasswordWarning = props => {
-  if (!props.display) return null;
-  let msg;
-  switch (props.type) {
-    case 'invalid':
-      msg = 'Passwords must be at least 6 characters with at least 1 number';
-      break;
-    case 'noMatch':
-      msg = 'Passwords must match';
-      break;
-    default:
-      msg = 'Unknown error';
-      break;
-  }
-  return (
-    <div className="helper-text red-text">{msg}</div>
-  );
-};
-
-PasswordWarning.propTypes = {
-  display: PropTypes.bool.isRequired,
-  type: PropTypes.string.isRequired
-};
 
 export default connect(mapStateToProps, { signup })(SignupPage);
