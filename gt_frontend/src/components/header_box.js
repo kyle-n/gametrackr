@@ -5,9 +5,24 @@ import M from 'materialize-css/dist/js/materialize.min';
 import { connect } from 'react-redux';
 
 const mapStateToProps = state => {
-  return {
-    loggedIn: state.profile.token.length > 0
+  let props;
+  if (state.profile.token.length > 0) props = {
+    loggedIn: true,
+    tabs: [
+      { to: '/search', tabName: 'Search' },
+      { to: '/lists', tabName: 'Lists' },
+      { to: '/profile', tabName: 'Profile' }
+    ]
   };
+  else props = {
+    loggedIn: false,
+    tabs: [
+      { to: '/', tabName: 'Welcome' },
+      { to: '/login', tabName: 'Log In' },
+      { to: '/signup', tabName: 'Sign Up' }
+    ]
+  };
+  return props;
 }
 
 class HeaderBoxCpt extends Component {
@@ -22,7 +37,7 @@ class HeaderBoxCpt extends Component {
   render() {
     return (
       <header className="row col s12">
-        <NavBar loggedIn={this.props.loggedIn} path={this.props.location.pathname} />
+        <NavBar tabs={this.props.tabs} loggedIn={this.props.loggedIn} path={this.props.location.pathname} />
       </header>
     )
   }
@@ -31,16 +46,6 @@ class HeaderBoxCpt extends Component {
 class NavBar extends Component {
   constructor(props) {
     super(props);
-    if (!props.loggedIn) this.tabs = [
-      { to: '/', tabName: 'Welcome' },
-      { to: '/login', tabName: 'Log In' },
-      { to: '/signup', tabName: 'Sign Up' }
-    ];
-    else this.tabs = [
-      { to: '/search', tabName: 'Search' },
-      { to: '/lists', tabName: 'Lists' },
-      { to: '/profile', tabName: 'Profile' }
-    ];
     this.closeSidebar = this.closeSidebar.bind(this);
   }
   componentDidMount() {
@@ -50,7 +55,7 @@ class NavBar extends Component {
     if (e.target.tagName === 'A') this.sidebar.close();
   }
   render() {
-    const tabMarkup = this.tabs.map(t => {
+    const tabMarkup = this.props.tabs.map(t => {
       let active = false;
       if (this.props.path.startsWith(t.to)) {
         if (t.to === '/') active = t.to === this.props.path;

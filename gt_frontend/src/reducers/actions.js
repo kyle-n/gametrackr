@@ -24,7 +24,7 @@ export function setLoading(isLoading) {
   };
 }
 
-export function signup(email, password) {
+export function signup(email, password, cb) {
   return function (dispatch) {
     dispatch(setLoading(true));
     return axios.post(serverUrl + '/api/external', { email, password }).then(resp => {
@@ -32,18 +32,19 @@ export function signup(email, password) {
       axios.defaults.headers.common['authorization'] = 'jwt ' + resp.data.token;
       dispatch(setUserData(resp.data.id, email, resp.data.token));
       console.log('resp process done');
+      if (cb) return cb();
     }, e => console.log(e, 'signuperr'));
   }
 }
 
-export function logIn(email, password) {
+export function logIn(email, password, cb) {
   return function (dispatch) {
     dispatch(setLoading(true));
     return axios.post(serverUrl + '/api/external/login', { email, password }).then(resp => {
       dispatch(setLoading(false));
       axios.defaults.headers.common['authorization'] = 'jwt ' + resp.data.token;
       dispatch(setUserData(resp.data.id, email, resp.data.token));
-      return BrowserRouter()
+      if (cb) return cb();
     }, e => console.log(e, 'loginerr'));
   }
 }
