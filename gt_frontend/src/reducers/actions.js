@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT, AVAILABLE_EMAIL } from './definitions';
+import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT } from './definitions';
 import { config } from '../constants';
+import {  } from 'react-router-dom';
 
 const { serverUrl } = config;
 
@@ -42,6 +43,7 @@ export function logIn(email, password) {
       dispatch(setLoading(false));
       axios.defaults.headers.common['authorization'] = 'jwt ' + resp.data.token;
       dispatch(setUserData(resp.data.id, email, resp.data.token));
+      return BrowserRouter()
     }, e => console.log(e, 'loginerr'));
   }
 }

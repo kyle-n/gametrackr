@@ -22,16 +22,12 @@ class LoginPage extends Component {
   }
   render() {
     return (
-      <aside>
+      <div>
         <h3>Log in</h3>
         <LoginForm submit={this.sendLogin} email={this.state.email} password={this.state.password} 
           emailHandler={e => this.setState({ email: e.target.value })} 
           passwordHandler={e => this.setState({ password: e.target.value })} />
-        <div>
-          <Link to="/signup">Sign up</Link>
-          <Link to="/reset">Forgot your password?</Link>
-        </div>
-      </aside>
+      </div>
     )
   }
 }
@@ -39,15 +35,15 @@ class LoginPage extends Component {
 function LoginForm(props) {
   return (
     <form onSubmit={props.submit}>
-      <div className="form-control">
+      <div className="input-field">
         <label htmlFor="email-login">Email</label>
-        <input id="email-login" type="email" value={props.email} onChange={props.emailHandler} />
+        <input id="email-login" required type="email" value={props.email} onChange={props.emailHandler} />
       </div>
-      <div className="form-control">
+      <div className="input-field">
         <label htmlFor="password-login">Password</label>
-        <input id="password-login" type="password" value={props.password} onChange={props.passwordHandler} />
+        <input id="password-login" required type="password" value={props.password} onChange={props.passwordHandler} />
       </div>
-      <input type="submit" value="Log in" />
+      <button type="submit" className="btn">Log In<i className="material-icons right">send</i></button>
     </form>
   )
 }

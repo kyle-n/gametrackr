@@ -2,6 +2,13 @@ import React, { Component } from 'react';
 import { config } from '../constants';
 import { Link, withRouter } from 'react-router-dom';
 import M from 'materialize-css/dist/js/materialize.min';
+import { connect } from 'react-redux';
+
+const mapStateToProps = state => {
+  return {
+    loggedIn: state.profile.token.length > 0
+  };
+}
 
 class HeaderBoxCpt extends Component {
   constructor(props) {
@@ -15,7 +22,7 @@ class HeaderBoxCpt extends Component {
   render() {
     return (
       <header className="row col s12">
-        <NavBar path={this.props.location.pathname} />
+        <NavBar loggedIn={this.props.loggedIn} path={this.props.location.pathname} />
       </header>
     )
   }
@@ -24,10 +31,15 @@ class HeaderBoxCpt extends Component {
 class NavBar extends Component {
   constructor(props) {
     super(props);
-    this.tabs = [
+    if (!props.loggedIn) this.tabs = [
       { to: '/', tabName: 'Welcome' },
       { to: '/login', tabName: 'Log In' },
       { to: '/signup', tabName: 'Sign Up' }
+    ];
+    else this.tabs = [
+      { to: '/search', tabName: 'Search' },
+      { to: '/lists', tabName: 'Lists' },
+      { to: '/profile', tabName: 'Profile' }
     ];
     this.closeSidebar = this.closeSidebar.bind(this);
   }
@@ -56,7 +68,7 @@ class NavBar extends Component {
             </div>
             <div className="col s1 hide-on-med-and-up"></div>
             <div className="col s9 m4">
-              <Link to="/" style={titleCss} >{config.siteTitle}</Link>
+              <Link to={this.props.loggedIn ? '/home' : '/'} style={titleCss} >{config.siteTitle}</Link>
             </div>
             <div className="col m8 hide-on-small-only">
               <ul className="right" id="nav-desktop">
@@ -88,4 +100,4 @@ const NavTab = props => {
 };
 
 const HeaderBox = withRouter(HeaderBoxCpt);
-export default HeaderBox;
+export default connect(mapStateToProps, {})(HeaderBox)

@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import { signup, search } from './reducers/actions';
 import { connect } from 'react-redux';
-import { Route, Link } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { HomePage, HeaderBox, SignupPage, LoginPage, Loading } from './components';
 
 const mapStateToProps = state => {
