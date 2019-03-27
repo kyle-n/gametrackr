@@ -21,7 +21,7 @@ const GameResults = props => {
 
 const GameResult = props => (
   <a href="#" onClick={props.action}>
-    <div className="row">
+    <div className="row collection-item">
       <div className="col s8">{props.name}</div>
       <div className="col s4">{props.date}</div>
     </div>
