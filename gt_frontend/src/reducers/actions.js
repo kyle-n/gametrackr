@@ -58,6 +58,7 @@ export function updateProfile(id, email, password) {
       dispatch(setLoading(false));
       axios.defaults.headers.common['authorization'] = 'jwt ' + resp.data.token;
       dispatch(setUserData(resp.data.id, resp.data.email, resp.data.token));
+      dispatch(getAllLists());
     }, e => console.log(e, 'patch profile err'));
   }
 }
@@ -130,4 +131,15 @@ export function createList(title, deck) {
       dispatch(setList(resp.data.id, resp.data.title, resp.data.deck));
     }, e => console.log(e));
   };
+}
+
+export function getAllLists() {
+  return function (dispatch) {
+    dispatch(setLoading(true));
+    return axios.get(`${serverUrl}/api/lists`).then(resp => {
+      dispatch(setLoading(false));
+      if (!resp.data.lists) return console.log('could not get lists');
+      resp.data.lists.forEach(l => dispatch(setList(l.id, l.title, l.deck)));
+    });
+  }
 }
