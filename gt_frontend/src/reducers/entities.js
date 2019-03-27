@@ -1,4 +1,4 @@
-import { SET_REVIEW, PROCESS_SEARCH_RESULTS } from './definitions';
+import { SET_REVIEW, PROCESS_SEARCH_RESULTS, SET_LIST } from './definitions';
 import { combineReducers } from 'redux';
 
 const reviews = function reviews(state = {}, action) {
@@ -23,6 +23,8 @@ const games = function games(state = {}, action) {
 
 const lists = function lists(state = {}, action) {
   switch (action.type) {
+    case SET_LIST:
+      return Object.assign({}, state, { id: action.id, title: action.title, deck: action.deck });
     default:
       return state;
   }

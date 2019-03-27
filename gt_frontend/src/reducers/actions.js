@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT } from './definitions';
+import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT, SET_LIST } from './definitions';
 import { config } from '../constants';
 
 const { serverUrl } = config;
@@ -112,4 +112,22 @@ function processSearchResults(results) {
     type: PROCESS_SEARCH_RESULTS,
     results
   }
+}
+
+function setList(id, title, deck) {
+  return {
+    type: SET_LIST,
+    id, title, deck
+  };
+}
+
+export function createList(title, deck) {
+  return function (dispatch) {
+    dispatch(setLoading(true));
+    return axios.post(`${serverUrl}/api/lists`, { title, deck }).then(resp => {
+      dispatch(setLoading(false));
+      if (!resp.data.id) return console.log('could not get list');
+      dispatch(setList(resp.data.id, resp.data.title, resp.data.deck));
+    }, e => console.log(e));
+  };
 }
