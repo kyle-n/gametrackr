@@ -30,7 +30,7 @@ export const savePlatforms = (error: ServerError, gbResp: any): number => {
       });
       return t.batch(queries);
     });
-  });
+  }).catch(e => console.log('platformerr'));
   return 0;
 };
 
@@ -59,7 +59,7 @@ export const saveGames = (error: ServerError, gbResp: any): number => {
       });
       return t.batch(queries);
     });
-  });
+  }).catch(e => console.log('saveerr'))
   return 0;
 };
 
@@ -81,6 +81,13 @@ export const searchGiantBomb = (req: express.Request, resp: express.Response) =>
   axios.get(`https://www.giantbomb.com/api/search/${queryString}`).then(gbResp => {
     // immediately pass data to client for speedy showing results on frontend
     //console.log(gbResp.data.results[0]);
+    if (!gbResp.data.results.length) return;
+    const datesWithoutTime = gbResp.data.results.map((g: GiantBombGame) => {
+      let edited = g;
+      if (edited.original_release_date.indexOf(' ') !== -1) edited.original_release_date = edited.original_release_date.split(' ')[0];
+      return edited;
+    });
+    gbResp.data.results = datesWithoutTime;
     resp.json(gbResp.data);
     saveGames(error, gbResp);
     savePlatforms(error, gbResp);

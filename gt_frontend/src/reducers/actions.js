@@ -1,9 +1,11 @@
 import axios from 'axios';
 import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT } from './definitions';
 import { config } from '../constants';
-import {  } from 'react-router-dom';
 
 const { serverUrl } = config;
+const cachedProfile = localStorage.getItem('gt_profile');
+if (cachedProfile) axios.defaults.headers.common['authorization'] = 'jwt ' + (JSON.parse(cachedProfile)).token;
+console.log(axios.defaults.headers.common['authorization']);
 
 export function alert(text, status) {
   if (status) return {
@@ -102,7 +104,7 @@ export function search(query) {
     return axios.get(`${serverUrl}/api/search?searchTerm=${query}`).then(resp => {
       dispatch(setLoading(false));
       dispatch(processSearchResults(resp.data.results));
-    }, e => dispatch(alert(e.error.text, e.status)));
+    }, e => console.log(e));
   }
 }
 function processSearchResults(results) {

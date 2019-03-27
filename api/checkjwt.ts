@@ -18,5 +18,6 @@ export const checkJwt = (req: express.Request, resp: express.Response, next: exp
       resp.locals.email = decoded.email;
       return next();
     } else return resp.status(401).send('Please log in again');
+    //} else return console.log(req.headers);
   } else return resp.status(401).send('You must be logged in to do that');
 };
