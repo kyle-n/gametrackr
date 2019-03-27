@@ -6,7 +6,7 @@ const SearchPage = props => (
   <div>
     <h1>Search</h1>
     <SearchBox />
-    <GameResults />
+    <GameResults large={true} small={false} />
   </div>
 );
 

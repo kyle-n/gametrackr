@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import GameResultCard from './game_result_card';
 
 const mapStateToProps = state => {
   return {
@@ -9,11 +10,14 @@ const mapStateToProps = state => {
 
 const GameResults = props => {
   let resultsMarkup = null;
-  if (props.results.length) resultsMarkup = props.results.map(game => {
+  if (props.results && props.results.length && props.small) resultsMarkup = props.results.map(game => {
     return (<GameResult key={game.id} id={game.id} name={game.name} date={game.original_release_date} />);
   });
+  if (props.results && props.results.length && props.large) resultsMarkup = props.results.map(game => {
+    return (<GameResultCard key={game.id} game={game} />);
+  });
   return (
-    <div className="collection">
+    <div className={props.small ? 'collection' : ''}>
       {resultsMarkup}
     </div>
   );
