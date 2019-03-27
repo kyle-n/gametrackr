@@ -3,9 +3,13 @@ import { connect } from 'react-redux';
 import GameResultCard from './game_result_card';
 
 const mapStateToProps = state => {
+  const lists = [];
+  for (const id of state.userLists) {
+    lists.push(id);
+  };
   return {
     results: state.results.map(id => state.entities.games[id]),
-    lists: state.entities.userLists.map(id => state.entities.lists[id])
+    lists
   };
 }
 
