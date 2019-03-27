@@ -4,14 +4,15 @@ import { search } from '../reducers/actions';
 import { debounce } from '../utils';
 
 const mapStateToProps = state => {
-  return {};
+  return {
+  };
 }
 
 class SearchBox extends Component {
   constructor(props) {
     super(props);
-    this.state = { query: '' };
-    this.sendQuery = debounce(this.sendQuery, 1000);
+    this.state = { query: '', loading: false };
+    this.sendQuery = debounce(this.sendQuery, 500);
   }
   sendQuery() {
     if (!this.state.query) return;
