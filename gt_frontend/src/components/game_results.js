@@ -3,9 +3,9 @@ import { connect } from 'react-redux';
 import GameResultCard from './game_result_card';
 
 const mapStateToProps = state => {
-  console.log(state);
+  console.log(state.userLists);
   const lists = [];
-  for (const id of state.userLists) {
+  for (const [key, id] of Object.entries(state.userLists)) {
     lists.push(id);
   };
   return {

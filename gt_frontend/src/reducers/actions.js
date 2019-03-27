@@ -5,7 +5,6 @@ import { config } from '../constants';
 const { serverUrl } = config;
 const cachedProfile = localStorage.getItem('gt_profile');
 if (cachedProfile) axios.defaults.headers.common['authorization'] = 'jwt ' + (JSON.parse(cachedProfile)).token;
-console.log(axios.defaults.headers.common['authorization']);
 
 export function alert(text, status) {
   if (status) return {
@@ -141,5 +140,5 @@ export function getAllLists() {
       if (!resp.data.lists) return console.log('could not get lists');
       resp.data.lists.forEach(l => dispatch(setList(l.id, l.title, l.deck)));
     });
-  }
+  };
 }

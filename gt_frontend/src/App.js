@@ -1,20 +1,22 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { signup, search } from './reducers/actions';
 import { connect } from 'react-redux';
+import { getAllLists } from './reducers/actions';
 import { Route } from 'react-router-dom';
 import { HomePage, HeaderBox, SignupPage, LoginPage, Loading, SearchPage, ListsPage, ListPage } from './components';
 
 const mapStateToProps = state => {
   return {
-    loading: state.ui.loading
+    loading: state.ui.loading,
+    loggedIn: state.profile.token.length > 0
   }
 }
 
 class App extends Component {
   constructor(props) {
     super(props);
+    if (props.loggedIn) this.props.getAllLists();
   }
   render() {
     return (
@@ -34,4 +36,4 @@ class App extends Component {
   }
 }
 
-export default connect(mapStateToProps, { signup, search })(App);
+export default connect(mapStateToProps, { getAllLists })(App);
