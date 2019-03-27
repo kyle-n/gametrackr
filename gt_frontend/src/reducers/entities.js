@@ -8,7 +8,7 @@ const reviews = function reviews(state = {}, action) {
     default:
       return state;
   }
-}
+};
 
 const games = function games(state = {}, action) {
   switch (action.type) {
@@ -19,9 +19,16 @@ const games = function games(state = {}, action) {
     default:
       return state;
   }
-}
+};
+
+const lists = function lists(state = {}, action) {
+  switch (action.type) {
+    default:
+      return state;
+  }
+};
 
 const entries = combineReducers({
-  reviews, games
+  reviews, games, lists
 });
 export default entries;

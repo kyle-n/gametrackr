@@ -4,7 +4,8 @@ import GameResultCard from './game_result_card';
 
 const mapStateToProps = state => {
   return {
-    results: state.results.map(id => state.entities.games[id])
+    results: state.results.map(id => state.entities.games[id]),
+    lists: state.entities.userLists.map(id => state.entities.lists[id])
   };
 }
 
@@ -14,7 +15,7 @@ const GameResults = props => {
     return (<GameResult key={game.id} id={game.id} name={game.name} date={game.original_release_date} />);
   });
   if (props.results && props.results.length && props.large) resultsMarkup = props.results.map(game => {
-    return (<GameResultCard key={game.id} game={game} />);
+    return (<GameResultCard key={game.id} game={game} lists={props.lists} />);
   });
   return (
     <div className={props.small ? 'collection' : ''}>
