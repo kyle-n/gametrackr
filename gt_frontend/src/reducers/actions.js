@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT, SET_LIST } from './definitions';
+import { ALERT, SET_LOADING, SET_USER_DATA, LOG_OUT, SET_REVIEW, PROCESS_SEARCH_RESULTS, ERROR_ALERT, SET_LIST, CREATE_ENTRY, UPDATE_ENTRY, DELETE_ENTRY } from './definitions';
 import { config } from '../constants';
 
 const { serverUrl } = config;
@@ -143,10 +143,29 @@ export function getAllLists() {
   };
 }
 
-export function createEntry(game_id, list_id) {
+export function createEntry(list_id, game_id, ranking, text) {
   return function (dispatch) {
-    return axios.post(`${serverUrl}/api/lists`).then(resp => {
+    return axios.post(`${serverUrl}/api/lists/${list_id}`, { game_id, ranking, text }).then(resp => {
+      if (!resp.data.id) return console.log('bad create!');
+      dispatch({ type: CREATE_ENTRY, list_id, entry: { game_id, ranking: resp.data.ranking, text, id: resp.data.id }});
+    });
+  }
+}
 
-    })
+export function updateEntry(list_id, entry_id, game_id, ranking, text) {
+  return function (dispatch) {
+    return axios.patch(`${serverUrl}/api/lists/${list_id}/entries/${entry_id}`, { ranking, text }).then(resp => {
+      if (!resp.data.id) return console.log('bad udpate');
+      dispatch({ type: UPDATE_ENTRY, list_id, entry: { game_id, ranking: resp.data.ranking, text, id: resp.data.id }});
+    });
+  }
+}
+
+export function deleteEntry(list_id, entry_id) {
+  return function (dispatch) {
+    return axios.delete(`${serverUrl}/api/lists/${list_id}/entries/${entry_id}`).then(resp => {
+      if (!resp.data.entries) return console.log('bad delete');
+      dispatch({ type: DELETE_ENTRY, list_id, entry: { id: entry_id } });
+    });
   }
 }

@@ -11,6 +11,6 @@ export const PROCESS_SEARCH_RESULTS = 'PROCESS_SEARCH_RESULTS';
 
 export const SET_LIST = 'SET_LIST';
 
-export const ADD_ENTRY = 'ADD_ENTRY';
+export const CREATE_ENTRY = 'CREATE_ENTRY';
 export const UPDATE_ENTRY = 'UPDATE_ENTRY';
 export const DELETE_ENTRY = 'DELETE_ENTRY';
