@@ -36,7 +36,7 @@ GameResultCard.propTypes = {
 
 const DropdownButtonAndList = props => {
   const collectionMarkup = props.lists.map(list => {
-      return (<ListForAdd id={list.id} key={list.id} addToList={props.addToList} title={list.title} />);
+      return (<ListForAdd key={list.id} id={list.id} addToList={props.addToList} title={list.title} />);
   });
   const dropdownName = `dropdown-collection-${props.gameId}`;
   return (
@@ -52,7 +52,7 @@ const DropdownButtonAndList = props => {
 }
 
 const ListForAdd = props => (
-  <div onClick={() => props.addToList(props.id)} className="collection-item">
+  <div key={props.id} onClick={() => props.addToList(props.id)} className="collection-item">
     {props.title}
   </div>
 );

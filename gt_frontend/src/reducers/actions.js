@@ -142,3 +142,11 @@ export function getAllLists() {
     });
   };
 }
+
+export function createEntry(game_id, list_id) {
+  return function (dispatch) {
+    return axios.post(`${serverUrl}/api/lists`).then(resp => {
+
+    })
+  }
+}

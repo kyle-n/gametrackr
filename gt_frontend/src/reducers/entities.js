@@ -21,16 +21,8 @@ const games = function games(state = {}, action) {
   }
 };
 
-const lists = function lists(state = {}, action) {
-  switch (action.type) {
-    case SET_LIST:
-      return Object.assign({}, state, { id: action.id, title: action.title, deck: action.deck });
-    default:
-      return state;
-  }
-};
-
-const entries = combineReducers({
+const entities = combineReducers({
   reviews, games, lists
 });
-export default entries;
+
+export default entities;

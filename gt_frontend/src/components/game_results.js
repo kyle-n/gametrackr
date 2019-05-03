@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import GameResultCard from './game_result_card';
+import { addGameToList } from '../reducers/actions';
 
 const mapStateToProps = state => {
-  console.log(state.userLists);
   const lists = [];
   for (const [key, id] of Object.entries(state.userLists)) {
     lists.push(id);
@@ -20,7 +20,8 @@ const GameResults = props => {
     return (<GameResult key={game.id} id={game.id} name={game.name} date={game.original_release_date} />);
   });
   if (props.results && props.results.length && props.large) resultsMarkup = props.results.map(game => {
-    return (<GameResultCard key={game.id} game={game} lists={props.lists} />);
+    return (<GameResultCard key={game.id} game={game} lists={props.lists} 
+      addToList={props.addGameToList.bind(this, game.id)} />);
   });
   return (
     <div className={props.small ? 'collection' : ''}>
@@ -38,4 +39,4 @@ const GameResult = props => (
   </a>
 );
 
-export default connect(mapStateToProps, {})(GameResults);
+export default connect(mapStateToProps, { addGameToList })(GameResults);
