@@ -1,0 +1,37 @@
+{
+  "name": "gametrackr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kyle-n/gametrackr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kyle-n/gametrackr/issues"
+  },
+  "homepage": "https://github.com/kyle-n/gametrackr#readme",
+  "dependencies": {
+    "axios-observable": "^1.1.2",
+    "bcrypt": "^3.0.6",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "node": "^12.12.0",
+    "path": "^0.12.7",
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "rxjs": "^6.5.3",
+    "sequelize": "^5.19.6"
+  },
+  "devDependencies": {
+    "jasmine": "^3.5.0",
+    "typescript": "^3.6.4"
+  }
+}
