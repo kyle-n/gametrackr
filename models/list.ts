@@ -1,8 +1,15 @@
-import {Model} from 'sequelize';
+import { Model, Table, Column } from 'sequelize-typescript';
 
+@Table
 export class List extends Model {
-  public id!: number;
+
+  @Column
   public title!: string;
+
+  @Column
   public deck!: string;
+
+  @Column
   public entries!: Array<number>;
+
 }

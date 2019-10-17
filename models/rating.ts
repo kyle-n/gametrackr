@@ -1,8 +1,10 @@
-import {Model} from 'sequelize';
+import {Model, Table, Column, BelongsTo} from 'sequelize-typescript';
+import { User } from './user';
 
+@Table
 export class Rating extends Model {
-  public id: number;
-  public gameId: number;
-  public rating: number;
-  public userId: number;
+
+  @Column
+  public rating!: number;
+
 }
