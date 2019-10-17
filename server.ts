@@ -13,13 +13,14 @@ dotenv.config();
 // app config
 const app: express.Application = express();
 app.use(json());
+const port = process.env.PORT || 8000;
 
 // start up server
 startup();
 
 // test process
 app.use((req, resp) => resp.send('Hello'));
-app.listen(process.env.PORT || 8000, () => console.log(`Listening at port ${process.env.PORT || 8000}...`));
+app.listen(port, () => console.log(`Listening at port ${port}...`));
 
 async function startup() {
   await initializeDatabase();
