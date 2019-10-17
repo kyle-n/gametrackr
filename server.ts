@@ -14,12 +14,14 @@ dotenv.config();
 const app: express.Application = express();
 app.use(json());
 
-// init db
-initializeDatabase().subscribe(
-  () => console.log('Connected to Postgres'),
-  () => console.log('Could not connect to Postgres')
-);
+// start up server
+startup();
 
 // test process
 app.use((req, resp) => resp.send('Hello'));
 app.listen(process.env.PORT || 8000, () => console.log(`Listening at port ${process.env.PORT || 8000}...`));
+
+async function startup() {
+  await initializeDatabase();
+  console.log('Connected to Postgres');
+}
