@@ -9,13 +9,38 @@ export class Platform extends Model {
   // class data
   // ---------------------------
 
-  @AllowNull(false)
+  @Column
+  public abbreviation!: string;
+
+  @Column
+  public company!: string;
+
+  @Column
+  public deck!: string;
+
+  @Column
+  public description!: string;
+
+  @Column
+  public gbId!: number;
+
+  @Column
+  public image!: string;
+
+  @Column
+  public installBase!: number;
+
   @Column
   public name!: string;
 
-  @AllowNull(false)
   @Column
-  public deck!: string;
+  public originalPrice!: number;
+
+  @Column
+  public releaseDate!: Date;
+
+  @Column
+  public siteDetailUrl!: string;
 
   // ---------------------------
   // exterior relations
