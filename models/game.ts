@@ -1,4 +1,4 @@
-import {Model, Table, Column, AllowNull, HasMany, BelongsToMany} from 'sequelize-typescript';
+import {Model, Table, Column, AllowNull, HasMany, BelongsToMany, DataType} from 'sequelize-typescript';
 import {Rating} from './rating';
 import {Platform} from './Platform';
 import {GamePlatform} from './GamePlatform';
@@ -22,7 +22,7 @@ export class Game extends Model {
   @Column
   public description!: string;
 
-  @Column
+  @Column(DataType.STRING)
   public developers!: Array<string>;
 
   @Column
@@ -34,10 +34,10 @@ export class Game extends Model {
   @Column
   public expectedReleaseYear!: string;
 
-  @Column
+  @Column(DataType.STRING)
   public franchises!: Array<string>;
 
-  @Column
+  @Column(DataType.STRING)
   public genres!: Array<string>;
 
   @AllowNull(false)
@@ -51,7 +51,7 @@ export class Game extends Model {
   @Column
   public name!: string;
 
-  @Column
+  @Column(DataType.STRING)
   public releases!: Array<Date>;
 
   @Column
