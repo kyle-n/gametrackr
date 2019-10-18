@@ -1,34 +1,42 @@
-import {Model, Table, Column, NotNull, HasMany} from 'sequelize-typescript';
+import {Model, Table, Column, AllowNull, HasMany, ForeignKey, BelongsToMany, BelongsTo} from 'sequelize-typescript';
 import { Rating } from './rating';
+import { Platform } from './Platform';
+import { GamePlatform } from './GamePlatform';
+import { Entry } from './Entry';
+import { List } from './list';
 
 @Table
 export class Game extends Model {
 
+  // class attributes
+  @AllowNull(false)
   @Column
-  @NotNull
   public name!: string;
 
+  @AllowNull(false)
   @Column
-  @NotNull
   public imageUrl!: string;
 
+  @AllowNull(false)
   @Column
-  @NotNull
   public deck!: string;
 
+  @AllowNull(false)
   @Column
-  @NotNull
   public description!: string;
 
+  @AllowNull(false)
   @Column
-  @NotNull
-  public platforms!: Array<string>;
-
-  @Column
-  @NotNull
   public releaseDate!: Date;
 
-  @HasMany(() => Rating)
+  // exterior relations
+  @BelongsToMany(() => Platform, () => GamePlatform)
+  public platforms!: Array<Platform>;
+
+  @HasMany(() => Rating, 'gameId')
   public ratings!: Array<Rating>;
+
+  @HasMany(() => Entry, 'gameId')
+  public entries!: Array<Entry>;
 
 }

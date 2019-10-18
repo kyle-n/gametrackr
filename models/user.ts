@@ -1,27 +1,25 @@
-import {Model, Table, Column, HasMany, DataType, Sequelize, AllowNull, Unique} from 'sequelize-typescript';
+import {Model, Table, Column, HasMany, DataType, Sequelize, AllowNull, Unique, NotNull} from 'sequelize-typescript';
 import { List } from './list';
 import { Rating } from './rating';
 
 @Table
 export class User extends Model<User> {
 
-  @Column
-  @AllowNull(false)
   @Unique
+  @Column
   public username!: string;
 
-  @Column
   @AllowNull(false)
+  @Column
   public password!: string;
 
-  @Column
-  @AllowNull(false)
   @Unique
+  @Column
   public email!: string;
 
-  @HasMany(() => List)
-  public lists!: List[];
+  @HasMany(() => List, 'userId')
+  public lists!: Array<List>;
 
-  @HasMany(() => Rating)
-  public ratings!: Rating[];
+  @HasMany(() => Rating, 'userId')
+  public ratings!: Array<Rating>;
 }
