@@ -11,13 +11,8 @@ export class Game extends Model {
   // class data
   // ---------------------------
 
-  @AllowNull(false)
   @Column
-  public name!: string;
-
-  @AllowNull(false)
-  @Column
-  public imageUrl!: string;
+  public apiDetailUrl!: string;
 
   @AllowNull(false)
   @Column
@@ -27,9 +22,40 @@ export class Game extends Model {
   @Column
   public description!: string;
 
+  @Column
+  public developers!: Array<string>;
+
+  @Column
+  public expectedReleaseDay!: string;
+
+  @Column
+  public expectedReleaseMonth!: string;
+
+  @Column
+  public expectedReleaseYear!: string;
+
+  @Column
+  public franchises!: Array<string>;
+
+  @Column
+  public genres!: Array<string>;
+
   @AllowNull(false)
   @Column
-  public releaseDate!: Date;
+  public gbId!: number;
+
+  @Column
+  public image!: string;
+
+  @AllowNull(false)
+  @Column
+  public name!: string;
+
+  @Column
+  public releases!: Array<Date>;
+
+  @Column
+  public siteDetailUrl!: string;
 
   // ---------------------------
   // exterior relations
