@@ -5,11 +5,19 @@ import {User} from './user';
 @Table
 export class List extends Model {
 
+  // ---------------------------
+  // class data
+  // ---------------------------
+
   @Column
   public title!: string;
 
   @Column
   public deck!: string;
+
+  // ---------------------------
+  // exterior relations
+  // ---------------------------
 
   @HasMany(() => Entry, 'listId')
   public entries!: Array<Entry>;

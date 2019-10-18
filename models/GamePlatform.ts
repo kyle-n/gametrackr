@@ -1,6 +1,6 @@
-import { Model, ForeignKey, Column, Table } from 'sequelize-typescript';
-import { Game } from './Game';
-import { Platform } from './Platform';
+import {Model, ForeignKey, Column, Table} from 'sequelize-typescript';
+import {Game} from './Game';
+import {Platform} from './Platform';
 
 @Table
 export class GamePlatform extends Model {

@@ -1,14 +1,16 @@
-import {Model, Table, Column, AllowNull, HasMany, ForeignKey, BelongsToMany, BelongsTo} from 'sequelize-typescript';
-import { Rating } from './rating';
-import { Platform } from './Platform';
-import { GamePlatform } from './GamePlatform';
-import { Entry } from './Entry';
-import { List } from './list';
+import {Model, Table, Column, AllowNull, HasMany, BelongsToMany} from 'sequelize-typescript';
+import {Rating} from './rating';
+import {Platform} from './Platform';
+import {GamePlatform} from './GamePlatform';
+import {Entry} from './Entry';
 
 @Table
 export class Game extends Model {
 
-  // class attributes
+  // ---------------------------
+  // class data
+  // ---------------------------
+
   @AllowNull(false)
   @Column
   public name!: string;
@@ -29,7 +31,10 @@ export class Game extends Model {
   @Column
   public releaseDate!: Date;
 
+  // ---------------------------
   // exterior relations
+  // ---------------------------
+
   @BelongsToMany(() => Platform, () => GamePlatform)
   public platforms!: Array<Platform>;
 

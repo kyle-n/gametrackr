@@ -1,12 +1,20 @@
 import {Model, Table, Column, BelongsTo, ForeignKey} from 'sequelize-typescript';
-import { User } from './user';
-import { Game } from './Game';
+import {User} from './user';
+import {Game} from './Game';
 
 @Table
 export class Rating extends Model {
 
+  // ---------------------------
+  // class data
+  // ---------------------------
+
   @Column
   public rating!: number;
+
+  // ---------------------------
+  // exterior relations
+  // ---------------------------
 
   @ForeignKey(() => Game)
   @Column

@@ -5,7 +5,7 @@ import {List} from '../models/List';
 import {Entry} from '../models/Entry';
 import {Rating} from '../models/Rating';
 import {Platform} from '../models/Platform';
-import { GamePlatform } from '../models/GamePlatform';
+import {GamePlatform} from '../models/GamePlatform';
 
 export async function initializeDatabase(): Promise<Sequelize> {
   const sequelize = new Sequelize({

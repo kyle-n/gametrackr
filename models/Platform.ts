@@ -1,9 +1,13 @@
-import { Model, Table, AllowNull, Column, BelongsTo, BelongsToMany } from 'sequelize-typescript';
-import { Game } from './Game';
-import { GamePlatform } from './GamePlatform';
+import {Model, Table, AllowNull, Column, BelongsTo, BelongsToMany} from 'sequelize-typescript';
+import {Game} from './Game';
+import {GamePlatform} from './GamePlatform';
 
 @Table
 export class Platform extends Model {
+
+  // ---------------------------
+  // class data
+  // ---------------------------
 
   @AllowNull(false)
   @Column
@@ -12,6 +16,10 @@ export class Platform extends Model {
   @AllowNull(false)
   @Column
   public deck!: string;
+
+  // ---------------------------
+  // exterior relations
+  // ---------------------------
 
   @BelongsToMany(() => Game, () => GamePlatform)
   public games!: Array<Game>;
