@@ -18,6 +18,7 @@ export async function initializeDatabase(): Promise<Sequelize> {
   });
 
   await sequelize.authenticate();
+  await sequelize.sync();
 
   return sequelize;
 };
