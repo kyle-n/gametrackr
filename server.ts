@@ -6,6 +6,7 @@ import {json} from 'body-parser';
 
 // submodules
 import {initializeDatabase} from './db';
+import apiRouters from './api';
 
 // hidden vars
 dotenv.config();
@@ -13,6 +14,7 @@ dotenv.config();
 // app config
 const app: express.Application = express();
 app.use(json());
+app.use(apiRouters);
 
 // start up server
 startup();
