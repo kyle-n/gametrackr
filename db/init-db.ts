@@ -1,11 +1,11 @@
 import {Sequelize} from 'sequelize-typescript';
-import {User} from '../models/User';
-import {Game} from '../models/Game';
-import {List} from '../models/List';
-import {Entry} from '../models/Entry';
-import {Rating} from '../models/Rating';
-import {Platform} from '../models/Platform';
-import {GamePlatform} from '../models/GamePlatform';
+import {User} from '../models/user';
+import {Game} from '../models/game';
+import {List} from '../models/list';
+import {Entry} from '../models/entry';
+import {Rating} from '../models/rating';
+import {Platform} from '../models/platform';
+import {GamePlatform} from '../models/gameplatform';
 
 export async function initializeDatabase(): Promise<Sequelize> {
   const sequelize = new Sequelize({
