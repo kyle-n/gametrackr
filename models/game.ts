@@ -1,4 +1,4 @@
-import {Model, Table, Column, AllowNull, HasMany, BelongsToMany, DataType} from 'sequelize-typescript';
+import {Model, Table, Column, AllowNull, HasMany, BelongsToMany, DataType, Default, Unique} from 'sequelize-typescript';
 import {Rating} from './Rating';
 import {Platform} from './Platform';
 import {GamePlatform} from './GamePlatform';
@@ -10,6 +10,10 @@ export class Game extends Model {
   // ---------------------------
   // class data
   // ---------------------------
+
+  @Default(false)
+  @Column
+  public custom!: boolean;
 
   @Column
   public apiDetailUrl!: string;
@@ -26,13 +30,13 @@ export class Game extends Model {
   public developers!: Array<string>;
 
   @Column
-  public expectedReleaseDay!: string;
+  public expectedReleaseDay!: number;
 
   @Column
-  public expectedReleaseMonth!: string;
+  public expectedReleaseMonth!: number;
 
   @Column
-  public expectedReleaseYear!: string;
+  public expectedReleaseYear!: number;
 
   @Column(DataType.STRING)
   public franchises!: Array<string>;
@@ -41,6 +45,7 @@ export class Game extends Model {
   public genres!: Array<string>;
 
   @AllowNull(false)
+  @Unique
   @Column
   public gbId!: number;
 
