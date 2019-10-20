@@ -39,15 +39,16 @@ interface PublicListData {
   title: string;
   createdAt: string;
   updatedAt: string;
-  userName: string;
+  userName?: string;
 }
 
-export const getPublicListData: Function = (list: List, user: User): PublicListData => {
-  return {
+export const getPublicListData: Function = (list: List, user?: User): PublicListData => {
+  const publicData: PublicListData = {
     id: list.id,
     title: list.title,
     createdAt: list.createdAt,
     updatedAt: list.updatedAt,
-    userName: user.name
   };
+  if (user) publicData.userName = user.name;
+  return publicData;
 }
