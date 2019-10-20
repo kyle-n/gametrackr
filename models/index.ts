@@ -9,7 +9,6 @@ import {Entry} from '../models/Entry';
 import {Rating} from '../models/Rating';
 import {Platform} from '../models/Platform';
 import {GamePlatform} from '../models/GamePlatform';
-import {Post} from '../models/Post';
 
 export const sequelize = new Sequelize({
   database: <string>process.env.PSQL_DB_NAME,
@@ -17,7 +16,7 @@ export const sequelize = new Sequelize({
   password: process.env.PSQL_PASSWORD,
   host: 'localhost',
   dialect: 'postgres',
-  models: [GamePlatform, Game, Platform, Entry, List, Rating, User, Post]
+  models: [GamePlatform, Game, Platform, Entry, List, Rating, User]
 });
 
 export {User} from '../models/User';
@@ -27,4 +26,3 @@ export {Entry} from '../models/Entry';
 export {Rating} from '../models/Rating';
 export {Platform} from '../models/Platform';
 export {GamePlatform} from '../models/GamePlatform';
-export {Post} from '../models/Post';
