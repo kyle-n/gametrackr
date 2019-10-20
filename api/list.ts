@@ -49,3 +49,12 @@ router.patch('/:id', async (req, resp) => {
 
   return resp.json(updatedLists[0].getPublicData());
 });
+
+router.delete('/:id', async (req, resp) => {
+  // check permissions
+  const listToDelete: List | null = await List.findOne({where: {id: req.params.id}});
+  if (!listToDelete) return resp.status(404).send();
+
+  await listToDelete.destroy();
+  return resp.status(200).send();
+});
