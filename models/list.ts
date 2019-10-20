@@ -6,7 +6,6 @@ import {PublicEntity, PublicData} from './PublicInterfaces';
 interface PublicListData extends PublicData {
   title: string;
   updatedAt: string;
-  userName: string;
 }
 
 @Table
@@ -28,7 +27,6 @@ export class List extends Model<List> implements PublicEntity {
       createdAt: this.createdAt,
       title: this.title,
       updatedAt: this.updatedAt,
-      userName: this.user.name
     };
   }
 
