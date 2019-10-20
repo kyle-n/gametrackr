@@ -1,7 +1,7 @@
 import {Model, Table, Column, BelongsTo, ForeignKey} from 'sequelize-typescript';
 import {Game} from './Game';
-import {List} from './list';
-import {User} from './user';
+import {List} from './List';
+import {User} from './User';
 
 @Table
 export class Entry extends Model {

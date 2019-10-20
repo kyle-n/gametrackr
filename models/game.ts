@@ -1,5 +1,5 @@
 import {Model, Table, Column, AllowNull, HasMany, BelongsToMany, DataType} from 'sequelize-typescript';
-import {Rating} from './rating';
+import {Rating} from './Rating';
 import {Platform} from './Platform';
 import {GamePlatform} from './GamePlatform';
 import {Entry} from './Entry';

@@ -1,6 +1,6 @@
 import {Model, Table, Column, HasMany, BelongsTo, ForeignKey} from 'sequelize-typescript';
 import {Entry} from './Entry';
-import {User} from './user';
+import {User} from './User';
 
 @Table
 export class List extends Model {

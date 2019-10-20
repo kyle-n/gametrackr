@@ -1,6 +1,6 @@
-import {Model, Table, Column, HasMany, DataType, Sequelize, AllowNull, Unique, NotNull} from 'sequelize-typescript';
-import {List} from './list';
-import {Rating} from './rating';
+import {Model, Table, Column, HasMany, Unique, AllowNull} from 'sequelize-typescript';
+import {List} from './List';
+import {Rating} from './Rating';
 
 @Table
 export class User extends Model<User> {
@@ -11,7 +11,7 @@ export class User extends Model<User> {
 
   @Unique
   @Column
-  public username!: string;
+  public name!: string;
 
   @AllowNull(false)
   @Column
@@ -30,4 +30,5 @@ export class User extends Model<User> {
 
   @HasMany(() => Rating, 'userId')
   public ratings!: Array<Rating>;
+
 }
