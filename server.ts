@@ -15,7 +15,7 @@ import {sequelize} from './models';
 
   // init db
   await sequelize.authenticate();
-  await sequelize.sync({force: true});
+  await sequelize.sync();
   console.log('Connected to Postgres');
 
   // app config
