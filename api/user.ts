@@ -54,4 +54,25 @@ router.get('/:id', async (req, resp) => {
   return resp.json(getPublicUserData(foundUser));
 });
 
+router.patch('/:id', validPatch, async (req, resp) => {
+
+  // build update object
+  const update: {name?: string, password?: string, email?: string, confirmed?: boolean} = {};
+  if (req.body.name) update.name = req.body.name;
+  if (req.body.password) {
+    const encryptedPw: string = await hash(req.body.password, 10);
+    update.password = encryptedPw;
+  }
+  if (req.body.email) {
+    update.email = req.body.email;
+    update.confirmed = false;
+  }
+
+  const updatedUsers: User[] = (await User.update(update, {where: {id: req.params.id}}))[1];
+  if (!updatedUsers.length) return resp.status(404).send();
+  if (updatedUsers.length > 1) return resp.status(500).send();
+
+  return resp.json(getPublicUserData(updatedUsers[0]));
+});
+
 export default router;
