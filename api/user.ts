@@ -18,6 +18,23 @@ interface UserBodyPostOrPatch {
   email?: string;
 }
 
+interface PublicUserData {
+  id: number;
+  name: string;
+  email?: string;
+  createdAt: string;
+}
+
+const getPublicData: Function = (user: User, returnEmail?: boolean): PublicUserData => {
+  const publicData: PublicUserData = {
+    id: user.id,
+    name: user.name,
+    createdAt: user.createdAt
+  };
+  if (returnEmail) publicData.email = user.email;
+  return publicData;
+}
+
 // init validators
 const validPost = (
   req: express.Request,
@@ -49,13 +66,16 @@ router.post('/', validPost, async (req, resp) => {
     confirmed: false
   });
 
-  const newUserStrategized = {
-    name: newUser.name,
-    email: newUser.email,
-    id: newUser.id,
-    createdAt: newUser.createdAt
-  };
-  return resp.json(newUserStrategized);
+  return resp.json(getPublicData(newUser));
+});
+
+router.get('/:id', async (req, resp) => {
+  const foundUser: User | null = await User.findOne({where: {id: req.params.id}});
+  if (!foundUser) return resp.status(404).send();
+  
+  // return email as well if user is requesting their own data
+
+  return resp.json(getPublicData(foundUser));
 });
 
 export default router;
