@@ -35,6 +35,13 @@ router.post('/', validPost, async (req, resp) => {
   return resp.json(newList.getPublicData());
 });
 
+router.get('/', async (req, resp) => {
+  // limit by user
+  const lists: Array<List> = await List.findAll({attributes: ['title', 'deck', 'id']});
+
+  return resp.json({lists});
+});
+
 router.get('/:id', async (req, resp) => {
   const foundList: List | null = await List.findOne({where: {id: req.params.id}});
   if (!foundList) return resp.status(404).send();
