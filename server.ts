@@ -5,28 +5,29 @@ import {join} from 'path';
 import {json} from 'body-parser';
 
 // submodules
-import {initializeDatabase} from './db';
 import apiRouters from './api';
+import {sequelize} from './models';
 
-// hidden vars
-dotenv.config();
+(async () => {
 
-// app config
-const app: express.Application = express();
-app.use(json());
-app.use(apiRouters);
+  // hidden vars
+  dotenv.config();
 
-// start up server
-startup();
-
-// test process
-app.use((req, resp) => resp.send('Hello'));
-
-async function startup() {
-  await initializeDatabase();
+  // init db
+  await sequelize.authenticate();
+  await sequelize.sync({force: true});
   console.log('Connected to Postgres');
-}
 
-// listen
-const port = process.env.PORT || 8000;
-app.listen(port, () => console.log(`Listening at port ${port}...`));
+  // app config
+  const app: express.Application = express();
+  app.use(json());
+  app.use(apiRouters);
+
+  // test process
+  app.use((req, resp) => resp.send('Hello'));
+
+  // listen
+  const port = process.env.PORT || 8000;
+  app.listen(port, () => console.log(`Listening at port ${port}...`));
+
+})();
