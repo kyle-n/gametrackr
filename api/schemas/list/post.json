@@ -1,0 +1,32 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "title",
+    "deck"
+  ],
+  "properties": {
+    "title": {
+      "$id": "#/properties/title",
+      "type": "string",
+      "title": "The Title Schema",
+      "default": "",
+      "examples": [
+        "my list"
+      ],
+      "pattern": ".{1,}"
+    },
+    "deck": {
+      "$id": "#/properties/deck",
+      "type": "string",
+      "title": "The Deck Schema",
+      "default": "",
+      "examples": [
+        "a great list"
+      ]
+    }
+  }
+}
