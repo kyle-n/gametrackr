@@ -1,4 +1,4 @@
-import {Model, Table, AllowNull, Column, BelongsTo, BelongsToMany} from 'sequelize-typescript';
+import {Model, Table, AllowNull, Column, BelongsTo, BelongsToMany, Unique} from 'sequelize-typescript';
 import {Game} from './Game';
 import {GamePlatform} from './GamePlatform';
 
@@ -13,6 +13,9 @@ export class Platform extends Model {
   public abbreviation!: string;
 
   @Column
+  public apiDetailUrl!: string;
+
+  @Column
   public company!: string;
 
   @Column
@@ -21,6 +24,7 @@ export class Platform extends Model {
   @Column
   public description!: string;
 
+  @Unique
   @Column
   public gbId!: number;
 
