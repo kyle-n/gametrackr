@@ -44,7 +44,13 @@ router.post('/', validPost, async (req, resp) => {
   const encryptedPw: string = await hash(req.body.password, 10);
 
   const newUser: User = await User.create({name: req.body.name, password: encryptedPw, email: req.body.email});
-  return resp.json(newUser);
+  const newUserStrategized = {
+    name: newUser.name,
+    email: newUser.email,
+    id: newUser.id,
+    createdAt: newUser.createdAt
+  };
+  return resp.json(newUserStrategized);
 });
 
 export default router;
