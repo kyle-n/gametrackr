@@ -21,7 +21,7 @@ import {sequelize} from './models';
   // app config
   const app: express.Application = express();
   app.use(json());
-  app.use(apiRouters);
+  app.use('/api', apiRouters);
 
   // test process
   app.use((req, resp) => resp.send('Hello'));
