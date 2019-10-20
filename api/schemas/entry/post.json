@@ -1,0 +1,42 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "text",
+    "gameId",
+    "listId"
+  ],
+  "properties": {
+    "text": {
+      "$id": "#/properties/text",
+      "type": "string",
+      "title": "The Text Schema",
+      "default": "",
+      "examples": [
+        "My entry blurb"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "gameId": {
+      "$id": "#/properties/gameId",
+      "type": "integer",
+      "title": "The Gameid Schema",
+      "default": 0,
+      "examples": [
+        1
+      ]
+    },
+    "listId": {
+      "$id": "#/properties/listId",
+      "type": "integer",
+      "title": "The Listid Schema",
+      "default": 0,
+      "examples": [
+        1
+      ]
+    }
+  }
+}
