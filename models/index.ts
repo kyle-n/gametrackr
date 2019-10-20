@@ -1,37 +1,30 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
-const db = {};
+import {Sequelize} from 'sequelize-typescript';
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+import {User} from '../models/User';
+import {Game} from '../models/Game';
+import {List} from '../models/List';
+import {Entry} from '../models/Entry';
+import {Rating} from '../models/Rating';
+import {Platform} from '../models/Platform';
+import {GamePlatform} from '../models/GamePlatform';
+import {Post} from '../models/Post';
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-  })
-  .forEach(file => {
-    const model = sequelize['import'](path.join(__dirname, file));
-    db[model.name] = model;
-  });
-
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
+export const sequelize = new Sequelize({
+  database: <string>process.env.PSQL_DB_NAME,
+  username: <string>process.env.PSQL_USERNAME,
+  password: process.env.PSQL_PASSWORD,
+  host: 'localhost',
+  dialect: 'postgres',
+  models: [GamePlatform, Game, Platform, Entry, List, Rating, User, Post]
 });
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
-module.exports = db;
+export {User} from '../models/User';
+export {Game} from '../models/Game';
+export {List} from '../models/List';
+export {Entry} from '../models/Entry';
+export {Rating} from '../models/Rating';
+export {Platform} from '../models/Platform';
+export {GamePlatform} from '../models/GamePlatform';
+export {Post} from '../models/Post';
