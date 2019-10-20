@@ -75,4 +75,14 @@ router.patch('/:id', validPatch, async (req, resp) => {
   return resp.json(getPublicUserData(updatedUsers[0]));
 });
 
+router.delete('/:id', async (req, resp) => {
+
+  // check permissions
+  const userToDelete: User | null = await User.findOne({where: {id: req.params.id}});
+  if (!userToDelete) return resp.status(404).send();
+
+  await userToDelete.destroy();
+  return resp.status(200).send();
+});
+
 export default router;
