@@ -1,11 +1,22 @@
 // npm
 import express from 'express';
-import {Schema} from 'jsonschema';
 import {validateRequest} from '../utils';
+import {Op} from 'sequelize';
+import {hash} from 'bcrypt';
 
 // schemas
 import * as postSchema from './schemas/user/post.json';
 import * as patchSchema from './schemas/user/patch.json';
+
+// models
+import {User} from '../models';
+
+// interfaces
+interface UserBodyPostOrPatch {
+  name?: string;
+  password?: string;
+  email?: string;
+}
 
 // init validators
 const validPost = (
@@ -22,8 +33,18 @@ const validPatch = (
 
 const router: express.Router = express.Router();
 
-router.post('/', validPost, (req, resp) => {
-  return resp.send('POSTed');
+// create user
+router.post('/', validPost, async (req, resp) => {
+  const previousUserWithNameOrEmail: User | null = await User.findOne({where: {[Op.or]: [
+    {name: req.body.name},
+    {email: req.body.email}
+  ]}});
+  if (previousUserWithNameOrEmail) return resp.status(406).send();
+
+  const encryptedPw: string = await hash(req.body.password, 10);
+
+  const newUser: User = await User.create({name: req.body.name, password: encryptedPw, email: req.body.email});
+  return resp.json(newUser);
 });
 
 export default router;
