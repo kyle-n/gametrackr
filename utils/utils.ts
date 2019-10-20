@@ -1,7 +1,7 @@
 // npm
 import express from 'express';
 import {ValidatorResult, Validator, Schema} from 'jsonschema';
-import {User} from '../models';
+import {User, List} from '../models';
 
 const validator: Validator = new Validator()
 
@@ -32,4 +32,22 @@ export const getPublicUserData: Function = (user: User, returnEmail?: boolean): 
   };
   if (returnEmail) publicData.email = user.email;
   return publicData;
+}
+
+interface PublicListData {
+  id: number;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  userName: string;
+}
+
+export const getPublicListData: Function = (list: List, user: User): PublicListData => {
+  return {
+    id: list.id,
+    title: list.title,
+    createdAt: list.createdAt,
+    updatedAt: list.updatedAt,
+    userName: user.name
+  };
 }
