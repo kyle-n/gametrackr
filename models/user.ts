@@ -21,6 +21,9 @@ export class User extends Model<User> {
   @Column
   public email!: string;
 
+  @Column
+  public confirmed!: boolean;
+
   // ---------------------------
   // exterior relations
   // ---------------------------

@@ -42,8 +42,13 @@ router.post('/', validPost, async (req, resp) => {
   if (previousUserWithNameOrEmail) return resp.status(406).send();
 
   const encryptedPw: string = await hash(req.body.password, 10);
+  const newUser: User = await User.create({
+    name: req.body.name,
+    password: encryptedPw,
+    email: req.body.email,
+    confirmed: false
+  });
 
-  const newUser: User = await User.create({name: req.body.name, password: encryptedPw, email: req.body.email});
   const newUserStrategized = {
     name: newUser.name,
     email: newUser.email,
