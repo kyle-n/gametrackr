@@ -1,6 +1,6 @@
 // npm
 import express from 'express';
-import {validateRequest} from '../utils';
+import {validateRequest, getPublicUserData} from '../utils';
 import {Op} from 'sequelize';
 import {hash} from 'bcrypt';
 
@@ -10,30 +10,6 @@ import * as patchSchema from './schemas/user/patch.json';
 
 // models
 import {User} from '../models';
-
-// interfaces
-interface UserBodyPostOrPatch {
-  name?: string;
-  password?: string;
-  email?: string;
-}
-
-interface PublicUserData {
-  id: number;
-  name: string;
-  email?: string;
-  createdAt: string;
-}
-
-const getPublicData: Function = (user: User, returnEmail?: boolean): PublicUserData => {
-  const publicData: PublicUserData = {
-    id: user.id,
-    name: user.name,
-    createdAt: user.createdAt
-  };
-  if (returnEmail) publicData.email = user.email;
-  return publicData;
-}
 
 // init validators
 const validPost = (
@@ -66,7 +42,7 @@ router.post('/', validPost, async (req, resp) => {
     confirmed: false
   });
 
-  return resp.json(getPublicData(newUser));
+  return resp.json(getPublicUserData(newUser));
 });
 
 router.get('/:id', async (req, resp) => {
@@ -75,7 +51,7 @@ router.get('/:id', async (req, resp) => {
   
   // return email as well if user is requesting their own data
 
-  return resp.json(getPublicData(foundUser));
+  return resp.json(getPublicUserData(foundUser));
 });
 
 export default router;
