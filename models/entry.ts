@@ -2,16 +2,33 @@ import {Model, Table, Column, BelongsTo, ForeignKey} from 'sequelize-typescript'
 import {Game} from './Game';
 import {List} from './List';
 import {User} from './User';
+import {PublicEntity, PublicData} from './PublicInterfaces';
+
+interface PublicEntryData extends PublicData {
+  gameId: number;
+  listId: number;
+  text: string;
+}
 
 @Table
-export class Entry extends Model {
+export class Entry extends Model implements PublicEntity {
 
   // ---------------------------
   // class data
   // ---------------------------
 
   @Column
-  public caption!: string;
+  public text!: string;
+
+  public getPublicData(): PublicEntryData {
+    return {
+      id: this.id,
+      createdAt: this.createdAt,
+      gameId: this.gameId,
+      listId: this.listId,
+      text: this.text
+    };
+  }
 
   // ---------------------------
   // exterior relations
