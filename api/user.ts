@@ -68,7 +68,7 @@ router.patch('/:id', validPatch, async (req, resp) => {
     update.confirmed = false;
   }
 
-  const updatedUsers: User[] = (await User.update(update, {where: {id: req.params.id}}))[1];
+  const updatedUsers: User[] = (await User.update(update, {where: {id: req.params.id}, returning: true}))[1];
   if (!updatedUsers.length) return resp.status(404).send();
   if (updatedUsers.length > 1) return resp.status(500).send();
 
