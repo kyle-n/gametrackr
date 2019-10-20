@@ -6,11 +6,21 @@ export interface GiantBombConnector {
 }
 
 export interface PlatformStrategized {
+  abbreviation: string;
   api_detail_url: string;
   id: number;
   name: string;
   site_detail_url: string;
-  abbreviation: string;
+}
+
+export interface GiantBombPlatform extends PlatformStrategized {
+  company: string;
+  deck: string;
+  description: string;
+  image: ImageStrategized;
+  install_base: number;
+  original_price: number;
+  release_date: string;
 }
 
 export interface ImageStrategized {
