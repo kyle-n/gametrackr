@@ -1,0 +1,13 @@
+// For testing users:
+
+POST: 
+curl -d '{"name": "crb", "password": "crb", "email": "kylebnazario@gmail.com"}' -H "Content-Type: application/json" -X POST http://localhost:8000/users
+
+GET:
+curl -i -H "Accept: application/json" "localhost:8000/users/1"
+
+PATCH:
+curl -d '{"name": "2"}' -H "Content-Type: application/json" -X PATCH http://localhost:8000/users/1
+
+DELETE:
+curl -d "Content-Type: application/json" -X DELETE http://localhost:8000/users/1
