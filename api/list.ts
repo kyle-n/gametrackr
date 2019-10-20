@@ -41,3 +41,11 @@ router.get('/:id', async (req, resp) => {
 
   return resp.json(foundList.getPublicData());
 });
+
+router.patch('/:id', async (req, resp) => {
+  // build update object
+  const updatedLists: Array<List> = (await List.update(req.body, {where: {id: req.params.id}, returning: true}))[1];
+  if (!updatedLists.length) return resp.status(404).send();
+
+  return resp.json(updatedLists[0].getPublicData());
+});
