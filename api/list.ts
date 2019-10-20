@@ -2,7 +2,7 @@
 import express from 'express';
 
 // helpers
-import {validateRequest, getPublicListData} from '../utils';
+import {validateRequest} from '../utils';
 
 // schemas
 import * as postSchema from './schemas/list/post.json';
@@ -32,5 +32,12 @@ router.post('/', validPost, async (req, resp) => {
     deck: req.body.deck
   });
   
-  return resp.json(getPublicListData(newList));
+  return resp.json(newList.getPublicData());
+});
+
+router.get('/:id', async (req, resp) => {
+  const foundList: List | null = await List.findOne({where: {id: req.params.id}});
+  if (!foundList) return resp.status(404).send();
+
+  return resp.json(foundList.getPublicData());
 });

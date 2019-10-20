@@ -1,6 +1,6 @@
 // npm
 import express from 'express';
-import {validateRequest, getPublicUserData} from '../utils';
+import {validateRequest} from '../utils';
 import {Op} from 'sequelize';
 import {hash} from 'bcrypt';
 
@@ -42,7 +42,7 @@ router.post('/', validPost, async (req, resp) => {
     confirmed: false
   });
 
-  return resp.json(getPublicUserData(newUser));
+  return resp.json(newUser.getPublicData(true));
 });
 
 router.get('/:id', async (req, resp) => {
@@ -51,7 +51,7 @@ router.get('/:id', async (req, resp) => {
   
   // return email as well if user is requesting their own data
 
-  return resp.json(getPublicUserData(foundUser));
+  return resp.json(foundUser.getPublicData());
 });
 
 router.patch('/:id', validPatch, async (req, resp) => {
@@ -72,7 +72,7 @@ router.patch('/:id', validPatch, async (req, resp) => {
   if (!updatedUsers.length) return resp.status(404).send();
   if (updatedUsers.length > 1) return resp.status(500).send();
 
-  return resp.json(getPublicUserData(updatedUsers[0]));
+  return resp.json(updatedUsers[0].getPublicData(true));
 });
 
 router.delete('/:id', async (req, resp) => {
