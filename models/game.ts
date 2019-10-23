@@ -16,12 +16,12 @@ export interface GameProps {
     expectedReleaseYear: number;
     franchises: Array<any>;
     genres: Array<any>;
-    gbId: number;
+    gbId: number | null;
     image: string;
     name: string;
     platforms?: PlatformProps[];
     releases: Array<any>;
-    siteDetailUrl: string;
+    siteDetailUrl: string | null;
 }
 
 @Table
@@ -64,8 +64,6 @@ export class Game extends Model implements GameProps {
   @Column(DataType.STRING)
   public genres!: Array<string>;
 
-  @AllowNull(false)
-  @Unique
   @Column
   public gbId!: number;
 
