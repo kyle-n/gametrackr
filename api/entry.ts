@@ -39,7 +39,14 @@ router.get('/:id', async (req, resp) => {
 });
 
 router.patch('/:id', validPatch, async (req, resp) => {
-  const updatedEntries: Array<Entry> = (await Entry.update(req.body, {where: {id: req.params.id}}))[1];
+  const update: {
+    text?: string;
+    gameId?: number;
+  } = {};
+  if (req.body.text) update.text = req.body.text;
+  if (req.body.gameId) update.gameId = req.body.gameId;
+
+  const updatedEntries: Array<Entry> = (await Entry.update(update, {where: {id: req.params.id}}))[1];
   if (!updatedEntries.length) return resp.status(404).send();
   if (updatedEntries.length > 1) return resp.status(500).send();
 

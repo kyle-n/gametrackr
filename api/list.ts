@@ -9,7 +9,7 @@ import * as postSchema from './schemas/list/post.json';
 import * as patchSchema from './schemas/list/patch.json';
 import * as putSchema from './schemas/list/put.json';
 
-// models
+// model
 import {List} from '../models';
 
 // init validators
@@ -59,7 +59,14 @@ router.get('/:id', async (req, resp) => {
 
 router.patch('/:id', validPatch, async (req, resp) => {
   // build update object
-  const updatedLists: Array<List> = (await List.update(req.body, {where: {id: req.params.id}, returning: true}))[1];
+  const updateData: {
+    title?: string;
+    deck?: string;
+  } = {};
+  if (req.body.title) updateData.title = req.body.title;
+  if (req.body.deck) updateData.deck = req.body.deck;
+
+  const updatedLists: Array<List> = (await List.update(updateData, {where: {id: req.params.id}, returning: true}))[1];
   if (!updatedLists.length) return resp.status(404).send();
 
   return resp.json(updatedLists[0].getPublicData());
