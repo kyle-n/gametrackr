@@ -1,4 +1,4 @@
-import {Game} from '../models';
+import {Game, GameProps} from '../models';
 
 export interface GiantBombConnector {
   search: (query: string) => Promise<GiantBombResponse>;
@@ -75,4 +75,5 @@ export interface GiantBombResponse {
   limit: number;
   offset: number;
   results: Array<GiantBombGame>;
+  games?: Array<GameProps>;
 }
