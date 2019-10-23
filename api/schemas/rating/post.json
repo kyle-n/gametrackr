@@ -5,13 +5,14 @@
   "type": "object",
   "title": "The Root Schema",
   "required": [
+    "gameId",
     "rating"
   ],
   "properties": {
-    "id": {
-      "$id": "#/properties/id",
+    "gameId": {
+      "$id": "#/properties/gameId",
       "type": "integer",
-      "title": "The Id Schema",
+      "title": "The Gameid Schema",
       "default": 0,
       "examples": [
         1
@@ -23,7 +24,7 @@
       "title": "The Rating Schema",
       "default": 0,
       "examples": [
-        5
+        1
       ]
     }
   }
