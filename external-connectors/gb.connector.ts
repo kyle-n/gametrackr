@@ -1,25 +1,48 @@
 import axios from 'axios';
-import {Game, Platform} from '../models';
+import {Game, GameProps, Platform, PlatformProps} from '../models';
 
 import {GiantBombConnector, GiantBombGame, GiantBombResponse, PlatformStrategized, ImageStrategized} from './gb.interfaces';
-import {mapGbGame, mapStrategizedGbPlatform} from './gb.mappings';
+import {mapGbGame, mapStrategizedGbPlatform, mapGbPlatform} from './gb.mappings';
 
 const baseUrl = 'https://www.giantbomb.com/api';
 
-const upsertGames = async (games: Array<GiantBombGame>): Promise<void> => {
-  const mappedGames: Array<any> = games.map(mapGbGame);
+const upsertGames = async (mappedGames: Array<GameProps>): Promise<void> => {
   await Game.bulkCreate(mappedGames, {updateOnDuplicate: [
     'apiDetailUrl', 'deck', 'description', 'expectedReleaseDay', 'expectedReleaseMonth',
     'expectedReleaseYear', 'image', 'name', 'siteDetailUrl'
   ]});
 };
 
-const upsertStrategizedPlatforms = async (platforms: Array<PlatformStrategized>): Promise<void> => {
-  const mappedPlatforms: Array<any> = platforms.map(mapStrategizedGbPlatform);
+const upsertStrategizedPlatforms = async (mappedPlatforms: Array<PlatformProps>): Promise<void> => {
   await Platform.bulkCreate(mappedPlatforms, {updateOnDuplicate: [
     'siteDetailUrl'
   ]});
 };
+
+const upsertGamesAndPlatforms = (results: GiantBombGame[]): GameProps[] => {
+  const gamesToUpsert: GameProps[] = [];
+  const platformsToUpsert: PlatformProps[] = [];
+  const previousPlatformIds: number[] = [];
+  results.forEach((result, i) => {
+    const mappedGame = mapGbGame(result);
+    gamesToUpsert.push(mappedGame);
+    if (result.platforms) {
+      mappedGame.platforms = result.platforms.map(platform => {
+        const mappedPlatform = mapStrategizedGbPlatform(platform);
+        if (!previousPlatformIds.includes(platform.id)) {
+          previousPlatformIds.push(platform.id);
+          platformsToUpsert.push(mappedPlatform);
+        }
+        return mappedPlatform;
+      });
+    }
+  });
+
+  upsertGames(gamesToUpsert)
+  upsertStrategizedPlatforms(platformsToUpsert);
+
+  return gamesToUpsert;
+}
 
 const search = async (query: string): Promise<GiantBombResponse> => {
   const url: string = baseUrl + '/search?' + [
@@ -29,17 +52,11 @@ const search = async (query: string): Promise<GiantBombResponse> => {
     'resources=game'
   ].join('&');
   const gbResp: GiantBombResponse = <any>(await axios.get(url, {headers: [{accept: 'application/json'}], data: {}})).data;
+  console.log(gbResp.status_code, gbResp.number_of_total_results, 'results');
 
   // do not wait for database caching to return results to the user
-  upsertGames(gbResp.results);
-  const addedPlatforms: Array<number> = [];
-  const platformsToUpsert: Array<PlatformStrategized> = gbResp.results
-    .reduce((allPlatforms: Array<PlatformStrategized>, game: GiantBombGame) => {
-      const platformsToConcat: Array<PlatformStrategized> = game.platforms
-        .filter((platform: PlatformStrategized) => !addedPlatforms.includes(platform.id));
-      return allPlatforms.concat(platformsToConcat);
-    }, []);
-  upsertStrategizedPlatforms(platformsToUpsert);
+  gbResp.games = upsertGamesAndPlatforms(gbResp.results);
+  gbResp.results = [];
 
   return gbResp;
 };
