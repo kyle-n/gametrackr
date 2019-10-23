@@ -18,21 +18,15 @@ const validPut = (
 
 const router: express.Router = express.Router();
 
-router.put('/games/:id', validPut, async (req, resp) => {
-  const upsertData: {
-    rating: number,
-    gameId: number,
-    userId: number,
-    id?: number
-  } = {
-    rating: req.body.rating,
-    gameId: parseInt(req.params.id),
-    userId: 1
+router.post('/', async (req, resp) => {
+  const ratingProps: RatingProps = {
+    gameId: req.body.gameId,
+    userId: 1,
+    rating: req.body.rating
   };
-  if (req.body.id) upsertData.id = req.body.id;
-  const upsertedRating: Rating = (await Rating.upsert(upsertData, {returning: true}))[0];
-  
-  return resp.json(upsertedRating);
+  const newRating: Rating = await Rating.create(ratingProps);
+
+  return resp.json(newRating);
 });
 
 router.get('/:id', async (req, resp) => {
@@ -40,4 +34,22 @@ router.get('/:id', async (req, resp) => {
   if (!foundRating) return resp.status(404).send();
 
   return resp.json(foundRating);
+});
+
+router.patch('/:id', async (req, resp) => {
+  const update = {rating: req.body.rating};
+  const updatedRatings: Rating[] = (await Rating.update(update, {where: {id: req.params.id}, returning: true}))[1];
+
+  if (!updatedRatings.length) return resp.status(404).send();
+  if (updatedRatings.length > 1) return resp.status(500).send();
+
+  return resp.json(updatedRatings[0]);
+});
+
+router.delete('/:id', async (req, resp) => {
+  const ratingToDelete: Rating | null = await Rating.findOne({where: {id: req.params.id}});
+  if (!ratingToDelete) return resp.status(404).send();
+
+  await ratingToDelete.destroy();
+  return resp.status(200).send();
 });
