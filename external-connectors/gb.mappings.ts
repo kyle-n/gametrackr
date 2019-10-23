@@ -1,7 +1,7 @@
 import {GiantBombGame, PlatformStrategized, GiantBombPlatform} from './gb.interfaces';
-import {Platform} from '../models';
+import {Platform, GameProps, PlatformProps} from '../models';
 
-export const mapGbGame = (game: GiantBombGame): any => {
+export const mapGbGame = (game: GiantBombGame): GameProps => {
   return {
     custom: false,
     apiDetailUrl: game.api_detail_url || '',
@@ -21,7 +21,7 @@ export const mapGbGame = (game: GiantBombGame): any => {
   };
 }
 
-export const mapStrategizedGbPlatform = (platform: PlatformStrategized): any => {
+export const mapStrategizedGbPlatform = (platform: PlatformStrategized): PlatformProps => {
   return {
     abbreviation: platform.abbreviation,
     apiDetailUrl: platform.api_detail_url,
@@ -31,7 +31,7 @@ export const mapStrategizedGbPlatform = (platform: PlatformStrategized): any => 
   }
 };
 
-export const mapGbPlatform = (platform: GiantBombPlatform): any => {
+export const mapGbPlatform = (platform: GiantBombPlatform): PlatformProps => {
   const mappedPlatform = mapStrategizedGbPlatform(platform);
   mappedPlatform.company = platform.company;
   mappedPlatform.deck = platform.deck;
@@ -39,6 +39,6 @@ export const mapGbPlatform = (platform: GiantBombPlatform): any => {
   mappedPlatform.image = platform.image.original_url;
   mappedPlatform.installBase = platform.install_base;
   mappedPlatform.originalPrice = platform.original_price;
-  mappedPlatform.releaseDate = platform.release_date;
+  mappedPlatform.releaseDate = new Date(platform.release_date);
   return mappedPlatform;
 };
