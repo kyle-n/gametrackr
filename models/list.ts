@@ -8,8 +8,14 @@ interface PublicListData extends PublicData {
   updatedAt: string;
 }
 
+export interface ListProps {
+  title: string;
+  deck: string;
+  userId: number;
+}
+
 @Table
-export class List extends Model<List> implements PublicEntity {
+export class List extends Model<List> implements PublicEntity, ListProps {
 
   // ---------------------------
   // class data

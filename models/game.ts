@@ -1,11 +1,31 @@
 import {Model, Table, Column, AllowNull, HasMany, BelongsToMany, DataType, Default, Unique} from 'sequelize-typescript';
 import {Rating} from './Rating';
-import {Platform} from './Platform';
+import {Platform, PlatformProps} from './Platform';
 import {GamePlatform} from './GamePlatform';
 import {Entry} from './Entry';
+import {DataTypes} from 'sequelize';
+
+export interface GameProps {
+    custom: boolean;
+    apiDetailUrl: string;
+    deck: string;
+    description: string;
+    developers: Array<string>;
+    expectedReleaseDay: number;
+    expectedReleaseMonth: number;
+    expectedReleaseYear: number;
+    franchises: Array<any>;
+    genres: Array<any>;
+    gbId: number;
+    image: string;
+    name: string;
+    platforms?: PlatformProps[];
+    releases: Array<any>;
+    siteDetailUrl: string;
+}
 
 @Table
-export class Game extends Model {
+export class Game extends Model implements GameProps {
 
   // ---------------------------
   // class data
@@ -23,7 +43,7 @@ export class Game extends Model {
   public deck!: string;
 
   @AllowNull(false)
-  @Column
+  @Column(DataTypes.STRING(999999))
   public description!: string;
 
   @Column(DataType.STRING)

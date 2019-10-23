@@ -19,10 +19,10 @@ export const sequelize = new Sequelize({
   models: [GamePlatform, Game, Platform, Entry, List, Rating, User]
 });
 
-export {User} from '../models/User';
-export {Game} from '../models/Game';
-export {List} from '../models/List';
-export {Entry} from '../models/Entry';
-export {Rating} from '../models/Rating';
-export {Platform} from '../models/Platform';
+export {User, UserProps} from '../models/User';
+export {Game, GameProps} from '../models/Game';
+export {List, ListProps} from '../models/List';
+export {Entry, EntryProps} from '../models/Entry';
+export {Rating, RatingProps} from '../models/Rating';
+export {Platform, PlatformProps} from '../models/Platform';
 export {GamePlatform} from '../models/GamePlatform';

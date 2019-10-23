@@ -10,8 +10,14 @@ interface PublicEntryData extends PublicData {
   text: string;
 }
 
+export interface EntryProps {
+  text: string;
+  gameId: number;
+  listId: number;
+}
+
 @Table
-export class Entry extends Model implements PublicEntity {
+export class Entry extends Model implements PublicEntity, EntryProps {
 
   // ---------------------------
   // class data

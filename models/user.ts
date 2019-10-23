@@ -8,8 +8,15 @@ interface PublicUserData extends PublicData {
   email?: string;
 }
 
+export interface UserProps {
+  name: string;
+  password: string;
+  email: string;
+  confirmed: boolean;
+}
+
 @Table
-export class User extends Model<User> implements PublicEntity {
+export class User extends Model<User> implements PublicEntity, UserProps {
 
   // ---------------------------
   // class data

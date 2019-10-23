@@ -2,8 +2,23 @@ import {Model, Table, AllowNull, Column, BelongsTo, BelongsToMany, Unique} from 
 import {Game} from './Game';
 import {GamePlatform} from './GamePlatform';
 
+export interface PlatformProps {
+    abbreviation: string;
+    apiDetailUrl: string;
+    company?: string;
+    deck?: string;
+    description?: string;
+    gbId: number;
+    image?: string;
+    installBase?: number;
+    name: string;
+    originalPrice?: number;
+    releaseDate?: Date;
+    siteDetailUrl: string;
+}
+
 @Table
-export class Platform extends Model {
+export class Platform extends Model implements PlatformProps {
 
   // ---------------------------
   // class data
