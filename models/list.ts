@@ -2,10 +2,12 @@ import {Model, Table, Column, HasMany, BelongsTo, ForeignKey} from 'sequelize-ty
 import {Entry} from './Entry';
 import {User} from './User';
 import {PublicEntity, PublicData} from './PublicInterfaces';
+import {DataTypes} from 'sequelize';
 
 interface PublicListData extends PublicData {
   title: string;
   updatedAt: string;
+  entryIds: number[];
 }
 
 export interface ListProps {
@@ -31,6 +33,7 @@ export class List extends Model<List> implements PublicEntity, ListProps {
     return {
       id: this.id,
       createdAt: this.createdAt,
+      entryIds: this.entryIds,
       title: this.title,
       updatedAt: this.updatedAt,
     };
@@ -39,6 +42,9 @@ export class List extends Model<List> implements PublicEntity, ListProps {
   // ---------------------------
   // exterior relations
   // ---------------------------
+
+  @Column(DataTypes.ARRAY(DataTypes.INTEGER))
+  public entryIds!: Array<number>;
 
   @HasMany(() => Entry, 'listId')
   public entries!: Array<Entry>;
