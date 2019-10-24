@@ -1,1 +1,1 @@
-export * from './gb.connector';
+export * from './giantbomb';

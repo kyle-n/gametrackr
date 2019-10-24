@@ -1,5 +1,5 @@
-import {GiantBombGame, PlatformStrategized, GiantBombPlatform} from './gb.interfaces';
-import {Platform, GameProps, PlatformProps} from '../models';
+import {GiantBombGame, PlatformStrategized, GiantBombPlatform} from './interfaces';
+import {Platform, GameProps, PlatformProps} from '../../models';
 
 export const mapGbGame = (game: GiantBombGame): GameProps => {
   return {

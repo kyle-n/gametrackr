@@ -1,8 +1,8 @@
 import axios from 'axios';
-import {Game, GameProps, Platform, PlatformProps} from '../models';
+import {Game, GameProps, Platform, PlatformProps} from '../../models';
 
-import {GiantBombConnector, GiantBombGame, GiantBombResponse, PlatformStrategized, ImageStrategized} from './gb.interfaces';
-import {mapGbGame, mapStrategizedGbPlatform, mapGbPlatform} from './gb.mappings';
+import {GiantBombConnector, GiantBombGame, GiantBombResponse, PlatformStrategized, ImageStrategized} from './interfaces';
+import {mapGbGame, mapStrategizedGbPlatform, mapGbPlatform} from './mappings';
 
 const baseUrl = 'https://www.giantbomb.com/api';
 

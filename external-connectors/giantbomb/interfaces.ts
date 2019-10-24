@@ -1,4 +1,4 @@
-import {Game, GameProps} from '../models';
+import {Game, GameProps} from '../../models';
 
 export interface GiantBombConnector {
   search: (query: string) => Promise<GiantBombResponse>;
