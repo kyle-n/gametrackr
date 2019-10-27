@@ -3,7 +3,9 @@ import {
   Home as HomeIcon,
   List as ListIcon,
   Search as SearchIcon,
-  Info as InfoIcon
+  Info as InfoIcon,
+  PersonAdd as SignupIcon,
+  ExitToApp as LoginIcon
 } from '@material-ui/icons';
 
 export const routes = {
@@ -14,6 +16,18 @@ export const routes = {
       icon: HomeIcon,
       showOnlyWhenLoggedIn: false,
       exact: true
+    },
+    {
+      path: '/signup',
+      title: 'Sign up',
+      icon: SignupIcon,
+      showOnlyWhenLoggedIn: false
+    },
+    {
+      path: '/login',
+      title: 'Log in',
+      icon: LoginIcon,
+      showOnlyWhenLoggedIn: false
     },
     {
       path: '/about',
