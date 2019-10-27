@@ -1,5 +1,6 @@
-.desktop-only {
-  color: red;
+.unstyled-link {
+  text-decoration: none;
+  color: unset;
 }
 
 @media (min-width: 768px) {
