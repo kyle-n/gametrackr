@@ -18,7 +18,7 @@ function App() {
       <CssBaseline>
         <main>
           <BrowserRouter>
-            <Title routes={routes.top} />
+            <Title routes={routes.top} loggedIn={true}/>
             <RouteDisplay routes={allRoutes} />
           </BrowserRouter>
         </main>
