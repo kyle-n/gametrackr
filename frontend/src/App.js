@@ -1,8 +1,8 @@
 import React from 'react';
 import './App.css';
 import {BrowserRouter, } from 'react-router-dom';
-import {RouteDisplay, routes} from './routing';
 
+import {RouteDisplay, routes} from './routing';
 import {Title} from './nav';
 
 function App() {
