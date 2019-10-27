@@ -6,7 +6,6 @@ export class Title extends React.Component {
 
   constructor(props) {
     super(props);
-    this.routes = Title.getRoutesForLoginStatus(props.routes, props.loggedIn);
   }
 
   static getRoutesForLoginStatus = (routes, loggedIn) => {
@@ -14,10 +13,11 @@ export class Title extends React.Component {
   };
 
   render() {
+    const routes = Title.getRoutesForLoginStatus(this.props.routes, this.props.loggedIn);
     return (
       <header>
         <h1>gametrackr</h1>
-        <MobileNav routes={this.routes} />
+        <MobileNav routes={routes} />
       </header>
     );
   }
