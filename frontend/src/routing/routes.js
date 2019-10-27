@@ -10,33 +10,33 @@ export const routes = {
   top: [
     {
       path: '/',
-      title: 'gametrackr',
-      icon: (<HomeIcon />),
+      title: 'GameTrackr',
+      icon: HomeIcon,
       showOnlyWhenLoggedIn: false,
       exact: true
     },
     {
       path: '/about',
-      title: 'about this website',
-      icon: (<InfoIcon />),
+      title: 'About',
+      icon: InfoIcon,
       showOnlyWhenLoggedIn: false
     },
     {
       path: '/home',
-      title: 'home',
-      icon: (<HomeIcon />),
-      showOnlyWhenLoggedIn: true,
+      title: 'Home',
+      icon: HomeIcon,
+      showOnlyWhenLoggedIn: true
     },
     {
       path: '/lists',
-      title: 'lists',
-      icon: (<ListIcon />),
+      title: 'Lists',
+      icon: ListIcon,
       showOnlyWhenLoggedIn: true
     },
     {
       path: '/search',
-      title: 'search',
-      icon: (<SearchIcon />),
+      title: 'Search',
+      icon: SearchIcon,
       showOnlyWhenLoggedIn: true
     }
   ]
