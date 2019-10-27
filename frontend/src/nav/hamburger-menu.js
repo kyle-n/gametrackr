@@ -10,12 +10,7 @@ export class MobileNav extends React.Component {
   constructor(props) {
     super(props);
     this.state = {open: false}
-    this.routes = MobileNav.getRoutesForLoginStatus(props.routes, false);
   }
-
-  static getRoutesForLoginStatus = (routes, loggedIn) => {
-    return routes.filter(route => route.showOnlyWhenLoggedIn === loggedIn);
-  };
 
   toggleDrawer = () => this.setState({open: !this.state.open});
 
@@ -25,21 +20,12 @@ export class MobileNav extends React.Component {
         <DrawerButton toggleDrawer={this.toggleDrawer}/>
         <SideDrawerContainer
           open={this.state.open}
-          routes={this.routes}
+          routes={this.props.routes}
         />
       </div>
     );
   }
 }
-
-const SideDrawerLink = props => (
-  <NavLink to={props.route.path} className="unstyled-link">
-    <ListItem button>
-      <ListItemIcon><props.route.icon /></ListItemIcon>
-      <ListItemText>{props.route.title}</ListItemText>
-    </ListItem>
-  </NavLink>
-);
 
 const SideDrawerContainer = props => {
   const navLinks = props.routes.map(route => {
@@ -55,6 +41,15 @@ const SideDrawerContainer = props => {
     </Drawer>
   );
 };
+
+const SideDrawerLink = props => (
+  <NavLink to={props.route.path} className="unstyled-link">
+    <ListItem button>
+      <ListItemIcon><props.route.icon /></ListItemIcon>
+      <ListItemText>{props.route.title}</ListItemText>
+    </ListItem>
+  </NavLink>
+);
 
 const DrawerButton = props => (
   <IconButton onClick={props.toggleDrawer}>
