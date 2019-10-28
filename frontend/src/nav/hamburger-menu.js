@@ -1,10 +1,9 @@
 import React from 'react';
-import {Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText} from '@material-ui/core';
+import {Drawer, IconButton, List} from '@material-ui/core';
 import {
   Menu as MenuIcon,
 } from '@material-ui/icons';
-import {NavLink} from 'react-router-dom';
-import '../utils/layout.css';
+import {NavLinkWithIcon} from './nav-link-with-icon';
 
 export class MobileNav extends React.Component {
   constructor(props) {
@@ -30,7 +29,7 @@ export class MobileNav extends React.Component {
 const SideDrawerContainer = props => {
   const navLinks = props.routes.map(route => {
     return (
-      <SideDrawerLink key={route.path} route={route}/>
+      <NavLinkWithIcon key={route.path} route={route}/>
     );
   });
   return (
@@ -41,15 +40,6 @@ const SideDrawerContainer = props => {
     </Drawer>
   );
 };
-
-const SideDrawerLink = props => (
-  <NavLink to={props.route.path} className="unstyled-link">
-    <ListItem button>
-      <ListItemIcon><props.route.icon /></ListItemIcon>
-      <ListItemText>{props.route.title}</ListItemText>
-    </ListItem>
-  </NavLink>
-);
 
 const DrawerButton = props => (
   <IconButton onClick={props.toggleDrawer}>
