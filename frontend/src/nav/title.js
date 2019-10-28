@@ -13,7 +13,8 @@ export class Title extends React.Component {
   }
 
   static getRoutesForLoginStatus = (routes, loggedIn) => {
-    return routes.filter(route => route.showOnlyWhenLoggedIn === loggedIn);
+    if (loggedIn) return routes.filter(route => route.showWhenLoggedIn);
+    else return routes.filter(route => route.showWhenLoggedOut);
   };
 
   render() {

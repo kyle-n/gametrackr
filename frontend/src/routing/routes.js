@@ -14,37 +14,36 @@ export const routes = {
       path: '/signup',
       title: 'Sign up',
       icon: SignupIcon,
-      showOnlyWhenLoggedIn: false
+      showWhenLoggedIn: false,
+      showWhenLoggedOut: true
     },
     {
       path: '/login',
       title: 'Log in',
       icon: LoginIcon,
-      showOnlyWhenLoggedIn: false
-    },
-    {
-      path: '/about',
-      title: 'About',
-      icon: InfoIcon,
-      showOnlyWhenLoggedIn: false
-    },
-    {
-      path: '/home',
-      title: 'Home',
-      icon: HomeIcon,
-      showOnlyWhenLoggedIn: true
+      showWhenLoggedIn: false,
+      showWhenLoggedOut: true
     },
     {
       path: '/lists',
       title: 'Lists',
       icon: ListIcon,
-      showOnlyWhenLoggedIn: true
+      showWhenLoggedIn: true,
+      showWhenLoggedOut: false
     },
     {
       path: '/search',
       title: 'Search',
       icon: SearchIcon,
-      showOnlyWhenLoggedIn: true
+      showWhenLoggedIn: true,
+      showWhenLoggedOut: false
+    },
+    {
+      path: '/about',
+      title: 'About',
+      icon: InfoIcon,
+      showWhenLoggedIn: true,
+      showWhenLoggedOut: true
     }
   ]
 };
