@@ -4,6 +4,7 @@ import {MobileNav} from './hamburger-menu';
 import {Grid, Hidden} from '@material-ui/core';
 import {NavLinkWithIcon} from './nav-link-with-icon';
 import List from '@material-ui/core/List';
+import {Link} from 'react-router-dom';
 
 export class Title extends React.Component {
 
@@ -25,7 +26,7 @@ export class Title extends React.Component {
           </Grid>
         </Hidden>
         <Grid item xs={11} md={4}>
-          <SiteTitle/>
+          <SiteTitle loggedIn={this.props.loggedIn}/>
         </Grid>
         <Hidden smDown>
           <Grid item md={8}>
@@ -37,9 +38,11 @@ export class Title extends React.Component {
   }
 }
 
-const SiteTitle = () => (
+const SiteTitle = props => (
   <header style={{textAlign: 'center'}}>
-    <h1>gametrackr</h1>
+    <Link to={props.loggedIn ? '/home' : '/'} className="unstyled-link">
+      <h1>gametrackr</h1>
+    </Link>
   </header>
 );
 

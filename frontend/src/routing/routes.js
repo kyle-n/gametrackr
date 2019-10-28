@@ -11,13 +11,6 @@ import {
 export const routes = {
   top: [
     {
-      path: '/',
-      title: 'GameTrackr',
-      icon: HomeIcon,
-      showOnlyWhenLoggedIn: false,
-      exact: true
-    },
-    {
       path: '/signup',
       title: 'Sign up',
       icon: SignupIcon,
