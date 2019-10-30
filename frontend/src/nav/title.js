@@ -5,6 +5,7 @@ import {Grid, Hidden} from '@material-ui/core';
 import {NavLinkWithIcon} from './nav-link-with-icon';
 import List from '@material-ui/core/List';
 import {Link} from 'react-router-dom';
+import {ThemeMenu} from '../themes';
 
 export class Title extends React.Component {
 
@@ -26,11 +27,17 @@ export class Title extends React.Component {
             <MobileNav routes={routes}/>
           </Grid>
         </Hidden>
-        <Grid item xs={11} md={4}>
+        <Grid item xs={9} md={4}>
           <SiteTitle loggedIn={this.props.loggedIn}/>
         </Grid>
+        <Hidden mdUp>
+          <Grid item xs={2}>
+            <ThemeMenu />
+          </Grid>
+        </Hidden>
         <Hidden smDown>
           <Grid item md={8}>
+            <ThemeMenu />
             <DesktopNavLinks routes={routes}/>
           </Grid>
         </Hidden>
@@ -41,7 +48,7 @@ export class Title extends React.Component {
 
 const SiteTitle = props => (
   <header style={{textAlign: 'center'}}>
-    <Link to={props.loggedIn ? '/home' : '/'} className="unstyled-link">
+    <Link to={props.loggedIn ? '/home' : '/'} className="no-underline reset-color">
       <h1>gametrackr</h1>
     </Link>
   </header>
