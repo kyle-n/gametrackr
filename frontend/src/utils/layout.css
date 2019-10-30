@@ -1,5 +1,8 @@
-.unstyled-link {
+.no-underline {
   text-decoration: none;
+}
+
+.reset-color {
   color: unset;
 }
 
