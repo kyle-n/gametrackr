@@ -27,17 +27,16 @@ export class Title extends React.Component {
             <MobileNav routes={routes}/>
           </Grid>
         </Hidden>
-        <Grid item xs={9} md={4}>
+        <Grid item xs={7} md={4}>
           <SiteTitle loggedIn={this.props.loggedIn}/>
         </Grid>
         <Hidden mdUp>
-          <Grid item xs={2}>
+          <Grid item xs={4} style={{textAlign: 'center'}}>
             <ThemeMenu />
           </Grid>
         </Hidden>
         <Hidden smDown>
           <Grid item md={8}>
-            <ThemeMenu />
             <DesktopNavLinks routes={routes}/>
           </Grid>
         </Hidden>
