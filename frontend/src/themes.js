@@ -2,6 +2,7 @@ import React from 'react';
 import {createMuiTheme, ThemeProvider} from '@material-ui/core/styles';
 import {Button, Menu, MenuItem} from '@material-ui/core';
 import {Palette as PaletteIcon} from '@material-ui/icons';
+import './utils/layout.css';
 
 const dark = createMuiTheme({
   palette: {
@@ -29,8 +30,12 @@ export class ThemeMenu extends React.Component {
     this.state = {open: false};
   }
 
+  componentDidMount() {
+    this.anchorRef = document.getElementById('theme-picker');
+  }
+
   toggleOpen = event => {
-    this.anchorRef = event.target;
+    // this.anchorRef = event.target;
     this.setState({open: !this.state.open});
   };
 
@@ -43,12 +48,16 @@ export class ThemeMenu extends React.Component {
       );
     });
     return (
-      <div>
+      <div id="theme-picker">
         <Button variant="outlined" onClick={this.toggleOpen}>
           <PaletteIcon />
-          Theme
+          <span style={{marginLeft: '0.5rem'}}>Theme</span>
         </Button>
-        <Menu open={this.state.open} anchorEl={this.anchorRef} onClose={this.toggleOpen}>
+        <Menu open={this.state.open} anchorEl={this.anchorRef} onClose={this.toggleOpen}
+              transformOrigin={{vertical: 'top', horizontal: 'right'}}
+              anchorOrigin={{horizontal: 'center', vertical: 'bottom'}}
+              getContentAnchorEl={null}
+        >
           {menuItems}
         </Menu>
       </div>
