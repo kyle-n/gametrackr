@@ -36,8 +36,13 @@ export class Title extends React.Component {
           </Grid>
         </Hidden>
         <Hidden smDown>
-          <Grid item md={8}>
+          <Grid item md={6}>
             <DesktopNavLinks routes={routes}/>
+          </Grid>
+        </Hidden>
+        <Hidden smDown>
+          <Grid item md={2} style={{textAlign: 'left'}}>
+            <ThemeMenu />
           </Grid>
         </Hidden>
       </Grid>
