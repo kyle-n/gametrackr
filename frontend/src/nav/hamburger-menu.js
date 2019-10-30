@@ -1,5 +1,5 @@
 import React from 'react';
-import {Drawer, IconButton, List} from '@material-ui/core';
+import {Drawer, Hidden, IconButton, List} from '@material-ui/core';
 import {
   Menu as MenuIcon,
 } from '@material-ui/icons';
@@ -29,7 +29,9 @@ export class MobileNav extends React.Component {
 const SideDrawerContainer = props => {
   const navLinks = props.routes.map(route => {
     return (
-      <NavLinkWithIcon key={route.path} route={route}/>
+      <Hidden mdDown={route.title === 'Theme'}>
+        <NavLinkWithIcon key={route.path} route={route}/>
+      </Hidden>
     );
   });
   return (
