@@ -4,7 +4,7 @@ import React from 'react';
 import '../utils/layout.css';
 
 export const NavLinkWithIcon = props => (
-  <NavLink key={props.route.path} to={props.route.path} className="unstyled-link">
+  <NavLink to={props.route.path} className="unstyled-link" onClick={props.route.fn ? props.route.fn : null}>
     <ListItem>
       <ListItemIcon style={{minWidth: props.desktop ? '33px' : '60px'}}><props.route.icon /></ListItemIcon>
       <ListItemText style={{marginRight: props.desktop ? '0' : '60px'}}>{props.route.title}</ListItemText>
