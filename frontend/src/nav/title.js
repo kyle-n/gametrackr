@@ -1,4 +1,5 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import '../utils/layout.css';
 import {MobileNav} from './hamburger-menu';
 import {Grid, Hidden} from '@material-ui/core';
@@ -7,7 +8,7 @@ import List from '@material-ui/core/List';
 import {Link} from 'react-router-dom';
 import {ThemeMenu} from '../themes';
 
-export class Title extends React.Component {
+class Title extends React.Component {
 
   constructor(props) {
     super(props);
@@ -71,3 +72,9 @@ const DesktopNavLinks = props => {
   });
   return (<List style={horizontalListLayout}>{navLinks}</List>);
 };
+
+const mapStateToProps = state => {
+  return {loggedIn: !!(state.userId && state.jwt)}
+};
+
+export default connect(mapStateToProps)(Title);
