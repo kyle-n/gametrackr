@@ -7,6 +7,7 @@ import {NavLinkWithIcon} from './nav-link-with-icon';
 import List from '@material-ui/core/List';
 import {Link} from 'react-router-dom';
 import {ThemeMenu} from '../themes';
+import {setTheme} from '../redux';
 
 class Title extends React.Component {
 
@@ -33,7 +34,7 @@ class Title extends React.Component {
         </Grid>
         <Hidden mdUp>
           <Grid item xs={4} style={{textAlign: 'center'}}>
-            <ThemeMenu />
+            <ThemeMenu setTheme={this.props.setTheme} />
           </Grid>
         </Hidden>
         <Hidden smDown>
@@ -43,7 +44,7 @@ class Title extends React.Component {
         </Hidden>
         <Hidden smDown>
           <Grid item md={2} style={{textAlign: 'left'}}>
-            <ThemeMenu />
+            <ThemeMenu setTheme={this.props.setTheme} />
           </Grid>
         </Hidden>
       </Grid>
@@ -77,4 +78,6 @@ const mapStateToProps = state => {
   return {loggedIn: !!(state.userId && state.jwt)}
 };
 
-export default connect(mapStateToProps)(Title);
+const dispatchMap = {setTheme};
+
+export default connect(mapStateToProps, dispatchMap)(Title);
