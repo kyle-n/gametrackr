@@ -1,30 +1,9 @@
 import React from 'react';
-import {createMuiTheme, ThemeProvider} from '@material-ui/core/styles';
 import {Button, Menu, MenuItem} from '@material-ui/core';
 import {Palette as PaletteIcon} from '@material-ui/icons';
-import './utils/layout.css';
+import {themes} from './themes.model';
 
-const dark = createMuiTheme({
-  palette: {
-    type: 'dark',
-  }
-});
-
-const light = createMuiTheme({
-  palette: {
-    type: 'light'
-  }
-});
-
-const themes = {dark, light};
-
-export const Themes = props => (
-  <ThemeProvider theme={themes[props.theme]}>
-    {props.children}
-  </ThemeProvider>
-);
-
-export class ThemeMenu extends React.Component {
+export default class ThemeMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {open: false};
@@ -34,15 +13,19 @@ export class ThemeMenu extends React.Component {
     this.anchorRef = document.getElementById('theme-picker');
   }
 
+  themeClicked = (event, themeName) => {
+    this.props.setTheme(themeName);
+    this.toggleOpen(event);
+  };
+
   toggleOpen = event => {
-    // this.anchorRef = event.target;
     this.setState({open: !this.state.open});
   };
 
   render() {
     const menuItems = Object.keys(themes).map(themeName => {
       return (
-        <MenuItem key={themeName} onClick={() => this.props.setTheme(themes[themeName])}>
+        <MenuItem key={themeName} onClick={event => this.themeClicked(event, themeName)}>
           {themeName}
         </MenuItem>
       );
@@ -63,5 +46,4 @@ export class ThemeMenu extends React.Component {
       </div>
     );
   }
-
 }
