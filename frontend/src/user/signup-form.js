@@ -25,7 +25,7 @@ export class SignupForm extends React.Component {
     ].map(formControl => {
       return (
         <Grid key={formControl.label} item xs={12}>
-          <TextField required type={formControl.type} value={this.state[formControl.label]}
+          <TextField required type={formControl.type} value={this.state[formControl.label]} fullWidth
                      id={'signup-' + formControl.label} label={upperCaseFirstLetter(formControl.label)} margin="normal"
                      onChange={event => this.updateState(formControl.label, event.target.value)}
           />
@@ -37,7 +37,7 @@ export class SignupForm extends React.Component {
       <form>
         <Grid container>
           {formControls}
-          <Grid item xs={12}>
+          <Grid item xs={12} style={{marginTop: '1rem'}}>
             <Button variant="contained" color="primary" startIcon={<SignupIcon />} size="large">
               Create account
             </Button>
