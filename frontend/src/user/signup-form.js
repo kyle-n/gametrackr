@@ -14,54 +14,55 @@ export class SignupForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: {value: '', valid: true},
-      password: {value: '', valid: true},
-      email: {value: '', valid: true},
-      valid: false
-    };
-    this.formControls = [
-      {
+      name: {
         type: 'text',
         label: 'name',
         inputProps: {autoFocus: true},
+        valid: true,
         validator: val => val.length > 1 && val.length < 32
       },
-      {
+      password: {
         type: 'password',
         label: 'password',
         inputProps: {},
+        valid: true,
         validator: val => val.length > 1 && val.length < 10000
       },
-      {
+      email: {
         type: 'email',
         label: 'email',
         inputProps: {},
+        valid: true,
         validator: () => true
-      }
-    ];
+      },
+      valid: false
+    };
   }
 
   updateFormControl = (key, value) => {
-    this.setState({[key]: {value, valid: true}});
+    const newFcState = Object.assign({}, this.state[key], {value});
+    this.setState({[key]: newFcState});
   };
 
   render() {
-    const formControlMarkup = this.formControls.map(formControl => {
-      const inputName = 'signup-' + formControl.label;
-      return (
-        <Grid key={formControl.label} item xs={10}>
-          <FormControl fullWidth >
-            <InputLabel htmlFor={inputName}>
-              {upperCaseFirstLetter(formControl.label)}
-            </InputLabel>
-            <Input id={inputName} value={this.state[formControl.label].value} type={formControl.type}
-                   onChange={event => this.updateFormControl(formControl.label, event.target.value)}
-                   required inputProps={formControl.inputProps}
-            />
-          </FormControl>
-        </Grid>
-      );
-    });
+    const formControlMarkup = Object.values(this.state)
+      .filter(property => property && property.type)
+      .map(formControl => {
+        const inputName = 'signup-' + formControl.label;
+        return (
+          <Grid key={formControl.label} item xs={10}>
+            <FormControl fullWidth >
+              <InputLabel htmlFor={inputName}>
+                {upperCaseFirstLetter(formControl.label)}
+              </InputLabel>
+              <Input id={inputName} value={this.state[formControl.label].value} type={formControl.type}
+                     onChange={event => this.updateFormControl(formControl.label, event.target.value)}
+                     required inputProps={formControl.inputProps}
+              />
+            </FormControl>
+          </Grid>
+        );
+      });
 
     return (
       <form>
