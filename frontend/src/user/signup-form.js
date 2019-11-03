@@ -7,8 +7,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import {
   PersonAdd as SignupIcon,
 } from '@material-ui/icons';
-import {upperCaseFirstLetter} from '../utils';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import {isEmail, upperCaseFirstLetter} from '../utils';
 
 export class SignupForm extends React.Component {
   constructor(props) {
@@ -19,21 +18,21 @@ export class SignupForm extends React.Component {
         label: 'name',
         inputProps: {autoFocus: true},
         valid: true,
-        validator: val => val.length > 1 && val.length < 32
+        validator: val => val.length > 0 && val.length <= 32
       },
       password: {
         type: 'password',
         label: 'password',
         inputProps: {},
         valid: true,
-        validator: val => val.length > 1 && val.length < 10000
+        validator: val => val.length > 0 && val.length <= 10000
       },
       email: {
         type: 'email',
         label: 'email',
         inputProps: {},
         valid: true,
-        validator: () => true
+        validator: val => isEmail.test(val)
       },
       valid: false
     };
@@ -41,6 +40,7 @@ export class SignupForm extends React.Component {
 
   updateFormControl = (key, value) => {
     const newFcState = Object.assign({}, this.state[key], {value});
+    newFcState.valid = newFcState.validator(value);
     this.setState({[key]: newFcState});
   };
 
@@ -57,7 +57,7 @@ export class SignupForm extends React.Component {
               </InputLabel>
               <Input id={inputName} value={this.state[formControl.label].value} type={formControl.type}
                      onChange={event => this.updateFormControl(formControl.label, event.target.value)}
-                     required inputProps={formControl.inputProps}
+                     required inputProps={formControl.inputProps} error={!formControl.valid}
               />
             </FormControl>
           </Grid>
