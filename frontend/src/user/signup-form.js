@@ -92,10 +92,7 @@ export class SignupForm extends React.Component {
                   );
                 })}
                 <Grid item xs={12} style={{marginTop: '1rem'}}>
-                  <Button variant="contained" color="primary" startIcon={(<SignupIcon />)} size="large"
-                          disabled={!Object.values(errors).reduce((allFalsey, fcError) => allFalsey && !fcError, true)} >
-                    Create account
-                  </Button>
+                  <SubmitButton disabled={!Object.values(errors).reduce((allFalsey, fcError) => allFalsey && !fcError, true)}/>;
                 </Grid>
               </form>
             )}
@@ -125,4 +122,11 @@ const UserFormControlError = props => (
       <FormHelperText error>{props.error}</FormHelperText>
     )}
   </span>
+);
+
+const SubmitButton = props => (
+  <Button variant="contained" color="primary" startIcon={(<SignupIcon />)} size="large"
+          disabled={props.disabled} >
+    Create account
+  </Button>
 );
