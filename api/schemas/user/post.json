@@ -13,6 +13,8 @@
     "name": {
       "$id": "#/properties/name",
       "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
       "title": "The Name Schema",
       "default": "",
       "examples": [
@@ -23,6 +25,8 @@
     "password": {
       "$id": "#/properties/password",
       "type": "string",
+      "minLength": 1,
+      "maxLength": 10000,
       "title": "The Password Schema",
       "default": "",
       "examples": [
