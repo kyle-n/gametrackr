@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button, Grid, TextField} from '@material-ui/core';
-import {Formik} from 'formik';
+import {Formik, Form} from 'formik';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormGroup from '@material-ui/core/FormGroup'
 import FormControl from '@material-ui/core/FormControl';
@@ -78,23 +78,28 @@ export class SignupForm extends React.Component {
     return (
       <Grid container>
         <Grid item xs={12} sm={10}>
-          <Formik initialValues={this.initialValues} validate={this.validator} onSubmit={console.log}>
+          <Formik initialValues={this.initialValues} validate={this.validator} onSubmit={f => console.log(f)}>
             {({values, errors, touched, handleChange, handleBlur, handleSubmit}) => (
-              <form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit}>
                 {this.formControls.map(formControl => {
                   return (
                     <Grid item xs={12} key={formControl.label}>
-                      <UserFormControl formControl={formControl} value={values[formControl.label]}
+                      <UserFormControl formControl={formControl} value={values[formControl.label] || ''}
                                        onChange={handleChange} onBlur={handleBlur}
                                        error={touched[formControl.label] ? errors[formControl.label] : null}
                       />
                     </Grid>
                   );
                 })}
+                <p>{}</p>
                 <Grid item xs={12} style={{marginTop: '1rem'}}>
-                  <SubmitButton disabled={!Object.values(errors).reduce((allFalsey, fcError) => allFalsey && !fcError, true)}/>;
+                  <SubmitButton submit={handleSubmit} disabled={
+                    (!Object.values(errors).reduce((allFalsey, fcError) => allFalsey && !fcError, true)) ||
+                    (Object.values(touched).length < 2) ||
+                    (!Object.values(touched).reduce((allTruthy, fcVal) => allTruthy && fcVal, true))
+                  }/>
                 </Grid>
-              </form>
+              </Form>
             )}
           </Formik>
         </Grid>
@@ -126,7 +131,8 @@ const UserFormControlError = props => (
 
 const SubmitButton = props => (
   <Button variant="contained" color="primary" startIcon={(<SignupIcon />)} size="large"
-          disabled={props.disabled} >
+          disabled={props.disabled} type="submit" onClick={props.submit}
+  >
     Create account
   </Button>
 );
