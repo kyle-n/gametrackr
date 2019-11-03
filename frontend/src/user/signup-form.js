@@ -1,15 +1,13 @@
 import React from 'react';
-import {Button, Grid, TextField} from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import {Formik, Form} from 'formik';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import FormGroup from '@material-ui/core/FormGroup'
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
-import {
-  PersonAdd as SignupIcon,
-} from '@material-ui/icons';
-import {isEmail, upperCaseFirstLetter} from '../utils';
+import SignupIcon from '@material-ui/icons/PersonAdd'
+import {upperCaseFirstLetter} from '../utils';
 
 export class SignupForm extends React.Component {
   constructor(props) {
@@ -20,84 +18,46 @@ export class SignupForm extends React.Component {
       {
         type: 'text',
         label: 'name',
-        inputProps: {autoFocus: true},
+        inputProps: {autoFocus: true, required: true, maxLength: 32},
         valid: true,
-        validator: val => {
-          if (!val) return 'Required';
-          else if (val.length > 32) return 'Too long';
-          else return null;
-        }
       },
       {
         type: 'password',
         label: 'password',
-        inputProps: {},
+        inputProps: {required: true, maxLength: 10000},
         valid: true,
-        validator: val => {
-          if (!val) return 'Required';
-          else if (val.length > 10000) return 'Too long';
-          else return null;
-        }
       },
       {
         type: 'email',
         label: 'email',
-        inputProps: {},
+        inputProps: {required: true},
         valid: true,
-        validator: val => {
-          if (!val) return 'Required';
-          else if (!isEmail.test(val)) return 'Invalid email';
-          else return null;
-        }
       },
     ];
-
-    // config object for Formik
-    this.initialValues = {};
-    Object.keys(this.formControls).forEach(formControl => {
-      this.initialValues[formControl.label] = '';
-    });
-
-    // validator function
-    this.validator = values => {
-      const errors = {};
-
-      Object.values(this.formControls).forEach(formControl => {
-        errors[formControl.label] = formControl.validator(values[formControl.label]);
-      });
-
-      return errors;
-    };
   }
 
-  updateFormControl = (key, value) => {
-    this.setState({[key]: value});
+  submitForm = (f) => {
+    console.log(f, 'submit')
   };
 
   render() {
     return (
       <Grid container>
-        <Grid item xs={12} sm={10}>
-          <Formik initialValues={this.initialValues} validate={this.validator} onSubmit={f => console.log(f)}>
-            {({values, errors, touched, handleChange, handleBlur, handleSubmit}) => (
-              <Form onSubmit={handleSubmit}>
-                {this.formControls.map(formControl => {
+        <Grid item xs={12}>
+          <Formik initialValues={{name: '', password: '', email: ''}} onSubmit={this.submitForm}>
+            {formik => (
+              <Form>
+                {this.formControls.map(fc => {
                   return (
-                    <Grid item xs={12} key={formControl.label}>
-                      <UserFormControl formControl={formControl} value={values[formControl.label] || ''}
-                                       onChange={handleChange} onBlur={handleBlur}
-                                       error={touched[formControl.label] ? errors[formControl.label] : null}
-                      />
-                    </Grid>
+                    <UserFormControl key={fc.label}
+                                     formControl={fc}
+                                     value={formik.values[fc.label]}
+                                     onChange={formik.handleChange}
+                    />
                   );
                 })}
-                <p>{}</p>
                 <Grid item xs={12} style={{marginTop: '1rem'}}>
-                  <SubmitButton submit={handleSubmit} disabled={
-                    (!Object.values(errors).reduce((allFalsey, fcError) => allFalsey && !fcError, true)) ||
-                    (Object.values(touched).length < 2) ||
-                    (!Object.values(touched).reduce((allTruthy, fcVal) => allTruthy && fcVal, true))
-                  }/>
+                  <SubmitButton />
                 </Grid>
               </Form>
             )}
@@ -109,29 +69,30 @@ export class SignupForm extends React.Component {
 }
 
 const UserFormControl = props => {
-  const fcName = 'user-' + props.formControl.label;
+  const fcId = 'user-' + props.formControl.label;
   return (
     <FormControl fullWidth>
-      <InputLabel htmlFor={fcName}>{upperCaseFirstLetter(props.formControl.label)}</InputLabel>
-      <Input type={props.formControl.type} name={props.formControl.label} id={fcName} value={props.value}
-             onChange={props.onChange} onBlur={props.onBlur} required inputProps={props.formControl.inputProps}
-             error={props.error && props.error.length > 0} />
-      <UserFormControlError error={props.error} />
+      <InputLabel htmlFor={fcId}>
+        {upperCaseFirstLetter(props.formControl.label)}
+      </InputLabel>
+      <Input type={props.formControl.type}
+             name={props.formControl.label}
+             id={fcId}
+             inputProps={props.formControl.inputProps}
+             value={props.value}
+             onChange={props.onChange}
+      />
     </FormControl>
   );
 };
 
-const UserFormControlError = props => (
-  <span>
-    {props.error && (
-      <FormHelperText error>{props.error}</FormHelperText>
-    )}
-  </span>
-);
-
 const SubmitButton = props => (
-  <Button variant="contained" color="primary" startIcon={(<SignupIcon />)} size="large"
-          disabled={props.disabled} type="submit" onClick={props.submit}
+  <Button variant="contained"
+          color="primary"
+          startIcon={(<SignupIcon />)}
+          size="large"
+          type="submit"
+          onClick={props.submit}
   >
     Create account
   </Button>
