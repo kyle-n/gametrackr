@@ -22,21 +22,33 @@ export class SignupForm extends React.Component {
         label: 'name',
         inputProps: {autoFocus: true},
         valid: true,
-        validator: val => val.length > 0 && val.length <= 32
+        validator: val => {
+          if (!val) return 'Required';
+          else if (val.length > 32) return 'Too long';
+          else return null;
+        }
       },
       {
         type: 'password',
         label: 'password',
         inputProps: {},
         valid: true,
-        validator: val => val.length > 0 && val.length <= 10000
+        validator: val => {
+          if (!val) return 'Required';
+          else if (val.length > 10000) return 'Too long';
+          else return null;
+        }
       },
       {
         type: 'email',
         label: 'email',
         inputProps: {},
         valid: true,
-        validator: val => isEmail.test(val)
+        validator: val => {
+          if (!val) return 'Required';
+          else if (!isEmail.test(val)) return 'Invalid email';
+          else return null;
+        }
       },
     ];
 
@@ -50,14 +62,9 @@ export class SignupForm extends React.Component {
     this.validator = values => {
       const errors = {};
 
-      if (!values.name) errors.name = 'Required';
-      else if (values.name.length > 32) errors.name = 'Too long'
-
-      if (!values.password) errors.password = 'Required';
-      else if (values.password.length > 10000) errors.password = 'Too long';
-
-      if (!values.email) errors.email = 'Required';
-      else if (!isEmail(values.email)) errors.email = 'Invalid email address';
+      Object.values(this.formControls).forEach(formControl => {
+        errors[formControl.label] = formControl.validator(values[formControl.label]);
+      });
 
       return errors;
     };
@@ -68,33 +75,21 @@ export class SignupForm extends React.Component {
   };
 
   render() {
-    // const formControlMarkup = this.formControls.map(formControl => {
-    //   const inputName = 'user-' + formControl.label;
-    //   return (
-    //     <Grid key={formControl.label} item xs={10}>
-    //       <FormControl fullWidth >
-    //         <InputLabel htmlFor={inputName}>
-    //           {upperCaseFirstLetter(formControl.label)}
-    //         </InputLabel>
-    //         <Input id={inputName} value={this.state[formControl.label]} type={formControl.type}
-    //                onChange={event => this.updateFormControl(formControl.label, event.target.value)}
-    //                required inputProps={formControl.inputProps} error={!formControl.valid}
-    //         />
-    //       </FormControl>
-    //     </Grid>
-    //   );
-    // });
-
     return (
       <Grid container>
         <Formik initialValues={this.initialValues} validate={this.validator} onSubmit={console.log}>
           {({values, errors, touched, handleChange, handleBlur, handleSubmit}) => (
             <form onSubmit={handleSubmit}>
-              <Input type="name" name="name" value={values.name}
-                     onChange={handleChange} onBlur={handleBlur} />
-              {errors && errors.name && touched.name && (
-                <FormHelperText error>{errors.name}</FormHelperText>
-              )}
+              {this.formControls.map(formControl => {
+                return (
+                  <Grid item xs={12} key={formControl.label}>
+                    <UserFormControl formControl={formControl} value={values[formControl.label]}
+                                     onChange={handleChange} onBlur={handleBlur}
+                                     error={errors[formControl.label]} touched={touched[formControl.label]}
+                    />
+                  </Grid>
+                );
+              })}
             </form>
           )}
           {/*<Grid item xs={12} style={{marginTop: '1rem'}}>*/}
@@ -108,3 +103,24 @@ export class SignupForm extends React.Component {
     );
   }
 }
+
+const UserFormControl = props => {
+  const fcName = 'user-' + props.formControl.label;
+  return (
+    <FormControl fullWidth>
+      <InputLabel htmlFor={fcName}>{upperCaseFirstLetter(props.formControl.label)}</InputLabel>
+      <Input type={props.formControl.type} name={props.formControl.label} id={fcName} value={props.value}
+             onChange={props.onChange} onBlur={props.onBlur} required inputProps={props.formControl.inputProps}
+             error={props.error && props.error.length > 0} />
+      <UserFormControlError error={props.error} touched={props.touched} />
+    </FormControl>
+  );
+};
+
+const UserFormControlError = props => (
+  <span>
+    {props.error && props.touched && (
+      <FormHelperText error>{props.error}</FormHelperText>
+    )}
+  </span>
+);
