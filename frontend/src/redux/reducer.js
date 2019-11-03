@@ -1,19 +1,27 @@
 import {SET_USER_ID, SET_JWT, SET_THEME} from './action-types';
+import {getCachedGlobalState, cacheGlobalState} from './caching';
 
-const initialState = {
+const initialState = getCachedGlobalState() || {
   theme: 'dark',
   userId: null,
   jwt: null
 };
 
 export function reducer(state = initialState, action) {
+  let newState;
   switch (action.type) {
     case SET_USER_ID:
-      return Object.assign({}, state, {userId: action.userId});
+      newState = Object.assign({}, state, {userId: action.userId});
+      cacheGlobalState(newState);
+      return newState;
     case SET_JWT:
-      return Object.assign({}, state, {jwt: action.jwt});
+      newState = Object.assign({}, state, {jwt: action.jwt});
+      cacheGlobalState(newState);
+      return newState;
     case SET_THEME:
-      return Object.assign({}, state, {theme: action.theme});
+      newState = Object.assign({}, state, {theme: action.theme});
+      cacheGlobalState(newState);
+      return newState;
     default:
       return state;
   }
