@@ -5,7 +5,7 @@ export const RouteDisplay = props => {
   const routeMarkup = props.routes.map(route => {
     return (
       <Route key={route.path} exact={route.exact} path={route.path}>
-        <p>{route.name}</p>
+        <route.component />
       </Route>
     );
   });
