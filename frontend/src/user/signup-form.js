@@ -86,19 +86,19 @@ export class SignupForm extends React.Component {
                     <Grid item xs={12} key={formControl.label}>
                       <UserFormControl formControl={formControl} value={values[formControl.label]}
                                        onChange={handleChange} onBlur={handleBlur}
-                                       error={errors[formControl.label]} touched={touched[formControl.label]}
+                                       error={touched[formControl.label] ? errors[formControl.label] : null}
                       />
                     </Grid>
                   );
                 })}
+                <Grid item xs={12} style={{marginTop: '1rem'}}>
+                  <Button variant="contained" color="primary" startIcon={(<SignupIcon />)} size="large"
+                          disabled={!Object.values(errors).reduce((allFalsey, fcError) => allFalsey && !fcError, true)} >
+                    Create account
+                  </Button>
+                </Grid>
               </form>
             )}
-            {/*<Grid item xs={12} style={{marginTop: '1rem'}}>*/}
-            {/*  <Button variant="contained" color="primary" startIcon={SignupIcon} size="large"*/}
-            {/*          disabled={true} >*/}
-            {/*    Create account*/}
-            {/*  </Button>*/}
-            {/*</Grid>*/}
           </Formik>
         </Grid>
       </Grid>
@@ -114,14 +114,14 @@ const UserFormControl = props => {
       <Input type={props.formControl.type} name={props.formControl.label} id={fcName} value={props.value}
              onChange={props.onChange} onBlur={props.onBlur} required inputProps={props.formControl.inputProps}
              error={props.error && props.error.length > 0} />
-      <UserFormControlError error={props.error} touched={props.touched} />
+      <UserFormControlError error={props.error} />
     </FormControl>
   );
 };
 
 const UserFormControlError = props => (
   <span>
-    {props.error && props.touched && (
+    {props.error && (
       <FormHelperText error>{props.error}</FormHelperText>
     )}
   </span>
