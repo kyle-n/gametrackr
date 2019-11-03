@@ -29,8 +29,8 @@ export class MobileNav extends React.Component {
 const SideDrawerContainer = props => {
   const navLinks = props.routes.map(route => {
     return (
-      <Hidden mdDown={route.title === 'Theme'}>
-        <NavLinkWithIcon key={route.path} route={route}/>
+      <Hidden key={route.path} mdDown={route.title === 'Theme'}>
+        <NavLinkWithIcon route={route}/>
       </Hidden>
     );
   });
