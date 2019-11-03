@@ -77,28 +77,30 @@ export class SignupForm extends React.Component {
   render() {
     return (
       <Grid container>
-        <Formik initialValues={this.initialValues} validate={this.validator} onSubmit={console.log}>
-          {({values, errors, touched, handleChange, handleBlur, handleSubmit}) => (
-            <form onSubmit={handleSubmit}>
-              {this.formControls.map(formControl => {
-                return (
-                  <Grid item xs={12} key={formControl.label}>
-                    <UserFormControl formControl={formControl} value={values[formControl.label]}
-                                     onChange={handleChange} onBlur={handleBlur}
-                                     error={errors[formControl.label]} touched={touched[formControl.label]}
-                    />
-                  </Grid>
-                );
-              })}
-            </form>
-          )}
-          {/*<Grid item xs={12} style={{marginTop: '1rem'}}>*/}
-          {/*  <Button variant="contained" color="primary" startIcon={SignupIcon} size="large"*/}
-          {/*          disabled={true} >*/}
-          {/*    Create account*/}
-          {/*  </Button>*/}
-          {/*</Grid>*/}
-        </Formik>
+        <Grid item xs={12} sm={10}>
+          <Formik initialValues={this.initialValues} validate={this.validator} onSubmit={console.log}>
+            {({values, errors, touched, handleChange, handleBlur, handleSubmit}) => (
+              <form onSubmit={handleSubmit}>
+                {this.formControls.map(formControl => {
+                  return (
+                    <Grid item xs={12} key={formControl.label}>
+                      <UserFormControl formControl={formControl} value={values[formControl.label]}
+                                       onChange={handleChange} onBlur={handleBlur}
+                                       error={errors[formControl.label]} touched={touched[formControl.label]}
+                      />
+                    </Grid>
+                  );
+                })}
+              </form>
+            )}
+            {/*<Grid item xs={12} style={{marginTop: '1rem'}}>*/}
+            {/*  <Button variant="contained" color="primary" startIcon={SignupIcon} size="large"*/}
+            {/*          disabled={true} >*/}
+            {/*    Create account*/}
+            {/*  </Button>*/}
+            {/*</Grid>*/}
+          </Formik>
+        </Grid>
       </Grid>
     );
   }
