@@ -21,6 +21,17 @@ import {sequelize} from './models';
   // app config
   const app: express.Application = express();
   app.use(json());
+
+  // cors
+  app.use((req, resp, next) => {
+    resp.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    resp.header('Access-Control-Allow-Credentials', 'true');
+    resp.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+    next();
+  });
+
+  // api
   app.use('/api', apiRouters);
 
   // test process
