@@ -1,3 +1,3 @@
-import SignupPageComponent from './signup-page';
+import UserFormPageComponent from './user-form-page';
 
-export const SignupPage = SignupPageComponent;
+export const UserFormPage = UserFormPageComponent;

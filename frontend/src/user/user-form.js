@@ -1,14 +1,14 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import {Formik, Form} from 'formik';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import SignupIcon from '@material-ui/icons/PersonAdd'
+import {Formik, Form} from 'formik';
 import {upperCaseFirstLetter} from '../utils';
 
-export class SignupForm extends React.Component {
+export default class UserForm extends React.Component {
   constructor(props) {
     super(props);
 

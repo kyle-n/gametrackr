@@ -7,7 +7,7 @@ import {
   ExitToApp as LoginIcon
 } from '@material-ui/icons';
 
-import {SignupPage} from '../user';
+import {UserFormPage} from '../user';
 
 export const routes = {
   top: [
@@ -17,7 +17,7 @@ export const routes = {
       icon: SignupIcon,
       showWhenLoggedIn: false,
       showWhenLoggedOut: true,
-      component: SignupPage
+      component: UserFormPage
     },
     {
       path: '/login',
@@ -25,7 +25,7 @@ export const routes = {
       icon: LoginIcon,
       showWhenLoggedIn: false,
       showWhenLoggedOut: true,
-      component: SignupPage
+      component: UserFormPage
     },
     {
       path: '/lists',
@@ -33,7 +33,7 @@ export const routes = {
       icon: ListIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: false,
-      component: SignupPage
+      component: UserFormPage
     },
     {
       path: '/search',
@@ -41,7 +41,7 @@ export const routes = {
       icon: SearchIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: false,
-      component: SignupPage
+      component: UserFormPage
     },
     {
       path: '/about',
@@ -49,7 +49,7 @@ export const routes = {
       icon: InfoIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: true,
-      component: SignupPage
+      component: UserFormPage
     }
   ]
 };
