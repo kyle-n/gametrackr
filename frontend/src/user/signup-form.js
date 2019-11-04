@@ -2,7 +2,6 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import {Formik, Form} from 'formik';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -36,10 +35,6 @@ export class SignupForm extends React.Component {
     ];
   }
 
-  submitForm = (f) => {
-    console.log(f, 'submit')
-  };
-
   render() {
     return (
       <Grid container>
@@ -57,7 +52,7 @@ export class SignupForm extends React.Component {
                   );
                 })}
                 <Grid item xs={12} style={{marginTop: '1rem'}}>
-                  <SubmitButton />
+                  <SubmitButton disabled={formik.isSubmitting} />
                 </Grid>
               </Form>
             )}
@@ -93,6 +88,7 @@ const SubmitButton = props => (
           size="large"
           type="submit"
           onClick={props.submit}
+          disabled={props.disabled}
   >
     Create account
   </Button>
