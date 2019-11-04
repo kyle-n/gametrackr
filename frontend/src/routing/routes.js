@@ -8,6 +8,7 @@ import {
 } from '@material-ui/icons';
 
 import {UserFormPage} from '../user';
+import {SearchPage} from '../search';
 
 export const routes = {
   top: [
@@ -41,7 +42,7 @@ export const routes = {
       icon: SearchIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: false,
-      component: UserFormPage
+      component: SearchPage
     },
     {
       path: '/about',
