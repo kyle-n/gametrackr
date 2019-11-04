@@ -1,5 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import SearchGameInput from './search-input';
 
 class SearchContainer extends React.Component {
   constructor(props) {
@@ -7,7 +8,7 @@ class SearchContainer extends React.Component {
   }
   render() {
     return (
-      <p>Search stuff</p>
+      <SearchGameInput />
     );
   }
 }
