@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import SearchIcon from '@material-ui/icons/Search';
 import {debounce} from 'throttle-debounce';
 
-export default class SearchGameInput extends React.Component {
+export default class SearchInput extends React.Component {
   constructor(props) {
     super(props);
 
@@ -31,16 +31,19 @@ export default class SearchGameInput extends React.Component {
   }
 }
 
-const SearchFormControl = props => (
-  <FormControl fullWidth>
-    <InputLabel htmlFor="game-search-input">
-      Search {props.searchType}
-    </InputLabel>
-    <Input id="game-search-input"
-           type="text"
-           name="Search games"
-           autoFocus
-           onChange={e => props.setQuery(e.target.value)}
-    />
-  </FormControl>
-);
+const SearchFormControl = props => {
+  const inputId = props.searchType + '-search-input';
+  return (
+    <FormControl fullWidth>
+      <InputLabel htmlFor={inputId}>
+        Search {props.searchType}
+      </InputLabel>
+      <Input id={inputId}
+             type="text"
+             name={'Search ' + props.searchType}
+             autoFocus
+             onChange={e => props.setQuery(e.target.value)}
+      />
+    </FormControl>
+  );
+};
