@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import SearchInput from './search-input';
+import GameResultsBox from './game-results-box';
 import {searchGame} from '../external-connectors';
 
 class SearchContainer extends React.Component {
@@ -22,10 +23,13 @@ class SearchContainer extends React.Component {
 
   render() {
     return (
-      <SearchInput searchType="games"
-                   setQuery={this.searchGames}
-                   loading={this.state.loading}
-      />
+      <div>
+        <SearchInput searchType="games"
+                     setQuery={this.searchGames}
+                     loading={this.state.loading}
+        />
+        <GameResultsBox games={this.state.searchResults} />
+      </div>
     );
   }
 }
