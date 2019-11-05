@@ -4,11 +4,18 @@ import Input from '@material-ui/core/Input';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
 import SearchIcon from '@material-ui/icons/Search';
+import {debounce} from 'throttle-debounce';
 import {searchGame} from '../external-connectors';
 
 export default class SearchGameInput extends React.Component {
   constructor(props) {
     super(props);
+
+    const search = async query => {
+      const resp = await searchGame(query);
+      console.log(resp);
+    };
+    this.debouncedSearch = debounce(1000, search);
   }
 
   render() {
@@ -28,6 +35,7 @@ export default class SearchGameInput extends React.Component {
                    type="text"
                    name="Search games"
                    autoFocus
+                   onChange={e => this.debouncedSearch(e.target.value)}
             />
           </FormControl>
         </Grid>

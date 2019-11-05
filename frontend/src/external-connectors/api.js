@@ -16,7 +16,7 @@ export const createUser = async (userData) => {
 };
 
 export const searchGame = async (query) => {
-  const url = apiUrl + '/search?q=' + encodeURIComponent(query);
+  const url = apiUrl + '/games/search?q=' + encodeURIComponent(query);
   const searchResults = await axios.get(url);
 
   return searchResults.data;
