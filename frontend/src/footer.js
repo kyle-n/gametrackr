@@ -10,7 +10,7 @@ export const Footer = props => (
         <Divider style={{margin: '3rem 0 1rem 0'}} />
       </Grid>
       <Grid item xs={12}>
-        <Typography variant="p">
+        <Typography variant="body2">
           Made by <a href="https://www.kylenazario.com/" target="_blank" className="reset-color">Kyle Nazario</a>.
           See the <a href="https://github.com/kyle-n/gametrackr" target="_blank" className="reset-color">source code</a>.
         </Typography>

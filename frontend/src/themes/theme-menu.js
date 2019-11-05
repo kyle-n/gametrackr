@@ -1,6 +1,8 @@
 import React from 'react';
-import {Button, Menu, MenuItem} from '@material-ui/core';
-import {Palette as PaletteIcon} from '@material-ui/icons';
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import PaletteIcon from '@material-ui/icons/Palette';
 import {themes} from './themes.model';
 
 export default class ThemeMenu extends React.Component {

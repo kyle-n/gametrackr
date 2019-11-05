@@ -1,4 +1,0 @@
-App-wide state:
-- Theme
-- user id
-- jwt

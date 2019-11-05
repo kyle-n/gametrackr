@@ -1,2 +1,2 @@
 export * from './route-display';
-export * from './routes';
+export * from './routes.model';

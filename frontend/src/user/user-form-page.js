@@ -1,12 +1,14 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import UserFormContainer from './user-form-container';
 import {Link} from 'react-router-dom';
+import {PageTitle} from '../utils';
 
 const UserFormPage = props => (
   <Grid container>
     <Grid item xs={12}>
-      <h2>Sign up for gametrackr</h2>
+      <PageTitle title="Sign up"/>
     </Grid>
     <Grid item xs={12} md={7}>
       <UserFormContainer />
@@ -18,7 +20,7 @@ const UserFormPage = props => (
 );
 
 const LoginMessage = () => (
-  <p>Already have an account? <Link to='/login' className="reset-color">Log in here</Link>.</p>
+  <Typography variant="body1">Already have an account? <Link to='/login' className="reset-color">Log in here</Link>.</Typography>
 );
 
 export default UserFormPage;

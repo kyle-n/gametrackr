@@ -1,8 +1,9 @@
 import React from 'react';
-import {Drawer, Hidden, IconButton, List} from '@material-ui/core';
-import {
-  Menu as MenuIcon,
-} from '@material-ui/icons';
+import Drawer from '@material-ui/core/Drawer';
+import Hidden from '@material-ui/core/Hidden';
+import IconButton from '@material-ui/core/IconButton';
+import List from '@material-ui/core/List';
+import MenuIcon from '@material-ui/icons/Menu';
 import {NavLinkWithIcon} from './nav-link-with-icon';
 
 export class MobileNav extends React.Component {

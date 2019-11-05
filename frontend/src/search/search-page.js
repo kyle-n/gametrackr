@@ -1,9 +1,10 @@
 import React from 'react';
 import SearchContainer from './search-container';
+import {PageTitle} from '../utils';
 
 const SearchPage = props => (
   <div>
-    <h2>Search</h2>
+    <PageTitle title="Search" />
     <SearchContainer />
   </div>
 );

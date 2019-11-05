@@ -2,9 +2,11 @@ import React from 'react';
 import {connect} from 'react-redux';
 import '../utils/layout.css';
 import {MobileNav} from './hamburger-menu';
-import {Grid, Hidden} from '@material-ui/core';
 import {NavLinkWithIcon} from './nav-link-with-icon';
+import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
 import List from '@material-ui/core/List';
+import Typography from '@material-ui/core/Typography';
 import {Link} from 'react-router-dom';
 import {ThemeMenu} from '../themes';
 import {setTheme} from '../redux';
@@ -55,7 +57,7 @@ class Title extends React.Component {
 const SiteTitle = props => (
   <header style={{textAlign: 'center'}}>
     <Link to={props.loggedIn ? '/home' : '/'} className="no-underline reset-color">
-      <h1>gametrackr</h1>
+      <Typography variant="h4" variantMapping={{h4: 'h1'}}>gametrackr</Typography>
     </Link>
   </header>
 );

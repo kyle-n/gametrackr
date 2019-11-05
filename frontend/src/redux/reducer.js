@@ -9,20 +9,22 @@ const initialState = getCachedGlobalState() || {
 
 export function reducer(state = initialState, action) {
   let newState;
+
   switch (action.type) {
     case SET_USER_ID:
       newState = Object.assign({}, state, {userId: action.userId});
-      cacheGlobalState(newState);
-      return newState;
+      break;
     case SET_JWT:
       newState = Object.assign({}, state, {jwt: action.jwt});
-      cacheGlobalState(newState);
-      return newState;
+      break;
     case SET_THEME:
       newState = Object.assign({}, state, {theme: action.theme});
-      cacheGlobalState(newState);
-      return newState;
+      break;
     default:
-      return state;
+      newState = state;
+      break;
   }
+
+  cacheGlobalState(newState);
+  return newState;
 }

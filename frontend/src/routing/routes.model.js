@@ -1,11 +1,9 @@
 import React from 'react';
-import {
-  List as ListIcon,
-  Search as SearchIcon,
-  Info as InfoIcon,
-  PersonAdd as SignupIcon,
-  ExitToApp as LoginIcon
-} from '@material-ui/icons';
+import ListIcon from '@material-ui/icons/List'
+import SearchIcon from '@material-ui/icons/Search';
+import InfoIcon from '@material-ui/icons/Info';
+import SignupIcon from '@material-ui/icons/PersonAdd';
+import LoginIcon from '@material-ui/icons/ExitToApp';
 
 import {UserFormPage} from '../user';
 import {SearchPage} from '../search';
