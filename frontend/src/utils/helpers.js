@@ -4,3 +4,7 @@ export const upperCaseFirstLetter = str => {
 };
 
 export const isEmail = new RegExp(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/);
+
+export const gamePropsToDate = game => {
+  return new Date(game.expectedReleaseYear + '-' + game.expectedReleaseMonth + '-' + game.expectedReleaseDay);
+};
