@@ -4,3 +4,5 @@
 node_modules
 build
 .idea
+*sublime*
+.DS_Store
