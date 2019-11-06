@@ -1,6 +1,7 @@
 import React from 'react';
 import Grow from '@material-ui/core/Grow';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -28,7 +29,20 @@ const GameCard = props => {
             {props.game.deck}
           </CardContent>
           <CardActions>
-            <p>actions</p>
+            <Grid container>
+              <Grid item xs={12} sm={6}>
+                {props.game.description ? (
+                  <Button size="small" color="secondary">
+                    Details
+                  </Button>
+                ) : null}
+              </Grid>
+              <Grid item xs={12} sm={6} style={{textAlign: 'right'}}>
+                <Button size="small" color="secondary">
+                  Add to list
+                </Button>
+              </Grid>
+            </Grid>
           </CardActions>
         </Card>
       </Grow>
