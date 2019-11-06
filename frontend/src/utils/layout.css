@@ -6,14 +6,14 @@
   color: unset;
 }
 
-@media (min-width: 768px) {
-  .mobile-only {
-    display: none;
-  }
+.small-margin {
+	margin: 1rem;
 }
 
-@media (max-width: 767px) {
-  .desktop-only {
-    display: none;
-  }
+.medium-margin {
+	margin: 2rem;
+}
+
+.large-margin {
+	margin: 3rem;
 }
