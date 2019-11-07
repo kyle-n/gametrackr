@@ -21,7 +21,7 @@ const App = props => {
         <Container>
           <main>
             <BrowserRouter>
-              <Title routes={routes.top} />
+              <Title routes={routes.nav} />
               <RouteDisplay routes={allRoutes} />
             </BrowserRouter>
           </main>

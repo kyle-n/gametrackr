@@ -7,9 +7,10 @@ import LoginIcon from '@material-ui/icons/ExitToApp';
 
 import {UserFormPage} from '../user';
 import {SearchPage} from '../search';
+import {GameDetailsPageContainer} from '../games';
 
 export const routes = {
-  top: [
+  nav: [
     {
       path: '/signup',
       title: 'Sign up',
@@ -49,6 +50,14 @@ export const routes = {
       showWhenLoggedIn: true,
       showWhenLoggedOut: true,
       component: UserFormPage
+    }
+  ],
+  games: [
+    {
+      path: '/games/:id/details',
+      showWhenLoggedIn: true,
+      showWhenLoggedOut: true,
+      component: GameDetailsPageContainer
     }
   ]
 };
