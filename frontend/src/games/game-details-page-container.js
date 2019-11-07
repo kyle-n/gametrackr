@@ -15,7 +15,6 @@ class GameDetailsPageContainer extends React.Component {
 	}
 
 	render() {
-		console.log(this.state.game)
 		return (
 			<GameDetailsPage game={this.state.game} />
 		);
