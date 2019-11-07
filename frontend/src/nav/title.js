@@ -7,6 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
 import {Link} from 'react-router-dom';
 import {ThemeMenu} from '../themes';
 import {setTheme} from '../redux';
@@ -25,41 +26,41 @@ class Title extends React.Component {
   render() {
     const routes = Title.getRoutesForLoginStatus(this.props.routes, this.props.loggedIn);
     return (
-      <Grid container alignItems="center">
-        <Hidden mdUp>
-          <Grid item xs={1}>
-            <MobileNav routes={routes}/>
+      <Box component="header" mb="2rem" mt="1rem">
+        <Grid container alignItems="center">
+          <Hidden mdUp>
+            <Grid item xs={1}>
+              <MobileNav routes={routes}/>
+            </Grid>
+          </Hidden>
+          <Grid item xs={7} md={4}>
+            <SiteTitle loggedIn={this.props.loggedIn}/>
           </Grid>
-        </Hidden>
-        <Grid item xs={7} md={4}>
-          <SiteTitle loggedIn={this.props.loggedIn}/>
+          <Hidden mdUp>
+            <Grid item xs={4} style={{textAlign: 'center'}}>
+              <ThemeMenu setTheme={this.props.setTheme} />
+            </Grid>
+          </Hidden>
+          <Hidden smDown>
+            <Grid item md={6}>
+              <DesktopNavLinks routes={routes}/>
+            </Grid>
+          </Hidden>
+          <Hidden smDown>
+            <Grid item md={2} style={{textAlign: 'left'}}>
+              <ThemeMenu setTheme={this.props.setTheme} />
+            </Grid>
+          </Hidden>
         </Grid>
-        <Hidden mdUp>
-          <Grid item xs={4} style={{textAlign: 'center'}}>
-            <ThemeMenu setTheme={this.props.setTheme} />
-          </Grid>
-        </Hidden>
-        <Hidden smDown>
-          <Grid item md={6}>
-            <DesktopNavLinks routes={routes}/>
-          </Grid>
-        </Hidden>
-        <Hidden smDown>
-          <Grid item md={2} style={{textAlign: 'left'}}>
-            <ThemeMenu setTheme={this.props.setTheme} />
-          </Grid>
-        </Hidden>
-      </Grid>
+      </Box>
     );
   }
 }
 
 const SiteTitle = props => (
-  <header style={{textAlign: 'center'}}>
-    <Link to={props.loggedIn ? '/home' : '/'} className="no-underline reset-color">
-      <Typography variant="h4" variantMapping={{h4: 'h1'}}>gametrackr</Typography>
-    </Link>
-  </header>
+  <Link to={props.loggedIn ? '/home' : '/'} className="no-underline reset-color">
+    <Typography variant="h4" variantMapping={{h4: 'h1'}}>gametrackr</Typography>
+  </Link>
 );
 
 const DesktopNavLinks = props => {
