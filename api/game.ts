@@ -1,4 +1,5 @@
 import express from 'express';
+import {Op} from 'sequelize';
 
 import {validateRequest} from '../utils';
 import {GbConnector} from '../external-connectors';
@@ -49,7 +50,12 @@ router.post('/', validPostOrPatch, async (req, resp) => {
 });
 
 router.get('/:id', async (req, resp) => {
-  const foundGame: Game | null = await Game.findOne({where: {id: req.params.id}});
+  const foundGame: Game | null = await Game.findOne({where: {
+    [Op.or]: [
+      {id: req.params.id},
+      {gbId: req.params.id}
+    ]
+  }});
   if (!foundGame) return resp.status(404).send();
 
   return resp.json(foundGame);
