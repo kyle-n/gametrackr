@@ -8,7 +8,9 @@ const GameResultsBox = props => (
   	<Grid container>
 	    {props.games.map(game => {
 	      return (
-	        <GameCard key={game.gbId} game={game} />
+					<Grid item key={game.gbId} xs={12} sm={6} md={4} lg={3} xl={2}>
+						<GameCard game={game} />
+					</Grid>
 	      );
 	    })}
 	  </Grid>
