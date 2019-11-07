@@ -46,12 +46,17 @@ const DesktopLayout = props => (
 	</Grid>
 );
 
-const GameDetailsArticle = props => (
-		<article>
-			<div dangerouslySetInnerHTML={{__html: props.game.description}}>
+const GameDetailsArticle = props => {
+	const convertedDescription = props.game.description
+		.replace(/<a/g, '<a class="reset-color"');
+	console.log(convertedDescription, props.game.description)
+	return (
+		<article style={{overflow: 'hidden'}}>
+			<div dangerouslySetInnerHTML={{__html: convertedDescription}}>
 			</div>
 		</article>
-);
+	);
+};
 
 const GamePageLoadingSpinner = () => (
 			<div style={{textAlign: 'center'}} className="large-margin">
