@@ -8,7 +8,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import CardActions from '@material-ui/core/CardActions';
-import {makeStyles} from '@material-ui/core/styles';
+import {Link} from 'react-router-dom';
 import {gamePropsToDate} from '../utils';
 import './game-card.css';
 import '../utils/layout.css';
@@ -32,9 +32,11 @@ const GameCard = props => {
             <Grid container>
               <Grid item xs={12} sm={6}>
                 {props.game.description ? (
-                  <Button size="small" color="secondary">
-                    Details
-                  </Button>
+                  <Link to={`/games/${props.game.gbId}/details`}>
+                    <Button size="small" color="secondary">
+                      Details
+                    </Button>
+                  </Link>
                 ) : null}
               </Grid>
               <Grid item xs={12} sm={6} style={{textAlign: 'right'}}>
