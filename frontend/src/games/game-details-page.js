@@ -1,8 +1,9 @@
 import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
 import '../utils/layout.css';
-import {PageTitle} from '../utils';
+import GameCard from './game-card';
 
 const GameDetailsPage = props => {
 	return props.game && props.game.description ? (
@@ -12,14 +13,45 @@ const GameDetailsPage = props => {
 		);
 }
 
-const GameDetails = props => {
-	return (
+const GameDetails = props => (
+	<div>
+		<Hidden mdUp>
+			<MobileLayout game={props.game} />
+		</Hidden>
+		<Hidden smDown>
+			<DesktopLayout game={props.game} />
+		</Hidden>
+	</div>
+);
+
+const MobileLayout = props => (
+	<Grid container>
+		<Grid item xs={12}>
+			<GameCard game={props.game} />
+		</Grid>
+		<Grid item xs={12}>
+			<GameDetailsArticle game={props.game} />
+		</Grid>
+	</Grid>
+);
+
+const DesktopLayout = props => (
+	<Grid container>
+		<Grid item md={8}>
+			<GameDetailsArticle game={props.game} />
+		</Grid>
+		<Grid item md={4}>
+			<GameCard game={props.game} />
+		</Grid>
+	</Grid>
+);
+
+const GameDetailsArticle = props => (
 		<article>
-			<PageTitle title={props.game.name} />
-			<div dangerouslySetInnerHTML={{__html: props.game.description}}></div>
+			<div dangerouslySetInnerHTML={{__html: props.game.description}}>
+			</div>
 		</article>
-	);
-};
+);
 
 const GamePageLoadingSpinner = () => (
 			<div style={{textAlign: 'center'}} className="large-margin">
