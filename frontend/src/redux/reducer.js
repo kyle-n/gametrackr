@@ -1,10 +1,14 @@
-import {SET_USER_ID, SET_JWT, SET_THEME} from './action-types';
+import {SET_USER_ID, SET_JWT, SET_THEME, SEND_ALERT} from './action-types';
 import {getCachedGlobalState, cacheGlobalState} from './caching';
 
 const initialState = getCachedGlobalState() || {
   theme: 'dark',
   userId: null,
-  jwt: null
+  jwt: null,
+  message: {
+    type: null,
+    text: null
+  }
 };
 
 export function reducer(state = initialState, action) {
@@ -19,6 +23,10 @@ export function reducer(state = initialState, action) {
       break;
     case SET_THEME:
       newState = Object.assign({}, state, {theme: action.theme});
+      break;
+    case SEND_ALERT:
+      const message = {type: action.messageType, text: action.message};
+      newState = Object.assign({}, state, {message});
       break;
     default:
       newState = state;
