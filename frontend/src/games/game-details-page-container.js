@@ -2,6 +2,8 @@ import React from 'react';
 import {withRouter} from 'react-router-dom';
 import GameDetailsPage from './game-details-page';
 import {getGame} from '../external-connectors';
+import {sendAlert} from '../redux';
+import {connect} from 'react-redux';
 
 class GameDetailsPageContainer extends React.Component {
 	constructor(props) {
@@ -9,9 +11,11 @@ class GameDetailsPageContainer extends React.Component {
 		this.state = {game: null}
 	}
 
-	async componentDidMount() {
-		const game = await getGame(this.props.match.params.id);
-		this.setState({game});
+	componentDidMount() {
+		getGame(this.props.match.params.id).then(game => {
+			if (!game) return this.props.sendAlert('Could not load game details', 'error');
+			this.setState({game});
+		});
 	}
 
 	render() {
@@ -21,4 +25,6 @@ class GameDetailsPageContainer extends React.Component {
 	}
 }
 
-export default withRouter(GameDetailsPageContainer);
+const dispatchMaps = {sendAlert};
+
+export default withRouter(connect(null, dispatchMaps)(GameDetailsPageContainer));

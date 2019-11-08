@@ -8,6 +8,7 @@ import {RouteDisplay, routes} from './routing';
 import {Title} from './nav';
 import {ThemeDisplay} from './themes';
 import {Footer} from './footer';
+import {AlertContainer} from './alerts';
 
 const App = props => {
   let allRoutes = [];
@@ -26,6 +27,7 @@ const App = props => {
             </BrowserRouter>
           </main>
           <Footer />
+          <AlertContainer />
         </Container>
       </CssBaseline>
     </ThemeDisplay>

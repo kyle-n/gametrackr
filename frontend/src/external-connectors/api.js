@@ -24,7 +24,13 @@ export const searchGame = async (query) => {
 
 export const getGame = async (gameId) => {
   const url = apiUrl + '/games/' + gameId;
-  const gameResp = await axios.get(url);
+
+  let gameResp;
+  try {
+    gameResp = await axios.get(url);
+  } catch (e) {
+    return null;
+  }
 
   return gameResp.data;
 };

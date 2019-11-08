@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 import SearchInput from './search-input';
 import GameResultsBox from './game-results-box';
 import {searchGame} from '../external-connectors';
+import {sendAlert} from '../redux';
 
 class SearchContainer extends React.Component {
   constructor(props) {
@@ -17,6 +18,7 @@ class SearchContainer extends React.Component {
   searchGames = query => {
     this.setState({loading: true}, async () => {
       const resp = await searchGame(query);
+      if (!resp) return this.props.sendAlert('Could not load games');
       this.setState({searchResults: resp.games, loading: false});
     });
   };
@@ -34,6 +36,6 @@ class SearchContainer extends React.Component {
   }
 }
 
-const dispatchMap = {};
+const dispatchMap = {sendAlert};
 
 export default connect(null, dispatchMap)(SearchContainer);
