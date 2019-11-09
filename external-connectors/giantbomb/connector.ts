@@ -1,8 +1,8 @@
 import axios from 'axios';
 import {Game, GameProps, Platform, PlatformProps} from '../../models';
 
-import {GiantBombConnector, GiantBombGame, GiantBombResponse, PlatformStrategized, ImageStrategized} from './interfaces';
-import {mapGbGame, mapStrategizedGbPlatform, mapGbPlatform} from './mappings';
+import {GiantBombConnector, GiantBombGame, GiantBombResponse} from './interfaces';
+import {mapGbGame, mapStrategizedGbPlatform} from './mappings';
 
 const baseUrl = 'https://www.giantbomb.com/api';
 
@@ -23,7 +23,7 @@ const upsertGamesAndPlatforms = (results: GiantBombGame[]): GameProps[] => {
   const gamesToUpsert: GameProps[] = [];
   const platformsToUpsert: PlatformProps[] = [];
   const previousPlatformIds: number[] = [];
-  results.forEach((result, i) => {
+  results.forEach(result => {
     const mappedGame = mapGbGame(result);
     gamesToUpsert.push(mappedGame);
     if (result.platforms) {
