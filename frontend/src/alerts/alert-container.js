@@ -10,13 +10,21 @@ class AlertContainer extends React.Component {
   constructor(props) {
     super(props);
 
+    this.initializeDebouncer();
+  }
+
+  initializeDebouncer() {
+    const alertInterval = 3 * 1000;
     const clearAlert = () => this.props.sendAlert(null, null);
-    this.debouncedClearAlert = debounce(3 * 1000, clearAlert);
+    this.debouncedClearAlert = debounce(alertInterval, clearAlert);
   }
 
   componentDidUpdate() {
-    console.log('receiving props', this.props)
-    if (this.props.type || this.props.text) this.debouncedClearAlert();
+    if (this.props.type || this.props.message) this.debouncedClearAlert();
+  }
+
+  componentDidMount() {
+    if (this.props.type || this.props.message) this.debouncedClearAlert();
   }
 
   render() {
