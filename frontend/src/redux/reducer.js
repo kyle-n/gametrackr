@@ -1,7 +1,7 @@
 import {SET_USER_ID, SET_JWT, SET_THEME, SEND_ALERT} from './action-types';
 import {getCachedGlobalState, cacheGlobalState} from './caching';
 
-const initialState = getCachedGlobalState() || {
+const nullState = {
   theme: 'dark',
   userId: null,
   jwt: null,
@@ -9,7 +9,9 @@ const initialState = getCachedGlobalState() || {
     type: null,
     text: null
   }
-};
+}
+
+const initialState = getCachedGlobalState() || nullState;
 
 export function reducer(state = initialState, action) {
   let newState;
