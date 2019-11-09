@@ -4,6 +4,8 @@ import SearchInput from './search-input';
 import GameResultsBox from './game-results-box';
 import {searchGame} from '../external-connectors';
 import {sendAlert} from '../redux';
+import {withRouter, Redirect} from 'react-router-dom';
+import qs from 'qs';
 
 class SearchContainer extends React.Component {
   constructor(props) {
@@ -11,24 +13,30 @@ class SearchContainer extends React.Component {
 
     this.state = {
       searchResults: [],
-      loading: false
+      query: '',
     };
   }
 
+  componentDidMount() {
+    const queryParams = qs.parse(this.props.location.search, {ignoreQueryPrefix: true});
+    if (queryParams.q) this.searchGames(queryParams.q);
+  }
+
   searchGames = query => {
-    this.setState({loading: true}, async () => {
+    this.setState({query}, async () => {
       const resp = await searchGame(query);
       if (!resp) return this.props.sendAlert('Could not load games');
-      this.setState({searchResults: resp.games, loading: false});
+      this.setState({searchResults: resp.games, query: ''});
     });
   };
 
   render() {
     return (
       <div>
+        <RedirectToQueryPage query={this.state.query} />
         <SearchInput searchType="games"
                      setQuery={this.searchGames}
-                     loading={this.state.loading}
+                     loading={!!(this.state.query)}
         />
         <GameResultsBox games={this.state.searchResults} />
       </div>
@@ -36,6 +44,10 @@ class SearchContainer extends React.Component {
   }
 }
 
+const RedirectToQueryPage = props => {
+  return props.query ? (<Redirect to={'/search?q=' + props.query} />) : null;
+};
+
 const dispatchMap = {sendAlert};
 
-export default connect(null, dispatchMap)(SearchContainer);
+export default withRouter(connect(null, dispatchMap)(SearchContainer));
