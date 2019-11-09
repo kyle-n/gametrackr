@@ -39,11 +39,11 @@ export class Game extends Model implements GameProps {
   public apiDetailUrl!: string;
 
   @AllowNull(false)
-  @Column
+  @Column(DataType.TEXT)
   public deck!: string;
 
   @AllowNull(false)
-  @Column(DataTypes.STRING(999999))
+  @Column(DataTypes.TEXT)
   public description!: string;
 
   @Column(DataType.STRING)
