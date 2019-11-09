@@ -4,10 +4,19 @@ import {sendAlert} from '../redux';
 import Snackbar from '@material-ui/core/Snackbar';
 import ErrorIcon from '@material-ui/icons/Error';
 import CheckIcon from '@material-ui/icons/Check';
+import {debounce} from 'throttle-debounce';
 
 class AlertContainer extends React.Component {
   constructor(props) {
     super(props);
+
+    const clearAlert = () => this.props.sendAlert(null, null);
+    this.debouncedClearAlert = debounce(3 * 1000, clearAlert);
+  }
+
+  componentDidUpdate() {
+    console.log('receiving props', this.props)
+    if (this.props.type || this.props.text) this.debouncedClearAlert();
   }
 
   render() {
@@ -20,7 +29,7 @@ class AlertContainer extends React.Component {
         icon = CheckIcon;
         break;
       default:
-        icon = CheckIcon;
+        icon = null;
         break;
     }
 
@@ -36,7 +45,9 @@ class AlertContainer extends React.Component {
 const Alert = props => (
   <Snackbar anchorOrigin={{vertical: 'bottom', horizontal: 'left'}} message={(
       <span style={{display: 'flex', alignItems: 'center'}}>
-        <props.icon style={{marginRight: '1rem'}} />
+        {props.icon ? (
+          <props.icon style={{marginRight: '1rem'}} />
+        ) : null}
         {props.text}
       </span>
   )} open={props.open}>
