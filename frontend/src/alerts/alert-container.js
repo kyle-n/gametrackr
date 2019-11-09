@@ -2,9 +2,11 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {sendAlert} from '../redux';
 import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
 import ErrorIcon from '@material-ui/icons/Error';
 import CheckIcon from '@material-ui/icons/Check';
 import {debounce} from 'throttle-debounce';
+import {useTheme} from '@material-ui/core/styles';
 
 class AlertContainer extends React.Component {
   constructor(props) {
@@ -50,16 +52,29 @@ class AlertContainer extends React.Component {
   }
 }
 
-const Alert = props => (
-  <Snackbar anchorOrigin={{vertical: 'bottom', horizontal: 'left'}} message={(
-      <span style={{display: 'flex', alignItems: 'center'}}>
-        {props.icon ? (
-          <props.icon style={{marginRight: '1rem'}} />
-        ) : null}
-        {props.text}
-      </span>
-  )} open={props.open}>
-  </Snackbar>
+const Alert = props => {
+  const theme = useTheme();
+  let colorGroup = props.type === 'success' ? 'main' : 'error';
+
+  return (
+    <Snackbar anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+              open={props.open}>
+      <SnackbarContent style={{backgroundColor: theme.palette[colorGroup].light}}
+                       message={(
+                         <IconAndText icon={props.icon} text={props.text} />
+                       )}>
+      </SnackbarContent>
+    </Snackbar>
+  );
+};
+
+const IconAndText = props => (
+  <span style={{display: 'flex', alignItems: 'center'}}>
+    {props.icon ? (
+      <props.icon style={{marginRight: '1rem'}} />
+    ) : null}
+    {props.text}
+  </span>
 );
 
 const mapStateToProps = state => {
