@@ -1,9 +1,8 @@
-import {Model, Table, Column, AllowNull, HasMany, BelongsToMany, DataType, Default, Unique} from 'sequelize-typescript';
+import {Model, Table, Column, AllowNull, HasMany, BelongsToMany, DataType, Default} from 'sequelize-typescript';
 import {Rating} from './Rating';
 import {Platform, PlatformProps} from './Platform';
 import {GamePlatform} from './GamePlatform';
 import {Entry} from './Entry';
-import {DataTypes} from 'sequelize';
 
 export interface GameProps {
     custom: boolean;
@@ -43,7 +42,7 @@ export class Game extends Model implements GameProps {
   public deck!: string;
 
   @AllowNull(false)
-  @Column(DataTypes.TEXT)
+  @Column(DataType.TEXT)
   public description!: string;
 
   @Column(DataType.STRING)

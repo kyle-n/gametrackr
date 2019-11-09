@@ -1,4 +1,4 @@
-import {Model, Table, AllowNull, Column, BelongsTo, BelongsToMany, Unique} from 'sequelize-typescript';
+import {DataType, Model, Table, Column, BelongsToMany, Unique} from 'sequelize-typescript';
 import {Game} from './Game';
 import {GamePlatform} from './GamePlatform';
 
@@ -33,17 +33,17 @@ export class Platform extends Model implements PlatformProps {
   @Column
   public company!: string;
 
-  @Column
+  @Column(DataType.TEXT)
   public deck!: string;
 
-  @Column
+  @Column(DataType.TEXT)
   public description!: string;
 
   @Unique
   @Column
   public gbId!: number;
 
-  @Column
+  @Column(DataType.TEXT)
   public image!: string;
 
   @Column
@@ -58,7 +58,7 @@ export class Platform extends Model implements PlatformProps {
   @Column
   public releaseDate!: Date;
 
-  @Column
+  @Column(DataType.TEXT)
   public siteDetailUrl!: string;
 
   // ---------------------------
