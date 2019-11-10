@@ -1,12 +1,8 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
 import SignupIcon from '@material-ui/icons/PersonAdd'
 import {Formik, Form} from 'formik';
-import {upperCaseFirstLetter} from '../utils';
+import {SubmitButton, GtFormControl} from '../utils';
 
 export default class UserForm extends React.Component {
   constructor(props) {
@@ -44,15 +40,19 @@ export default class UserForm extends React.Component {
               <Form>
                 {this.formControls.map(fc => {
                   return (
-                    <UserFormControl key={fc.label}
-                                     formControl={fc}
-                                     value={formik.values[fc.label]}
-                                     onChange={formik.handleChange}
+                    <GtFormControl key={fc.label}
+                                   formControl={fc}
+                                   idPrefix="user"
+                                   value={formik.values[fc.label]}
+                                   onChange={formik.handleChange}
                     />
                   );
                 })}
                 <Grid item xs={12} style={{marginTop: '1rem'}}>
-                  <SubmitButton disabled={formik.isSubmitting} />
+                  <SubmitButton disabled={formik.isSubmitting}
+                                value="Create account"
+                                icon={SignupIcon}
+                   />
                 </Grid>
               </Form>
             )}
@@ -62,34 +62,3 @@ export default class UserForm extends React.Component {
     );
   }
 }
-
-const UserFormControl = props => {
-  const fcId = 'user-' + props.formControl.label;
-  return (
-    <FormControl fullWidth>
-      <InputLabel htmlFor={fcId}>
-        {upperCaseFirstLetter(props.formControl.label)}
-      </InputLabel>
-      <Input type={props.formControl.type}
-             name={props.formControl.label}
-             id={fcId}
-             inputProps={props.formControl.inputProps}
-             value={props.value}
-             onChange={props.onChange}
-      />
-    </FormControl>
-  );
-};
-
-const SubmitButton = props => (
-  <Button variant="contained"
-          color="primary"
-          startIcon={(<SignupIcon />)}
-          size="large"
-          type="submit"
-          onClick={props.submit}
-          disabled={props.disabled}
-  >
-    Create account
-  </Button>
-);
