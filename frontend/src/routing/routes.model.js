@@ -8,6 +8,7 @@ import LoginIcon from '@material-ui/icons/ExitToApp';
 import {SignupPage, LoginPage} from '../user';
 import {SearchPage} from '../search';
 import {GameDetailsPageContainer} from '../games';
+import {DesktopLoginLink} from '../nav';
 
 export const routes = {
   nav: [
@@ -25,7 +26,8 @@ export const routes = {
       icon: LoginIcon,
       showWhenLoggedIn: false,
       showWhenLoggedOut: true,
-      component: LoginPage
+      component: LoginPage,
+      alternateComponent: DesktopLoginLink
     },
     {
       path: '/lists',
