@@ -1,3 +1,1 @@
-import TitleComponent from './title';
-
-export const Title = TitleComponent;
+export {default as Title} from './title';

@@ -1,5 +1,2 @@
-import GameCardComponent from './game-card';
-import GameDetailsPageContainerComponent from './game-details-page-container';
-
-export const GameCard = GameCardComponent;
-export const GameDetailsPageContainer = GameDetailsPageContainerComponent;
+export {default as GameCard} from './game-card';
+export {default as GameDetailsPageContainer} from './game-details-page-container';

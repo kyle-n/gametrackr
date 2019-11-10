@@ -1,5 +1,2 @@
-import SearchPageComponent from './search-page';
-import SearchGameInputComponent from './search-input';
-
-export const SearchPage = SearchPageComponent;
-export const SearchGameInput = SearchGameInputComponent;
+export {default as SearchPage} from './search-page';
+export {default as SearchInput} from './search-input';

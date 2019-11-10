@@ -1,5 +1,2 @@
-import ThemeDisplayComponent from './theme-display';
-import ThemeMenuComponent from './theme-menu';
-
-export const ThemeDisplay = ThemeDisplayComponent;
-export const ThemeMenu = ThemeMenuComponent;
+export {default as ThemeDisplay} from './theme-display';
+export {default as ThemeMenu} from './theme-menu';

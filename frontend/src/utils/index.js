@@ -1,5 +1,3 @@
-import PageTitleComponent from './page-title';
-
-export const PageTitle = PageTitleComponent;
+export {default as PageTitle} from './page-title';
 export * from './layout.css';
 export * from './helpers';
