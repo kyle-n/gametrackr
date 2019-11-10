@@ -15,11 +15,12 @@ class SearchContainer extends React.Component {
       searchResults: [],
       query: null,
     };
+    const queryParams = qs.parse(this.props.location.search, {ignoreQueryPrefix: true});
+    if (queryParams.q) this.state.query = queryParams.q;
   }
 
   componentDidMount() {
-    const queryParams = qs.parse(this.props.location.search, {ignoreQueryPrefix: true});
-    if (queryParams.q) this.searchGames(queryParams.q);
+    if (this.state.query) this.searchGames(this.state.query);
   }
 
   searchGames = query => {
@@ -37,6 +38,7 @@ class SearchContainer extends React.Component {
         <SearchInput searchType="games"
                      setQuery={this.searchGames}
                      loading={!!(this.state.query)}
+                     preset={this.state.query}
         />
         <GameResultsBox games={this.state.searchResults} />
       </div>
