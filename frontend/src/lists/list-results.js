@@ -1,11 +1,12 @@
 import React from 'react';
+import ListCard from './list-card';
 
 const ListResults = props => {
   return props.lists.map(list => {
     return (
-      <p key={list.id}>{list.title}</p>
+      <ListCard key={list.id} list={list} />
     );
-  })
+  });
 };
 
 export default ListResults;
