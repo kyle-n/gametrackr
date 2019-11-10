@@ -14,32 +14,48 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 const ListCard = props => {
   const cardId = 'list-' + props.list.id;
-  let subheader;
-  if (props.list.updatedAt) subheader = 'Updated at ' + props.list.updatedAt.toDateString();
-  else if (props.list.createdAt) subheader = 'Created at ' + props.list.createdAt.toDateString();
   return (
     <Grow in>
       <Box margin="1rem">
-        <Card>
-          <CardHeader title={props.list.title}
-                      subheader={subheader} />
-          <CardContent>
-            <Typography variant="body1">
-              {props.list.deck}
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <Grid container>
-              <ViewLink />
-              <ListActionIcon icon={EditIcon} />
-              <ListActionIcon icon={DeleteIcon} />
-            </Grid>
-          </CardActions>
+        <Card id={cardId}>
+          <ListHeader list={props.list} />
+          {props.list.deck ? (
+            <ListDeck text={props.list.deck} />
+          ) : null}
+          <ListActions list={props.list} />
         </Card>
       </Box>
     </Grow>
   );
 };
+
+const ListHeader = props => {
+  let subheader = null;
+  if (props.list.updatedAt) subheader = 'Updated at ' + props.list.updatedAt.toDateString();
+  else if (props.list.createdAt) subheader = 'Created at ' + props.list.createdAt.toDateString();
+
+  return (<CardHeader title={props.list.title}
+                      subheader={subheader} />
+  );
+};
+
+const ListDeck = props => (
+  <CardContent>
+    <Typography variant="body1">
+      {props.text}
+    </Typography>
+  </CardContent>
+);
+
+const ListActions = props => (
+  <CardActions>
+    <Grid container>
+      <ViewLink />
+      <ListActionIcon icon={EditIcon} />
+      <ListActionIcon icon={DeleteIcon} />
+    </Grid>
+  </CardActions>
+);
 
 const ViewLink = props => (
   <Grid item xs={8} sm={10}>
