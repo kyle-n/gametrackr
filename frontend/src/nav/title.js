@@ -72,6 +72,7 @@ const DesktopNavLinks = props => {
     justifyContent: 'flex-end'
   };
   const navLinks = props.routes.map(route => {
+    if (route.alternateComponent) return (<route.alternateComponent key={route.path} route={route} desktop={true} />);
     return (<NavLinkWithIcon key={route.path} route={route} desktop={true} />);
   });
   return (<List style={horizontalListLayout}>{navLinks}</List>);
