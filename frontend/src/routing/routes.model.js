@@ -5,7 +5,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import SignupIcon from '@material-ui/icons/PersonAdd';
 import LoginIcon from '@material-ui/icons/ExitToApp';
 
-import {UserFormPage} from '../user';
+import {SignupPage} from '../user';
 import {SearchPage} from '../search';
 import {GameDetailsPageContainer} from '../games';
 
@@ -17,7 +17,7 @@ export const routes = {
       icon: SignupIcon,
       showWhenLoggedIn: false,
       showWhenLoggedOut: true,
-      component: UserFormPage
+      component: SignupPage
     },
     {
       path: '/login',
@@ -25,7 +25,7 @@ export const routes = {
       icon: LoginIcon,
       showWhenLoggedIn: false,
       showWhenLoggedOut: true,
-      component: UserFormPage
+      component: SignupPage
     },
     {
       path: '/lists',
@@ -33,7 +33,7 @@ export const routes = {
       icon: ListIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: false,
-      component: UserFormPage
+      component: SignupPage
     },
     {
       path: '/search',
@@ -49,7 +49,7 @@ export const routes = {
       icon: InfoIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: true,
-      component: UserFormPage
+      component: SignupPage
     }
   ],
   games: [
