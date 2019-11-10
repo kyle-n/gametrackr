@@ -5,7 +5,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import SignupIcon from '@material-ui/icons/PersonAdd';
 import LoginIcon from '@material-ui/icons/ExitToApp';
 
-import {SignupPage} from '../user';
+import {SignupPage, LoginPage} from '../user';
 import {SearchPage} from '../search';
 import {GameDetailsPageContainer} from '../games';
 
@@ -25,7 +25,7 @@ export const routes = {
       icon: LoginIcon,
       showWhenLoggedIn: false,
       showWhenLoggedOut: true,
-      component: SignupPage
+      component: LoginPage
     },
     {
       path: '/lists',
