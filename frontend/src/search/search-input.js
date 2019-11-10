@@ -21,6 +21,7 @@ const SearchInput = props => {
         <SearchFormControl searchType={props.searchType}
                            setQuery={debouncedSetQuery}
                            loading={props.loading}
+                           preset={props.preset}
         />
       </Grid>
     </Grid>
@@ -31,7 +32,7 @@ class SearchFormControl extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {value: ''}
+    this.state = {value: props.preset || ''}
     
     this.debouncedSetQuery = debounce(1 * 1000, props.setQuery);
   }
