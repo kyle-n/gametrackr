@@ -13,7 +13,7 @@ class SearchContainer extends React.Component {
 
     this.state = {
       searchResults: [],
-      query: '',
+      query: null,
     };
   }
 
@@ -26,7 +26,7 @@ class SearchContainer extends React.Component {
     this.setState({query}, async () => {
       const resp = await searchGame(query);
       if (!resp) return this.props.sendAlert('Could not load games');
-      this.setState({searchResults: resp.games, query: ''});
+      this.setState({searchResults: resp.games, query: null});
     });
   };
 
