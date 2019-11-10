@@ -27,23 +27,39 @@ const SearchInput = props => {
   );
 };
 
-const SearchFormControl = props => {
-  const inputId = props.searchType + '-search-input';
-  return (
-    <FormControl fullWidth>
-      <InputLabel htmlFor={inputId}>
-        Search {props.searchType}
-      </InputLabel>
-      <Input id={inputId}
-             type="text"
-             name={'Search ' + props.searchType}
-             autoFocus
-             onChange={e => props.setQuery(e.target.value)}
-             endAdornment={(<Spinner loading={props.loading} />)}
-      />
-    </FormControl>
-  );
-};
+class SearchFormControl extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {value: ''}
+    
+    this.debouncedSetQuery = debounce(1 * 1000, props.setQuery);
+  }
+
+  onChange(query) {
+    this.debouncedSetQuery(query);
+    this.setState({value: query});
+  }
+
+  render() {
+    const inputId = this.props.searchType + '-search-input';
+    return (
+      <FormControl fullWidth>
+        <InputLabel htmlFor={inputId}>
+          Search {this.props.searchType}
+        </InputLabel>
+        <Input id={inputId}
+              type="text"
+              name={'Search ' + this.props.searchType}
+              value={this.state.value}
+              autoFocus
+              onChange={e => this.onChange(e.target.value)}
+              endAdornment={(<Spinner loading={this.props.loading} />)}
+        />
+      </FormControl>
+    )
+  }
+}
 
 const Spinner = props => (
   <span>
