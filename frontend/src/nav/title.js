@@ -24,7 +24,7 @@ class Title extends React.Component {
   };
 
   render() {
-    const routes = Title.getRoutesForLoginStatus(this.props.routes, this.props.loggedIn);
+    const routes = Title.getRoutesForLoginStatus(this.props.routes, true);
     return (
       <Box component="header" mb="2rem" mt="1rem">
         <Grid container alignItems="center">

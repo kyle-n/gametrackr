@@ -9,6 +9,7 @@ import {SignupPage, LoginPage} from '../user';
 import {SearchPage} from '../search';
 import {GameDetailsPageContainer} from '../games';
 import {DesktopLoginLink} from '../nav';
+import {UserListsPage} from '../lists';
 
 export const routes = {
   nav: [
@@ -35,7 +36,7 @@ export const routes = {
       icon: ListIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: false,
-      component: SignupPage
+      component: UserListsPage
     },
     {
       path: '/search',
