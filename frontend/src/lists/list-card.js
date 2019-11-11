@@ -11,7 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import {Link} from 'react-router-dom';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import {DeleteIconButton} from '../utils';
 
 const ListCard = props => {
   const cardId = 'list-' + props.list.id;
@@ -23,7 +23,8 @@ const ListCard = props => {
           {props.list.deck ? (
             <ListDeck text={props.list.deck} />
           ) : null}
-          <ListActions list={props.list} />
+          <ListActions list={props.list}
+                       onDelete={props.onDelete}/>
         </Card>
       </Box>
     </Grow>
@@ -53,7 +54,7 @@ const ListActions = props => (
     <Grid container>
       <ViewLink listId={props.list.id} />
       <EditIconButton listId={props.list.id} />
-      <DeleteIconButton listId={props.list.id} />
+      <DeleteIconButtonArea listId={props.list.id} onDelete={props.onDelete} />
     </Grid>
   </CardActions>
 );
@@ -78,12 +79,12 @@ const EditIconButton = props => (
   </Grid>
 );
 
-const DeleteIconButton = props => (
+const DeleteIconButtonArea = props => (
   <Grid item xs={2} sm={1} style={{textAlign: 'center'}}>
-    <IconButton>
-      <DeleteIcon />
-    </IconButton>
+    <DeleteIconButton entityType="list"
+                      entityId={props.listId}
+                      onConfirm={() => props.onDelete(props.listId)} />
   </Grid>
-);
+)
 
 export default ListCard;
