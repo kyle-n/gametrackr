@@ -16,6 +16,11 @@ class ConfirmDelete extends React.Component {
 
   closeDialog = () => this.setState({open: false});
 
+  closeAndConfirm = () => {
+    this.closeDialog();
+    this.props.onConfirm()
+  }
+
   render() {
     return (
       <Dialog open={this.state.open}
@@ -29,10 +34,10 @@ class ConfirmDelete extends React.Component {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button>
+          <Button onClick={this.closeDialog}>
             Cancel
           </Button>
-          <Button color="secondary">
+          <Button onClick={this.closeAndConfirm} color="secondary">
             Delete
           </Button>
         </DialogActions>
