@@ -9,7 +9,7 @@ import {SignupPage, LoginPage} from '../user';
 import {SearchPage} from '../search';
 import {GameDetailsPageContainer} from '../games';
 import {DesktopLoginLink} from '../nav';
-import {UserListsPage} from '../lists';
+import {UserListsPage, ListPage} from '../lists';
 
 export const routes = {
   nav: [
@@ -36,7 +36,8 @@ export const routes = {
       icon: ListIcon,
       showWhenLoggedIn: true,
       showWhenLoggedOut: false,
-      component: UserListsPage
+      component: UserListsPage,
+      exact: true
     },
     {
       path: '/search',
@@ -61,6 +62,14 @@ export const routes = {
       showWhenLoggedIn: true,
       showWhenLoggedOut: true,
       component: GameDetailsPageContainer
+    }
+  ],
+  lists: [
+    {
+      path: '/lists/:id',
+      showWhenLoggedIn: true,
+      showWhenLoggedOut: true,
+      component: ListPage
     }
   ]
 };

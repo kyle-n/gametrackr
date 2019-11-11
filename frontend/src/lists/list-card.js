@@ -8,6 +8,7 @@ import Grow from '@material-ui/core/Grow';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
+import {Link} from 'react-router-dom';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -50,7 +51,7 @@ const ListDeck = props => (
 const ListActions = props => (
   <CardActions>
     <Grid container>
-      <ViewLink />
+      <ViewLink listId={props.list.id} />
       <ListActionIcon icon={EditIcon} />
       <ListActionIcon icon={DeleteIcon} />
     </Grid>
@@ -59,9 +60,11 @@ const ListActions = props => (
 
 const ViewLink = props => (
   <Grid item xs={8} sm={10}>
-    <Button size="large" color="secondary">
-      View
-    </Button>
+    <Link to={`/lists/${props.listId}`}>
+      <Button size="large" color="secondary">
+        View
+      </Button>
+    </Link>
   </Grid>
 );
 
