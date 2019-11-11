@@ -17,7 +17,7 @@ const ListCard = props => {
   const cardId = 'list-' + props.list.id;
   return (
     <Grow in>
-      <Box margin="1rem">
+      <Box margin="1rem" padding="0.5rem">
         <Card id={cardId}>
           <ListHeader list={props.list} />
           {props.list.deck ? (
@@ -60,7 +60,7 @@ const ListActions = props => (
 );
 
 const ViewLink = props => (
-  <Grid item xs={8} sm={10}>
+  <Grid item xs={8}>
     <Link to={`/lists/${props.listId}`}>
       <Button size="large" color="secondary">
         View
@@ -70,7 +70,7 @@ const ViewLink = props => (
 );
 
 const EditIconButton = props => (
-  <Grid item xs={2} sm={1} style={{textAlign: 'center'}}>
+  <Grid item xs={2} style={{textAlign: 'center'}}>
     <Link to={`/lists/${props.listId}/edit`}>
       <IconButton>
         <EditIcon />
@@ -80,7 +80,7 @@ const EditIconButton = props => (
 );
 
 const DeleteIconButtonArea = props => (
-  <Grid item xs={2} sm={1} style={{textAlign: 'center'}}>
+  <Grid item xs={2} style={{textAlign: 'center'}}>
     <DeleteIconButton entityType="list"
                       entityId={props.listId}
                       onConfirm={() => props.onDelete(props.listId)} />
