@@ -7,43 +7,32 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-class ConfirmDelete extends React.Component {
-  constructor(props) {
-    super(props);
+const ConfirmDelete = props => {
+  const confirmAndClose = () => {
+    props.onConfirm();
+    props.onClose();
+  };
+  return (
+    <Dialog open={props.open}
+            onClose={props.onClose}>
+      <DialogTitle id="confirm-delete-dialog">
+        Confirm delete
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Are you sure you want to delete {props.entityType} {props.entityId}?
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={props.onClose}>
+          Cancel
+        </Button>
+        <Button onClick={confirmAndClose} color="secondary">
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
-    this.state = {open: props.open};
-  }
-
-  closeDialog = () => this.setState({open: false});
-
-  closeAndConfirm = () => {
-    this.closeDialog();
-    this.props.onConfirm()
-  }
-
-  render() {
-    return (
-      <Dialog open={this.state.open}
-              onClose={this.closeDialog}>
-        <DialogTitle id="confirm-delete-dialog">
-          Confirm delete
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete {this.props.entityType} {this.props.entityId}?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.closeDialog}>
-            Cancel
-          </Button>
-          <Button onClick={this.closeAndConfirm} color="secondary">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  }
-}
-
-export default connect()(ConfirmDelete);
+export default ConfirmDelete
