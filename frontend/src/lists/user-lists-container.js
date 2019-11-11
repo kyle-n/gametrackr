@@ -1,12 +1,22 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import ListResults from './list-results';
 import {getUserLists} from '../external-connectors';
 import {sendAlert} from '../redux';
+
+// const mockList = {
+//   title: 'Test list',
+//   createdAt: new Date(),
+//   deck: 'This is my test list',
+//   userId: 1,
+//   id: 1
+// }
 
 class UserListsContainer extends React.Component {
   constructor(props) {
     super(props);
 
+    // this.state = {lists: [mockList]};
     this.state = {lists: []};
   }
 
@@ -16,9 +26,11 @@ class UserListsContainer extends React.Component {
     this.setState({lists});
   }
 
+  deleteList = listId => console.log('list deleted', listId);
+
   render() {
     return (
-      <p>container</p>
+      <ListResults lists={this.state.lists} onDelete={this.deleteList} />
     );
   }
 }
