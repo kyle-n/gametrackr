@@ -52,8 +52,8 @@ const ListActions = props => (
   <CardActions>
     <Grid container>
       <ViewLink listId={props.list.id} />
-      <ListActionIcon icon={EditIcon} />
-      <ListActionIcon icon={DeleteIcon} />
+      <EditIconButton listId={props.list.id} />
+      <DeleteIconButton listId={props.list.id} />
     </Grid>
   </CardActions>
 );
@@ -68,10 +68,20 @@ const ViewLink = props => (
   </Grid>
 );
 
-const ListActionIcon = props => (
+const EditIconButton = props => (
+  <Grid item xs={2} sm={1} style={{textAlign: 'center'}}>
+    <Link to={`/lists/${props.listId}/edit`}>
+      <IconButton>
+        <EditIcon />
+      </IconButton>
+    </Link>
+  </Grid>
+);
+
+const DeleteIconButton = props => (
   <Grid item xs={2} sm={1} style={{textAlign: 'center'}}>
     <IconButton>
-      <props.icon />
+      <DeleteIcon />
     </IconButton>
   </Grid>
 );
