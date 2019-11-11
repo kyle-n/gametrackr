@@ -69,7 +69,8 @@ export const routes = {
       path: '/lists/:id',
       showWhenLoggedIn: true,
       showWhenLoggedOut: true,
-      component: ListPage
+      component: ListPage,
+      exact: true
     }
   ]
 };
