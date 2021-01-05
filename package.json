@@ -21,7 +21,7 @@
     "@types/pg": "^7.4.13",
     "@types/pg-promise": "^5.4.3",
     "@types/sinon": "^7.0.8",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bcrypt": "^3.0.4",
     "body-parser": "^1.18.3",
     "dotenv": "^6.2.0",
